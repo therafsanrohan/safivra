@@ -15,7 +15,18 @@ export type BudgetBucket = 'needs' | 'wants' | 'savings_investments' | 'debt_rep
 
 export type DebtPayoffStrategy = 'avalanche' | 'snowball';
 
-export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'INR' | 'CHF' | 'SGD';
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'INR' | 'CHF' | 'SGD' | 'BDT';
+
+export type WorkspaceRole = 'owner' | 'admin' | 'member';
+
+export type DueType = 'receivable' | 'payable' | 'loan';
+
+export interface Workspace {
+  id: string;
+  name: string;
+  type: 'personal' | 'household' | 'business';
+  role: WorkspaceRole;
+}
 
 export interface UserProfile {
   id: string;
@@ -25,12 +36,13 @@ export interface UserProfile {
   monthlyIncome: number;
   currentAge: number;
   targetFireAge: number;
-  annualWithdrawalRate: number; // e.g., 4.0 for 4%
-  expectedReturnRate: number; // e.g., 8.0 for 8%
-  inflationRate: number; // e.g., 2.5 for 2.5%
+  annualWithdrawalRate: number;
+  expectedReturnRate: number;
+  inflationRate: number;
   emergencyFundTargetMonths: number;
   debtStrategy: DebtPayoffStrategy;
   literacyScore: number;
+  mfaEnabled?: boolean;
 }
 
 export interface Account {
@@ -62,9 +74,48 @@ export interface Transaction {
   amount: number;
   description: string;
   merchant?: string;
-  date: string; // ISO format string YYYY-MM-DD
+  date: string;
   isRecurring: boolean;
   notes?: string;
+  workspaceId?: string;
+}
+
+export interface JournalLine {
+  id: string;
+  journalEntryId: string;
+  accountId: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+  description: string;
+}
+
+export interface JournalEntry {
+  id: string;
+  entryNumber: number;
+  date: string;
+  memo: string;
+  lines: JournalLine[];
+  isReversed: boolean;
+}
+
+export interface ReceivablePayableItem {
+  id: string;
+  counterparty: string;
+  type: DueType;
+  totalAmount: number;
+  balanceDue: number;
+  apr: number;
+  dueDate: string;
+  status: 'pending' | 'paid' | 'overdue';
+  notes?: string;
+}
+
+export interface OfflineQueueAction {
+  id: string;
+  action: 'ADD_TRANSACTION' | 'UPDATE_DEBT' | 'CREATE_ACCOUNT';
+  payload: any;
+  createdAt: string;
 }
 
 export interface DebtItem {
@@ -72,7 +123,7 @@ export interface DebtItem {
   accountId: string;
   name: string;
   balance: number;
-  apr: number; // Annual percentage rate, e.g., 19.99
+  apr: number;
   minimumPayment: number;
   dueDay: number;
 }

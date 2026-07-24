@@ -3,12 +3,16 @@ import { FinanceProvider, useFinance } from './context/FinanceContext';
 import { Header } from './components/layout/Header';
 import { BottomNav } from './components/layout/BottomNav';
 import { QuickActionModal } from './components/layout/QuickActionModal';
+import { AuthModal } from './components/auth/AuthModal';
 import { NetWorthCard } from './components/dashboard/NetWorthCard';
 import { HealthScoreBadge } from './components/dashboard/HealthScoreBadge';
 import { BudgetOverview } from './components/dashboard/BudgetOverview';
 import { CashflowChart } from './components/dashboard/CashflowChart';
+import { CategoryDistributionChart } from './components/dashboard/CategoryDistributionChart';
 import { QuickStats } from './components/dashboard/QuickStats';
 import { TransactionList } from './components/transactions/TransactionList';
+import { JournalEntryView } from './components/ledger/JournalEntryView';
+import { ReceivablesView } from './components/receivables/ReceivablesView';
 import { FIRECalculator } from './components/wealth/FIRECalculator';
 import { DebtPayoffSimulator } from './components/wealth/DebtPayoffSimulator';
 import { LiteracyHub } from './components/literacy/LiteracyHub';
@@ -33,14 +37,29 @@ const MainContent: React.FC = () => {
             <BudgetOverview />
           </div>
 
-          {/* Monthly Cashflow Visual Chart */}
-          <CashflowChart />
+          {/* Monthly Cashflow & Category Breakdown Charts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CashflowChart />
+            <CategoryDistributionChart />
+          </div>
         </div>
       )}
 
       {activeTab === 'transactions' && (
         <div className="animate-fade-in">
           <TransactionList />
+        </div>
+      )}
+
+      {activeTab === 'ledger' && (
+        <div className="animate-fade-in">
+          <JournalEntryView />
+        </div>
+      )}
+
+      {activeTab === 'receivables' && (
+        <div className="animate-fade-in">
+          <ReceivablesView />
         </div>
       )}
 
@@ -73,6 +92,7 @@ export function App() {
         <Header />
         <MainContent />
         <QuickActionModal />
+        <AuthModal />
         <BottomNav />
       </div>
     </FinanceProvider>

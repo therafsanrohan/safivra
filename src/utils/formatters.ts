@@ -10,6 +10,7 @@ const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
   INR: '₹',
   CHF: 'CHF ',
   SGD: 'S$',
+  BDT: '৳',
 };
 
 export function formatCurrency(

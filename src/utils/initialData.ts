@@ -1,4 +1,4 @@
-import type { Account, Category, Transaction, DebtItem, UserProfile } from '../types/finance';
+import type { Account, Category, Transaction, DebtItem, UserProfile, Workspace, JournalEntry, ReceivablePayableItem } from '../types/finance';
 
 export const INITIAL_PROFILE: UserProfile = {
   id: 'user-default-1',
@@ -155,5 +155,61 @@ export const INITIAL_DEBTS: DebtItem[] = [
     apr: 4.49,
     minimumPayment: 320.00,
     dueDay: 28,
+  },
+];
+
+export const INITIAL_WORKSPACES: Workspace[] = [
+  { id: 'ws-1', name: 'Personal Vault', type: 'personal', role: 'owner' },
+  { id: 'ws-2', name: 'Morgan Family Household', type: 'household', role: 'admin' },
+  { id: 'ws-3', name: 'Nexus Ventures LLC', type: 'business', role: 'owner' },
+];
+
+export const INITIAL_JOURNAL_ENTRIES: JournalEntry[] = [
+  {
+    id: 'je-1',
+    entryNumber: 1001,
+    date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
+    memo: 'Monthly Apartment Rent Payment',
+    isReversed: false,
+    lines: [
+      { id: 'jl-1', journalEntryId: 'je-1', accountId: 'cat-1', accountName: 'Housing & Rent Expense', debit: 1750.00, credit: 0.00, description: 'Debit Rent Expense' },
+      { id: 'jl-2', journalEntryId: 'je-1', accountId: 'acc-1', accountName: 'Chase Checking Asset', debit: 0.00, credit: 1750.00, description: 'Credit Bank Account' },
+    ],
+  },
+  {
+    id: 'je-2',
+    entryNumber: 1002,
+    date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
+    memo: 'Bi-weekly Direct Deposit Payroll',
+    isReversed: false,
+    lines: [
+      { id: 'jl-3', journalEntryId: 'je-2', accountId: 'acc-1', accountName: 'Chase Checking Asset', debit: 3250.00, credit: 0.00, description: 'Debit Cash Asset' },
+      { id: 'jl-4', journalEntryId: 'je-2', accountId: 'rev-1', accountName: 'Salary Revenue', debit: 0.00, credit: 3250.00, description: 'Credit Payroll Income' },
+    ],
+  },
+];
+
+export const INITIAL_RECEIVABLES: ReceivablePayableItem[] = [
+  {
+    id: 'rec-1',
+    counterparty: 'David Miller (Freelance Project)',
+    type: 'receivable',
+    totalAmount: 1800.00,
+    balanceDue: 1200.00,
+    apr: 0.00,
+    dueDate: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0],
+    status: 'pending',
+    notes: 'UI/UX Design milestone payment',
+  },
+  {
+    id: 'rec-2',
+    counterparty: 'City Dental Clinic',
+    type: 'payable',
+    totalAmount: 450.00,
+    balanceDue: 450.00,
+    apr: 0.00,
+    dueDate: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+    status: 'pending',
+    notes: 'Annual checkup invoice',
   },
 ];

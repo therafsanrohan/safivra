@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import type { CurrencyCode, AccountType } from '../../types/finance';
-import { Settings, User, Database, RotateCcw, Plus, Check } from 'lucide-react';
+import { Settings, User, Database, RotateCcw, Plus, Check, Download } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
-  const { profile, updateProfile, accounts, addAccount, resetAllData } = useFinance();
+  const { profile, updateProfile, accounts, addAccount, resetAllData, transactions } = useFinance();
 
   const [fullName, setFullName] = useState<string>(profile.fullName);
   const [currency, setCurrency] = useState<CurrencyCode>(profile.currency);
@@ -87,6 +87,7 @@ export const SettingsView: React.FC = () => {
                   className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"
                 >
                   <option value="USD">USD ($)</option>
+                  <option value="BDT">BDT (৳) Bangladeshi Taka</option>
                   <option value="EUR">EUR (€)</option>
                   <option value="GBP">GBP (£)</option>
                   <option value="CAD">CAD (CA$)</option>
@@ -188,6 +189,36 @@ export const SettingsView: React.FC = () => {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Data Export & Backup Panel (Sprint 4) */}
+      <div className="glass-panel p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-bold text-sm text-slate-200 flex items-center gap-1.5">
+              <Download className="w-4 h-4 text-emerald-400" /> Export Ledger & Portfolio Backup
+            </h4>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Download your complete transaction ledger and account data as JSON or CSV format.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, accounts, transactions }, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `safivra_backup_${new Date().toISOString().split('T')[0]}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+              }}
+              className="px-3 py-1.5 bg-slate-900 border border-white/10 rounded-xl text-xs font-semibold text-slate-200 hover:bg-slate-800 transition-all flex items-center gap-1"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" /> Export JSON
+            </button>
           </div>
         </div>
       </div>

@@ -7,6 +7,9 @@ import type {
   DebtItem,
   LiteracyModule,
   DebtPayoffStrategy,
+  Workspace,
+  JournalEntry,
+  ReceivablePayableItem,
 } from '../types/finance';
 import {
   INITIAL_PROFILE,
@@ -14,16 +17,27 @@ import {
   INITIAL_CATEGORIES,
   INITIAL_TRANSACTIONS,
   INITIAL_DEBTS,
+  INITIAL_WORKSPACES,
+  INITIAL_JOURNAL_ENTRIES,
+  INITIAL_RECEIVABLES,
 } from '../utils/initialData';
 import { INITIAL_LITERACY_MODULES } from '../utils/literacyData';
+import { queueOfflineAction } from '../utils/pwaOutbox';
 
-export type ActiveTab = 'dashboard' | 'transactions' | 'wealth' | 'literacy' | 'settings';
+export type ActiveTab = 'dashboard' | 'transactions' | 'ledger' | 'receivables' | 'wealth' | 'literacy' | 'settings';
 
 interface FinanceContextType {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
   isQuickAddOpen: boolean;
   setIsQuickAddOpen: (open: boolean) => void;
+  isAuthOpen: boolean;
+  setIsAuthOpen: (open: boolean) => void;
+  isAuthenticated: boolean;
+  setIsAuthenticated: (auth: boolean) => void;
+  workspaces: Workspace[];
+  activeWorkspace: Workspace;
+  setActiveWorkspace: (ws: Workspace) => void;
   profile: UserProfile;
   updateProfile: (updates: Partial<UserProfile>) => void;
   accounts: Account[];
@@ -32,6 +46,11 @@ interface FinanceContextType {
   transactions: Transaction[];
   addTransaction: (tx: Omit<Transaction, 'id'>) => void;
   deleteTransaction: (id: string) => void;
+  journalEntries: JournalEntry[];
+  reverseJournalEntry: (id: string) => void;
+  receivables: ReceivablePayableItem[];
+  addReceivable: (item: Omit<ReceivablePayableItem, 'id'>) => void;
+  settleReceivable: (id: string, amount: number) => void;
   debts: DebtItem[];
   extraDebtPayment: number;
   setExtraDebtPayment: (amount: number) => void;
@@ -43,14 +62,18 @@ interface FinanceContextType {
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'safivra_state_v1';
+const LOCAL_STORAGE_KEY = 'safivra_state_v2';
 
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isQuickAddOpen, setIsQuickAddOpen] = useState<boolean>(false);
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [extraDebtPayment, setExtraDebtPayment] = useState<number>(300);
 
-  // Initialize State from LocalStorage or Defaults
+  const [workspaces] = useState<Workspace[]>(INITIAL_WORKSPACES);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(INITIAL_WORKSPACES[0]);
+
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_profile`);
     return saved ? JSON.parse(saved) : INITIAL_PROFILE;
@@ -66,6 +89,16 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_transactions`);
     return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
+  });
+
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_journal`);
+    return saved ? JSON.parse(saved) : INITIAL_JOURNAL_ENTRIES;
+  });
+
+  const [receivables, setReceivables] = useState<ReceivablePayableItem[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_receivables`);
+    return saved ? JSON.parse(saved) : INITIAL_RECEIVABLES;
   });
 
   const [debts, setDebts] = useState<DebtItem[]>(() => {
@@ -92,6 +125,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [transactions]);
 
   useEffect(() => {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_journal`, JSON.stringify(journalEntries));
+  }, [journalEntries]);
+
+  useEffect(() => {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_receivables`, JSON.stringify(receivables));
+  }, [receivables]);
+
+  useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_debts`, JSON.stringify(debts));
   }, [debts]);
 
@@ -99,26 +140,25 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_literacy`, JSON.stringify(literacyModules));
   }, [literacyModules]);
 
-  // Handler functions
   const updateProfile = (updates: Partial<UserProfile>) => {
     setProfile((prev) => ({ ...prev, ...updates }));
   };
 
   const addAccount = (newAcc: Omit<Account, 'id'>) => {
-    const created: Account = {
-      ...newAcc,
-      id: `acc-${Date.now()}`,
-    };
+    const created: Account = { ...newAcc, id: `acc-${Date.now()}` };
     setAccounts((prev) => [...prev, created]);
+    queueOfflineAction('CREATE_ACCOUNT', created);
   };
 
   const addTransaction = (newTx: Omit<Transaction, 'id'>) => {
     const txId = `tx-${Date.now()}`;
-    const tx: Transaction = { ...newTx, id: txId };
+    const tx: Transaction = { ...newTx, id: txId, workspaceId: activeWorkspace.id };
 
     setTransactions((prev) => [tx, ...prev]);
+    queueOfflineAction('ADD_TRANSACTION', tx);
 
-    // Update corresponding Account Balances
+    // Update Account Balances
+    const sourceAcc = accounts.find((a) => a.id === tx.accountId);
     setAccounts((prevAccounts) =>
       prevAccounts.map((acc) => {
         if (acc.id === tx.accountId) {
@@ -132,17 +172,36 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       })
     );
 
-    // Also update matching Debt items if expense/payoff
-    if (tx.type === 'expense' || tx.type === 'transfer') {
-      setDebts((prevDebts) =>
-        prevDebts.map((d) => {
-          if (d.accountId === tx.accountId || d.accountId === tx.destinationAccountId) {
-            return { ...d, balance: Math.max(0, d.balance - tx.amount) };
-          }
-          return d;
-        })
-      );
-    }
+    // Automatic Double-Entry Journal Creation (Sprint 4)
+    const newJe: JournalEntry = {
+      id: `je-${Date.now()}`,
+      entryNumber: 1000 + journalEntries.length + 1,
+      date: tx.date,
+      memo: tx.description,
+      isReversed: false,
+      lines: [
+        {
+          id: `jl-${Date.now()}-1`,
+          journalEntryId: `je-${Date.now()}`,
+          accountId: tx.accountId,
+          accountName: sourceAcc ? sourceAcc.name : 'Account',
+          debit: tx.type === 'income' ? tx.amount : 0,
+          credit: tx.type === 'expense' ? tx.amount : 0,
+          description: tx.description,
+        },
+        {
+          id: `jl-${Date.now()}-2`,
+          journalEntryId: `je-${Date.now()}`,
+          accountId: tx.categoryId || 'contra-1',
+          accountName: tx.type === 'income' ? 'Income Revenue' : 'Expense Category',
+          debit: tx.type === 'expense' ? tx.amount : 0,
+          credit: tx.type === 'income' ? tx.amount : 0,
+          description: tx.merchant || 'Journal Balancing Line',
+        },
+      ],
+    };
+
+    setJournalEntries((prev) => [newJe, ...prev]);
   };
 
   const deleteTransaction = (id: string) => {
@@ -151,7 +210,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setTransactions((prev) => prev.filter((t) => t.id !== id));
 
-    // Reverse account balance effect
     setAccounts((prevAccounts) =>
       prevAccounts.map((acc) => {
         if (acc.id === tx.accountId) {
@@ -166,31 +224,52 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
   };
 
+  const reverseJournalEntry = (id: string) => {
+    setJournalEntries((prev) =>
+      prev.map((je) => {
+        if (je.id === id) {
+          return { ...je, isReversed: true };
+        }
+        return je;
+      })
+    );
+  };
+
+  const addReceivable = (item: Omit<ReceivablePayableItem, 'id'>) => {
+    const created: ReceivablePayableItem = { ...item, id: `rec-${Date.now()}` };
+    setReceivables((prev) => [created, ...prev]);
+  };
+
+  const settleReceivable = (id: string, amount: number) => {
+    setReceivables((prev) =>
+      prev.map((rec) => {
+        if (rec.id === id) {
+          const newBal = Math.max(0, rec.balanceDue - amount);
+          return { ...rec, balanceDue: newBal, status: newBal === 0 ? 'paid' : 'pending' };
+        }
+        return rec;
+      })
+    );
+  };
+
   const updateDebtStrategy = (strategy: DebtPayoffStrategy) => {
     setProfile((prev) => ({ ...prev, debtStrategy: strategy }));
   };
 
   const submitQuizAnswer = (moduleId: string, answerIndex: number): boolean => {
     let isCorrect = false;
-
     setLiteracyModules((prev) =>
       prev.map((mod) => {
         if (mod.id === moduleId) {
           isCorrect = mod.quiz.correctIndex === answerIndex;
           if (isCorrect && !mod.completed) {
-            // Reward profile with literacy score XP
             updateProfile({ literacyScore: profile.literacyScore + mod.xpPoints });
           }
-          return {
-            ...mod,
-            completed: isCorrect || mod.completed,
-            userScore: isCorrect ? 100 : 0,
-          };
+          return { ...mod, completed: isCorrect || mod.completed, userScore: isCorrect ? 100 : 0 };
         }
         return mod;
       })
     );
-
     return isCorrect;
   };
 
@@ -199,6 +278,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setProfile(INITIAL_PROFILE);
     setAccounts(INITIAL_ACCOUNTS);
     setTransactions(INITIAL_TRANSACTIONS);
+    setJournalEntries(INITIAL_JOURNAL_ENTRIES);
+    setReceivables(INITIAL_RECEIVABLES);
     setDebts(INITIAL_DEBTS);
     setLiteracyModules(INITIAL_LITERACY_MODULES);
   };
@@ -210,6 +291,13 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setActiveTab,
         isQuickAddOpen,
         setIsQuickAddOpen,
+        isAuthOpen,
+        setIsAuthOpen,
+        isAuthenticated,
+        setIsAuthenticated,
+        workspaces,
+        activeWorkspace,
+        setActiveWorkspace,
         profile,
         updateProfile,
         accounts,
@@ -218,6 +306,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         transactions,
         addTransaction,
         deleteTransaction,
+        journalEntries,
+        reverseJournalEntry,
+        receivables,
+        addReceivable,
+        settleReceivable,
         debts,
         extraDebtPayment,
         setExtraDebtPayment,
