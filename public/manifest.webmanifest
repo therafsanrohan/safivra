@@ -1,0 +1,22 @@
+{
+  "name": "Safivra — Personal Finance",
+  "short_name": "Safivra",
+  "description": "Premium Mobile-First Personal Financial Management Web Application for Bangladeshi users.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7F5",
+  "theme_color": "#234C3A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
