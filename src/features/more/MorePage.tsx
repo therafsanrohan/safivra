@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight
+  Settings, Bell, LogOut, ChevronRight, PiggyBank
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { APP_CONFIG } from '@/config/app';
@@ -24,6 +24,7 @@ export const MorePage: React.FC = () => {
     {
       title: 'Planning & Analytics',
       items: [
+        { to: '/plans/savings', label: 'Savings, DPS & FDR', icon: PiggyBank },
         { to: '/plans/recurring', label: 'Recurring Commitments', icon: RefreshCw },
         { to: '/reports', label: 'Reports & Exports', icon: BookOpen },
         { to: '/notifications', label: 'Notifications', icon: Bell },

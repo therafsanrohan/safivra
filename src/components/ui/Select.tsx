@@ -103,10 +103,10 @@ export const Select: React.FC<SelectProps> = ({
             position="popper"
             sideOffset={4}
             className={[
-              'z-50 w-[var(--radix-select-trigger-width)] overflow-hidden',
+              'z-[999999] w-[var(--radix-select-trigger-width)] overflow-hidden',
               'bg-[var(--color-bg-surface)] border border-[var(--color-border)]',
-              'rounded-[var(--radius-card)] shadow-[var(--shadow-md)]',
-              'max-h-64',
+              'rounded-[var(--radius-card)] shadow-[var(--shadow-sheet)]',
+              'max-h-64 overflow-y-auto',
               'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
               'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
             ].join(' ')}

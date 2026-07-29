@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AuthGuard, GuestGuard } from '@/features/authentication/AuthGuard';
 import { SignInPage } from '@/features/authentication/SignInPage';
@@ -28,10 +28,12 @@ const PlansPage           = lazy(() => import('@/features/plans/PlansPage').then
 const BudgetsPage         = lazy(() => import('@/features/budgets/BudgetsPage').then((m) => ({ default: m.BudgetsPage })));
 const RecurringPage       = lazy(() => import('@/features/recurring/RecurringPage').then((m) => ({ default: m.RecurringPage })));
 const GoalsPage           = lazy(() => import('@/features/goals/GoalsPage').then((m) => ({ default: m.GoalsPage })));
+const SavingsPage         = lazy(() => import('@/features/savings/SavingsPage').then((m) => ({ default: m.SavingsPage })));
 const ReportsPage         = lazy(() => import('@/features/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })));
 const NotificationsPage   = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
 const SettingsPage        = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const MorePage            = lazy(() => import('@/features/more/MorePage').then((m) => ({ default: m.MorePage })));
+const NotFoundPage        = lazy(() => import('@/components/ui/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 const PageLoader: React.FC = () => (
   <div className="min-h-svh flex items-center justify-center bg-[var(--color-bg-page)]">
@@ -124,6 +126,8 @@ const router = createBrowserRouter([
       { path: 'plans/budgets', element: <Suspense fallback={<PageLoader />}><BudgetsPage /></Suspense> },
       { path: 'plans/recurring', element: <Suspense fallback={<PageLoader />}><RecurringPage /></Suspense> },
       { path: 'plans/goals', element: <Suspense fallback={<PageLoader />}><GoalsPage /></Suspense> },
+      { path: 'plans/savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
+      { path: 'savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
 
       // Reports
       { path: 'reports', element: <Suspense fallback={<PageLoader />}><ReportsPage /></Suspense> },
@@ -139,12 +143,12 @@ const router = createBrowserRouter([
       { path: 'more', element: <Suspense fallback={<PageLoader />}><MorePage /></Suspense> },
 
       // Fallback
-      { path: '*', element: <Navigate to="/" replace /> },
+      { path: '*', element: <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense> },
     ],
   },
 
   // Root fallback
-  { path: '*', element: <Navigate to="/" replace /> },
+  { path: '*', element: <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense> },
 ]);
 
 export const AppRouter: React.FC = () => <RouterProvider router={router} />;
