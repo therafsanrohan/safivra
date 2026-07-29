@@ -22,21 +22,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  const { email, password } = req.body || {};
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Missing email or password' });
-  }
-
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    const { email, password } = req.body || {};
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET || 'safivra-default-jwt-secret';
+
     const db = await getDb();
 
+    // Find user
     const user = await db.collection('users').findOne({ email: email.toLowerCase() });
-    if (!user || !verifyPassword(password, user.password)) {
+    if (!user) {
+      return res.status(400).json({ error: 'invalid_credentials' });
+    }
+
+    // Verify password
+    if (!verifyPassword(password, user.password)) {
       return res.status(400).json({ error: 'invalid_credentials' });
     }
 
@@ -63,6 +71,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (err: any) {
     console.error('[Signin] Error:', err);
-    return res.status(500).json({ error: err.message || 'Internal Server Error' });
+    return res.status(500).json({ error: err?.message || 'Internal Server Error' });
   }
 }

@@ -27,17 +27,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  const { email, password, full_name } = req.body || {};
-
-  if (!email || !password || !full_name) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    const { email, password, full_name } = req.body || {};
+
+    if (!email || !password || !full_name) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     const db = await getDb();
 
     // Check if email already registered
@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
     await db.collection('users').insertOne(userDoc);
 
-    // Save profile (mimicking Supabase handle_new_user trigger)
+    // Save profile
     const profileDoc = {
       id: userId,
       full_name: full_name,
@@ -73,6 +73,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ success: true, userId });
   } catch (err: any) {
     console.error('[Signup] Error:', err);
-    return res.status(500).json({ error: err.message || 'Internal Server Error' });
+    return res.status(500).json({ error: err?.message || 'Database connection error or invalid credentials.' });
   }
 }
