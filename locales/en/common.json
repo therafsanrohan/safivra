@@ -1,0 +1,21 @@
+{
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "add": "Add",
+  "close": "Close",
+  "back": "Back",
+  "loading": "Loading...",
+  "error": "Something went wrong",
+  "retry": "Try again",
+  "optional": "optional",
+  "required": "required",
+  "switchLang": "বাংলা",
+  "updateAvailable": "Update Available",
+  "updateAvailableDesc": "A new Safivra version is available. Update now?",
+  "updateNow": "Update now",
+  "later": "Later",
+  "readyOffline": "Ready Offline",
+  "readyOfflineDesc": "App is ready to work offline."
+}

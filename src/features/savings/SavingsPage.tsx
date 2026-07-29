@@ -14,6 +14,7 @@ import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { Dialog } from '@/components/ui/Dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { useToast } from '@/components/ui/Toast';
+import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 
 export interface SavingsSchemeRow {
   id: string;
@@ -74,6 +75,7 @@ const DEFAULT_SCHEMES: SavingsSchemeRow[] = [
 export const SavingsPage: React.FC = () => {
   const { user } = useAuthContext();
   const { t } = useLanguage();
+  const { loaded } = useFeatureTranslation('savings');
   const { success } = useToast();
   const [schemes, setSchemes] = useState<SavingsSchemeRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,7 +169,7 @@ export const SavingsPage: React.FC = () => {
   const totalDeposit = schemes.reduce((sum: number, s: SavingsSchemeRow) => sum + Number(s.deposit_amount), 0);
   const totalMaturity = schemes.reduce((sum: number, s: SavingsSchemeRow) => sum + Number(s.maturity_amount), 0);
 
-  if (loading) {
+  if (loading || !loaded) {
     return (
       <div className="page-container pt-5 space-y-4">
         <Skeleton height={24} width={120} />

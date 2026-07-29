@@ -1,0 +1,9 @@
+{
+  "title": "Add Transaction",
+  "expense": "Expense",
+  "income": "Income",
+  "transfer": "Transfer",
+  "loanPayment": "Loan Payment",
+  "cardPayment": "Card Payment",
+  "adjustment": "Adjustment"
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Financial Plans",
+  "subtitle": "Manage your financial goals and commitments",
+  "budgets": "Budgets",
+  "budgetsDesc": "Set category expense limits and track progress against spending.",
+  "manageBudgets": "Manage Budgets",
+  "savingsDps": "Savings, DPS & FDR",
+  "savingsDpsDesc": "Deposit pension schemes, bank FDRs, and National Sanchaypatra.",
+  "manageSavings": "Manage Savings",
+  "recurring": "Recurring",
+  "recurringDesc": "Track subscriptions and recurring bills.",
+  "manageRecurring": "Manage Recurring",
+  "goals": "Goals",
+  "goalsDesc": "Set financial goals and track your progress.",
+  "manageGoals": "Manage Goals"
+}

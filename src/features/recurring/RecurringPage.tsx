@@ -14,6 +14,7 @@ import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { Dialog } from '@/components/ui/Dialog';
 import { useToast } from '@/components/ui/Toast';
 import { parseError } from '@/lib/errors/handler';
+import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 
 interface RecurringRow {
   id: string;
@@ -69,6 +70,7 @@ const getMockRecurring = (lang: string): RecurringRow[] => [
 export const RecurringPage: React.FC = () => {
   const { user } = useAuthContext();
   const { t, locale } = useLanguage();
+  const { loaded } = useFeatureTranslation('recurring');
   const { success, error: showError } = useToast();
   const [items, setItems] = useState<RecurringRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -252,7 +254,7 @@ export const RecurringPage: React.FC = () => {
 
   const filteredCategories = categories.filter((c) => c.category_type === type);
 
-  if (loading) {
+  if (loading || !loaded) {
     return (
       <div className="page-container pt-5 space-y-4">
         <Skeleton height={24} width={100} />

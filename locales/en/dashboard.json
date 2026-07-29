@@ -1,0 +1,11 @@
+{
+  "totalBalance": "Total Balance",
+  "monthlyIncome": "Monthly Income",
+  "monthlyExpenses": "Monthly Expenses",
+  "netSavings": "Net Savings",
+  "recentTransactions": "Recent Transactions",
+  "seeAll": "See All",
+  "noTransactions": "No transactions yet",
+  "addFirst": "Add your first transaction",
+  "thisMonth": "This Month"
+}

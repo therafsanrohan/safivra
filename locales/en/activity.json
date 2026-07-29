@@ -1,0 +1,9 @@
+{
+  "title": "Activity",
+  "all": "All",
+  "income": "Income",
+  "expense": "Expense",
+  "transfers": "Transfers",
+  "noActivity": "No transactions found",
+  "filter": "Filter"
+}

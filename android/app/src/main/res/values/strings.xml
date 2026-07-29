@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Safivra</string>
+    <string name="title_activity_main">Safivra</string>
+    <string name="package_name">com.safivra.app</string>
+    <string name="custom_url_scheme">com.safivra.app</string>
+</resources>

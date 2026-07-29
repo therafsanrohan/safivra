@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { translations, type Locale, type TranslationKeys } from '@/lib/i18n/translations';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { type Locale, type TranslationKeys } from '@/lib/i18n/translations';
+import i18n from '@/i18n';
 
 interface LanguageContextValue {
   locale: Locale;
@@ -18,7 +19,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (saved === 'bn' || saved === 'en') ? saved : 'en';
   });
 
-  const setLocale = useCallback((next: Locale) => {
+  // Ensure i18next matches the initial language state
+  useEffect(() => {
+    i18n.changeLanguage(locale);
+  }, [locale]);
+
+  const setLocale = useCallback(async (next: Locale) => {
+    await i18n.changeLanguage(next);
     setLocaleState(next);
     localStorage.setItem(STORAGE_KEY, next);
   }, []);
@@ -27,8 +34,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLocale(locale === 'en' ? 'bn' : 'en');
   }, [locale, setLocale]);
 
+  // Merge loaded namespaces from the i18next store for the active locale
+  const tObject = (i18n.store.data[locale] || {}) as unknown as TranslationKeys;
+
   return (
-    <LanguageContext.Provider value={{ locale, t: translations[locale], toggleLocale, setLocale }}>
+    <LanguageContext.Provider value={{ locale, t: tObject, toggleLocale, setLocale }}>
       {children}
     </LanguageContext.Provider>
   );

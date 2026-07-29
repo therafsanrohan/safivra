@@ -32,7 +32,7 @@ export const BottomNav: React.FC = () => {
           'fixed bottom-0 left-0 right-0 z-30',
           'bg-[var(--color-bg-surface)] border-t border-[var(--color-border)]',
           'h-[var(--nav-height)] flex items-center',
-          'pb-[env(safe-area-inset-bottom,0)]',
+          'pb-[env(safe-area-inset-bottom,0px)]',
           'lg:hidden',
         ].join(' ')}
       >

@@ -1,0 +1,34 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+// Statically import core namespaces needed for the initial launch shell
+import commonEn from '../../locales/en/common.json';
+import commonBn from '../../locales/bn/common.json';
+import navEn from '../../locales/en/nav.json';
+import navBn from '../../locales/bn/nav.json';
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: {
+        common: commonEn,
+        nav: navEn,
+      },
+      bn: {
+        common: commonBn,
+        nav: navBn,
+      },
+    },
+    fallbackLng: 'en',
+    ns: ['common', 'nav'],
+    defaultNS: 'common',
+    interpolation: {
+      escapeValue: false, // React already escapes values
+    },
+    react: {
+      useSuspense: false, // Prevents loading cascades from blocking render
+    },
+  });
+
+export default i18n;

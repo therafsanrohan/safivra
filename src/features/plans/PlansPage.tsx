@@ -1,11 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Target, RefreshCw, Trophy, ChevronRight, Coins } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
+import { Card, Skeleton } from '@/components/ui/Card';
 import { useLanguage } from '@/context/LanguageContext';
+import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 
 export const PlansPage: React.FC = () => {
   const { t } = useLanguage();
+  const { loaded } = useFeatureTranslation('plans');
+
+  if (!loaded) {
+    return (
+      <div className="page-container pt-5 space-y-4">
+        <Skeleton height={24} width={100} />
+        <Skeleton height={140} />
+      </div>
+    );
+  }
 
   return (
     <div className="page-container pt-5 space-y-5 fade-in">

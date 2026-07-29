@@ -7,12 +7,27 @@ import {
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { APP_CONFIG } from '@/config/app';
-import { Card } from '@/components/ui/Card';
+import { Card, Skeleton } from '@/components/ui/Card';
+import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 
 export const MorePage: React.FC = () => {
   const { profile, signOut } = useAuthContext();
   const { t, toggleLocale, locale } = useLanguage();
+  const { loaded: moreLoaded } = useFeatureTranslation('more');
+  const { loaded: cardsLoaded } = useFeatureTranslation('creditCards');
+  const { loaded: settingsLoaded } = useFeatureTranslation('settings');
+
+  const loaded = moreLoaded && cardsLoaded && settingsLoaded;
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
+
+  if (!loaded) {
+    return (
+      <div className="page-container pt-5 space-y-4">
+        <Skeleton height={24} width={100} />
+        <Skeleton height={140} />
+      </div>
+    );
+  }
 
   const menuSections = [
     {

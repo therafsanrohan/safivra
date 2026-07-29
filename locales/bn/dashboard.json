@@ -1,0 +1,11 @@
+{
+  "totalBalance": "মোট ব্যালেন্স",
+  "monthlyIncome": "মাসিক আয়",
+  "monthlyExpenses": "মাসিক খরচ",
+  "netSavings": "নিট সঞ্চয়",
+  "recentTransactions": "সাম্প্রতিক লেনদেন",
+  "seeAll": "সব দেখুন",
+  "noTransactions": "এখনো কোন লেনদেন নেই",
+  "addFirst": "প্রথম লেনদেন যোগ করুন",
+  "thisMonth": "এই মাসে"
+}
