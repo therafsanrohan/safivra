@@ -85,6 +85,9 @@ export function parseError(error: unknown): AppError {
   }
 
   // Network
+  if (msg.includes('Offline placeholder configuration')) {
+    return { code: 'NETWORK_ERROR', message: 'You are using placeholder credentials. Please set your real VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the .env file.' };
+  }
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('network')) {
     return { code: 'NETWORK_ERROR', message: ERROR_MESSAGES.NETWORK_ERROR };
   }

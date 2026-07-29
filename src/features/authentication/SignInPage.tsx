@@ -61,28 +61,6 @@ export const SignInPage: React.FC = () => {
             </div>
           )}
 
-          <div className="mb-6 p-3.5 rounded-[var(--radius-card)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-[var(--color-text-primary)]">Demo Account Credentials:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setValue('email', 'demo@safivra.com');
-                  setValue('password', 'Demo1234');
-                }}
-                className="text-[var(--color-accent)] font-semibold hover:opacity-80 transition-opacity"
-              >
-                Auto-fill
-              </button>
-            </div>
-            <p className="text-[var(--color-text-secondary)]">
-              Email: <code className="font-mono text-[var(--color-text-primary)]">demo@safivra.com</code>
-            </p>
-            <p className="text-[var(--color-text-secondary)]">
-              Password: <code className="font-mono text-[var(--color-text-primary)]">Demo1234</code>
-            </p>
-          </div>
-
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <Input
               label="Email"

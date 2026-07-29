@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Ban } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/lib/mongodb/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';
@@ -62,34 +62,9 @@ export const TransactionDetailPage: React.FC = () => {
 
       if (fetchErr) throw fetchErr;
       setTx((data as unknown as FullTransaction) ?? null);
-    } catch {
-      setTx({
-        id: id || 'tx-1',
-        title: 'Monthly Salary Credit',
-        transaction_type: 'income',
-        transaction_date: new Date().toISOString().split('T')[0],
-        transaction_time: '10:30 AM',
-        merchant: 'Tech Firm BD Ltd',
-        description: 'Monthly payroll transfer',
-        status: 'posted',
-        created_at: new Date().toISOString(),
-        ledger_entries: [
-          {
-            id: 'le-1',
-            amount: 185000,
-            entry_role: 'asset_debit',
-            financial_account: { name: 'City Bank Salary Account' },
-            category: { name: 'Salary & Professional Fees' },
-          },
-          {
-            id: 'le-2',
-            amount: -185000,
-            entry_role: 'income_credit',
-            financial_account: null,
-            category: { name: 'Salary & Professional Fees' },
-          },
-        ],
-      });
+    } catch (err: any) {
+      setError(err.message || 'Could not fetch transaction details');
+      setTx(null);
     } finally {
       setLoading(false);
     }

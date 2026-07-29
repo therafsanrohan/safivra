@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Wallet, Landmark, CreditCard, TrendingUp, ChevronRight, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/lib/mongodb/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
@@ -30,84 +30,9 @@ export const AccountsPage: React.FC = () => {
         .order('name');
       if (error) throw error;
       setAccounts((data as AccountBalance[]) ?? []);
-    } catch {
-      setAccounts([
-        {
-          account_id: 'acc-1',
-          user_id: user.id,
-          name: 'City Bank Salary Account',
-          account_type: 'bank',
-          account_class: 'asset',
-          institution: 'City Bank',
-          currency_code: 'BDT',
-          credit_limit: null,
-          include_in_total: true,
-          include_in_net_worth: true,
-          is_active: true,
-          is_archived: false,
-          balance: '145000.00',
-        },
-        {
-          account_id: 'acc-2',
-          user_id: user.id,
-          name: 'bKash Personal',
-          account_type: 'mobile_financial_service',
-          account_class: 'asset',
-          institution: 'bKash',
-          currency_code: 'BDT',
-          credit_limit: null,
-          include_in_total: true,
-          include_in_net_worth: true,
-          is_active: true,
-          is_archived: false,
-          balance: '18450.00',
-        },
-        {
-          account_id: 'acc-3',
-          user_id: user.id,
-          name: 'DBBL FDR Savings',
-          account_type: 'savings',
-          account_class: 'asset',
-          institution: 'Dutch-Bangla Bank',
-          currency_code: 'BDT',
-          credit_limit: null,
-          include_in_total: true,
-          include_in_net_worth: true,
-          is_active: true,
-          is_archived: false,
-          balance: '250000.00',
-        },
-        {
-          account_id: 'acc-4',
-          user_id: user.id,
-          name: 'DBBL Home Loan',
-          account_type: 'loan',
-          account_class: 'liability',
-          institution: 'Dutch-Bangla Bank',
-          currency_code: 'BDT',
-          credit_limit: null,
-          include_in_total: false,
-          include_in_net_worth: true,
-          is_active: true,
-          is_archived: false,
-          balance: '-120000.00',
-        },
-        {
-          account_id: 'acc-5',
-          user_id: user.id,
-          name: 'City Bank AMEX Card',
-          account_type: 'credit_card',
-          account_class: 'liability',
-          institution: 'City Bank',
-          currency_code: 'BDT',
-          credit_limit: '100000.00',
-          include_in_total: false,
-          include_in_net_worth: true,
-          is_active: true,
-          is_archived: false,
-          balance: '-34200.00',
-        },
-      ]);
+    } catch (err: any) {
+      setError(err.message || 'Could not fetch accounts');
+      setAccounts([]);
     } finally {
       setLoading(false);
     }

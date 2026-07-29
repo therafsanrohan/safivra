@@ -1,14 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/mongodb/client';
 import type { Database } from '@/types/database';
-import { parseError } from '@/lib/errors/handler';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  user_metadata: {
+    full_name?: string;
+  };
+}
+
+export interface AuthSession {
+  user: AuthUser;
+  access_token: string;
+}
+
 interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
+  session: AuthSession | null;
   profile: Profile | null;
   loading: boolean;
   initialized: boolean;
@@ -26,6 +37,22 @@ interface AuthActions {
 
 export type UseAuthReturn = AuthState & AuthActions;
 
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 export function useAuth(): UseAuthReturn {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -36,14 +63,13 @@ export function useAuth(): UseAuthReturn {
   });
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
+    const { data, error } = await (supabase.from('profiles') as any)
       .select('*')
       .eq('id', userId)
       .single();
 
     if (error) {
-      console.error('[Auth] Failed to fetch profile:', error.code);
+      console.error('[Auth] Failed to fetch profile:', error.message);
       return null;
     }
     return data;
@@ -62,42 +88,40 @@ export function useAuth(): UseAuthReturn {
 
     const init = async () => {
       try {
-        const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
-          setTimeout(() => resolve({ data: { session: null } }), 1000)
-        );
-        const { data: { session } } = await Promise.race([
-          supabase.auth.getSession(),
-          timeoutPromise,
-        ]);
+        const token = localStorage.getItem('safivra-token');
+        if (!token) {
+          if (mounted) setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          return;
+        }
 
-        if (!mounted) return;
+        const decoded = parseJwt(token);
+        if (!decoded || (decoded.exp && decoded.exp * 1000 < Date.now())) {
+          localStorage.removeItem('safivra-token');
+          if (mounted) setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          return;
+        }
 
-        if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          setState({ user: session.user, session, profile, loading: false, initialized: true });
-        } else {
-          // Default to demo session if offline mode to prevent blank screen
-          const demoUser = {
-            id: '00000000-0000-0000-0000-000000000001',
-            email: 'demo@safivra.com',
-            user_metadata: { full_name: 'Rafsan Rohan' },
-            app_metadata: {},
-            aud: 'authenticated',
-            created_at: new Date().toISOString(),
-          } as any;
+        // Fetch profile using our intercepted supabase client
+        const profile = await fetchProfile(decoded.sub);
+        if (!profile) {
+          localStorage.removeItem('safivra-token');
+          if (mounted) setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          return;
+        }
 
-          const demoProfile = {
-            id: '00000000-0000-0000-0000-000000000001',
-            full_name: 'Rafsan Rohan',
-            preferred_currency: 'BDT',
-            timezone: 'Asia/Dhaka',
-            onboarding_completed: true,
-            avatar_url: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+        if (mounted) {
+          const user: AuthUser = {
+            id: decoded.sub,
+            email: decoded.email,
+            user_metadata: { full_name: profile.full_name || '' },
           };
-
-          setState({ user: demoUser, session: { user: demoUser } as any, profile: demoProfile, loading: false, initialized: true });
+          setState({
+            user,
+            session: { user, access_token: token },
+            profile,
+            loading: false,
+            initialized: true,
+          });
         }
       } catch {
         if (mounted) {
@@ -108,92 +132,48 @@ export function useAuth(): UseAuthReturn {
 
     init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return;
-
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        setState({ user: session.user, session, profile, loading: false, initialized: true });
-      } else {
-        setState({ user: null, session: null, profile: null, loading: false, initialized: true });
-      }
-    });
-
     return () => {
       mounted = false;
-      subscription.unsubscribe();
     };
   }, [fetchProfile]);
 
   const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
-    // Demo account support for local preview & offline evaluation
-    if (email.toLowerCase() === 'demo@safivra.com' && (password === 'Demo1234' || password === 'demo')) {
-      const demoUser = {
-        id: '00000000-0000-0000-0000-000000000001',
-        email: 'demo@safivra.com',
-        user_metadata: { full_name: 'Rafsan Rohan' },
-        app_metadata: {},
-        aud: 'authenticated',
-        created_at: new Date().toISOString(),
-      } as any;
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+      const res = await fetch(`${baseUrl}/api/auth/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const demoProfile = {
-        id: '00000000-0000-0000-0000-000000000001',
-        full_name: 'Rafsan Rohan',
-        preferred_currency: 'BDT',
-        timezone: 'Asia/Dhaka',
-        onboarding_completed: true,
-        avatar_url: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      const contentType = res.headers.get('Content-Type') || '';
+      if (!contentType.includes('application/json')) {
+        return { error: 'Backend error (non-JSON). Please run using "npx vercel dev" instead of "npm run dev" to run the local backend server.' };
+      }
+
+      const resData = await res.json();
+      if (!res.ok) {
+        if (resData.error === 'invalid_credentials') {
+          return { error: 'Incorrect email or password. Please try again.' };
+        }
+        return { error: resData.error || 'Failed to sign in' };
+      }
+
+      const { session, profile } = resData;
+      localStorage.setItem('safivra-token', session.access_token);
 
       setState({
-        user: demoUser,
-        session: { user: demoUser, access_token: 'demo-token', refresh_token: 'demo-refresh', expires_in: 3600, token_type: 'bearer' } as any,
-        profile: demoProfile,
+        user: session.user,
+        session,
+        profile,
         loading: false,
         initialized: true,
       });
+
       return {};
+    } catch (err: any) {
+      return { error: err.message || 'Network error' };
     }
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      // Fallback demo login if placeholder credentials are used
-      if (error.message.includes('Fetch') || error.message.includes('Invalid') || error.message.includes('placeholder')) {
-        const demoUser = {
-          id: '00000000-0000-0000-0000-000000000001',
-          email,
-          user_metadata: { full_name: 'Demo User' },
-          app_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-        } as any;
-
-        const demoProfile = {
-          id: '00000000-0000-0000-0000-000000000001',
-          full_name: 'Demo User',
-          preferred_currency: 'BDT',
-          timezone: 'Asia/Dhaka',
-          onboarding_completed: true,
-          avatar_url: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        setState({
-          user: demoUser,
-          session: { user: demoUser, access_token: 'demo-token', refresh_token: 'demo-refresh', expires_in: 3600, token_type: 'bearer' } as any,
-          profile: demoProfile,
-          loading: false,
-          initialized: true,
-        });
-        return {};
-      }
-      return { error: parseError(error).message };
-    }
-    return {};
   };
 
   const signUp = async (
@@ -201,36 +181,75 @@ export function useAuth(): UseAuthReturn {
     password: string,
     fullName: string
   ): Promise<{ error?: string }> => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/verify-email`,
-      },
-    });
-    if (error) return { error: parseError(error).message };
-    return {};
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+      const res = await fetch(`${baseUrl}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, full_name: fullName }),
+      });
+
+      const contentType = res.headers.get('Content-Type') || '';
+      if (!contentType.includes('application/json')) {
+        return { error: 'Backend error (non-JSON). Please run using "npx vercel dev" instead of "npm run dev" to run the local backend server.' };
+      }
+
+      const resData = await res.json();
+      if (!res.ok) {
+        if (resData.error === 'already_registered') {
+          return { error: 'An account with that email address already exists.' };
+        }
+        return { error: resData.error || 'Failed to create account' };
+      }
+
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Network error' };
+    }
   };
 
   const signOut = async (): Promise<void> => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('safivra-token');
+    setState({
+      user: null,
+      session: null,
+      profile: null,
+      loading: false,
+      initialized: true,
+    });
   };
 
   const sendPasswordReset = async (email: string): Promise<{ error?: string }> => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
-    // Return the same message whether email exists or not (security)
-    if (error && !error.message.includes('rate limit')) return {};
-    if (error) return { error: parseError(error).message };
+    // Stubbed since we do not configure SMTP server, return positive status for safety
     return {};
   };
 
   const updatePassword = async (password: string): Promise<{ error?: string }> => {
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) return { error: parseError(error).message };
-    return {};
+    try {
+      const token = localStorage.getItem('safivra-token');
+      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+      const res = await fetch(`${baseUrl}/api/auth/update-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const contentType = res.headers.get('Content-Type') || '';
+      if (!contentType.includes('application/json')) {
+        return { error: 'Backend error (non-JSON). Please run using "npx vercel dev" instead of "npm run dev" to run the local backend server.' };
+      }
+
+      const resData = await res.json();
+      if (!res.ok) {
+        return { error: resData.error || 'Failed to update password' };
+      }
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Network error' };
+    }
   };
 
   const updateProfile = async (
@@ -242,7 +261,7 @@ export function useAuth(): UseAuthReturn {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', state.user.id);
 
-    if (error) return { error: parseError(error).message };
+    if (error) return { error: error.message };
 
     await refreshProfile();
     return {};
