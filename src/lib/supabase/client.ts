@@ -25,7 +25,7 @@ const fastFetch: typeof fetch = (input, init) => {
     return Promise.reject(new TypeError('Offline placeholder configuration'));
   }
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
   const combinedSignal = init?.signal ? init.signal : controller.signal;
 
   return fetch(input, { ...init, signal: combinedSignal }).finally(() => {

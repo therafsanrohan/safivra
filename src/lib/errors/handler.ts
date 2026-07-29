@@ -84,8 +84,14 @@ export function parseError(error: unknown): AppError {
     return { code: 'RECORD_NOT_FOUND', message: ERROR_MESSAGES.RECORD_NOT_FOUND };
   }
 
-  // Network
-  if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('network')) {
+  // Network & Placeholder errors
+  if (msg.includes('Offline placeholder configuration') || msg.includes('placeholder')) {
+    return {
+      code: 'NETWORK_ERROR',
+      message: 'Supabase configuration is missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel Environment Variables and redeploy.',
+    };
+  }
+  if (msg.includes('Failed to fetch') || msg.includes('Load failed') || msg.includes('NetworkError') || msg.includes('network') || msg.includes('aborted')) {
     return { code: 'NETWORK_ERROR', message: ERROR_MESSAGES.NETWORK_ERROR };
   }
 
