@@ -60,18 +60,19 @@ export const AddTransactionPage: React.FC = () => {
     Promise.all([
       supabase.from('v_account_balances').select('*').eq('user_id', user.id).eq('is_active', true).eq('is_archived', false),
       supabase.from('transaction_categories').select('*').or(`user_id.eq.${user.id},user_id.is.null`).eq('is_active', true).order('sort_order'),
-      supabase.from('loans').select('id, name').eq('user_id', user.id).eq('status', 'active'),
-      supabase.from('credit_cards').select('id, nickname').eq('user_id', user.id).eq('status', 'active'),
+      supabase.from('loans').select('*').eq('user_id', user.id).eq('status', 'active'),
+      supabase.from('credit_cards').select('*').eq('user_id', user.id).eq('status', 'active'),
     ]).then(([acc, cat, lns, cds]) => {
       setAccounts(acc.data ?? []);
       setCategories(cat.data ?? []);
-      setLoans(lns.data ?? []);
-      setCards(cds.data ?? []);
+      setLoans((lns.data as any) ?? []);
+      setCards((cds.data as any) ?? []);
     });
   }, [user]);
 
   const txInfo = TRANSACTION_TYPES.find((t) => t.value === txType)!;
   const assetAccounts = accounts.filter((a) => a.account_class === 'asset');
+  const expenseAccounts = accounts.filter((a) => a.account_class === 'asset' || a.account_type === 'credit_card');
   const expenseCategories = categories.filter((c) => c.category_type === 'expense');
   const incomeCategories = categories.filter((c) => c.category_type === 'income');
 
@@ -128,7 +129,7 @@ export const AddTransactionPage: React.FC = () => {
       {/* Form by type */}
       {txType === 'expense' && (
         <ExpenseForm
-          accounts={assetAccounts}
+          accounts={expenseAccounts}
           categories={expenseCategories}
           onSubmit={handlePost}
           submitting={submitting}
@@ -374,30 +375,44 @@ const TransferForm: React.FC<{
 // ─── Loan Payment Form ────────────────────────────────────────────────────────
 const LoanPaymentForm: React.FC<{
   accounts: AccountRow[];
-  loans: Array<{ id: string; name: string }>;
+  loans: any[];
   categories: CategoryRow[];
   onSubmit: (type: TransactionType, params: Record<string, unknown>) => Promise<void>;
   submitting: boolean;
 }> = ({ accounts, loans, categories, onSubmit, submitting }) => {
-  const { register, handleSubmit, control, formState: { errors } } = useForm<LoanPaymentData>({
+  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<LoanPaymentData>({
     resolver: zodResolver(loanPaymentSchema),
     defaultValues: { transaction_date: todayString(), fee_amount: 0, interest_amount: 0, principal_amount: 0 },
   });
 
   const interestCategory = categories.find((c) => c.name === 'Loan Interest');
+  const selectedLoanId = watch('loan_id');
+
+  // Auto-fill connected account & installment from DB details
+  React.useEffect(() => {
+    if (!selectedLoanId) return;
+    const loan = loans.find((l) => l.id === selectedLoanId);
+    if (loan) {
+      if (loan.linked_account_id) {
+        setValue('payment_account_id', loan.linked_account_id);
+      }
+      if (loan.monthly_installment) {
+        setValue('total_amount', Number(loan.monthly_installment));
+      }
+    }
+  }, [selectedLoanId, loans, setValue]);
 
   const submit = handleSubmit(async (data) => {
-    // Find the loan's linked account (liability account)
     const selectedLoan = loans.find((l) => l.id === data.loan_id);
     await onSubmit('loan_payment', {
       p_transaction_date: data.transaction_date,
       p_title: `Loan Payment — ${selectedLoan?.name ?? 'Loan'}`,
       p_amount: data.total_amount,
       p_account_id: data.payment_account_id,
-      p_destination_account_id: data.loan_id, // will be used to identify loan liability account
+      p_destination_account_id: data.loan_id,
       p_category_id: interestCategory?.id,
-      p_principal_amount: data.principal_amount,
-      p_interest_amount: data.interest_amount,
+      p_principal_amount: data.principal_amount ?? 0,
+      p_interest_amount: data.interest_amount ?? 0,
       p_fee_amount: data.fee_amount ?? 0,
       p_loan_id: data.loan_id,
       p_description: data.description || null,
@@ -414,10 +429,10 @@ const LoanPaymentForm: React.FC<{
       )} />
       <div className="grid grid-cols-2 gap-3">
         <Controller name="principal_amount" control={control} render={({ field }) => (
-          <CurrencyInput label="Principal" required error={errors.principal_amount?.message} value={field.value} onChange={field.onChange} />
+          <CurrencyInput label="Principal" optional error={errors.principal_amount?.message} value={field.value} onChange={field.onChange} />
         )} />
         <Controller name="interest_amount" control={control} render={({ field }) => (
-          <CurrencyInput label="Interest" required error={errors.interest_amount?.message} value={field.value} onChange={field.onChange} />
+          <CurrencyInput label="Interest" optional error={errors.interest_amount?.message} value={field.value} onChange={field.onChange} />
         )} />
       </div>
       <Controller name="fee_amount" control={control} render={({ field }) => (
@@ -436,14 +451,27 @@ const LoanPaymentForm: React.FC<{
 // ─── Card Payment Form ────────────────────────────────────────────────────────
 const CardPaymentForm: React.FC<{
   accounts: AccountRow[];
-  cards: Array<{ id: string; nickname: string }>;
+  cards: any[];
   onSubmit: (type: TransactionType, params: Record<string, unknown>) => Promise<void>;
   submitting: boolean;
 }> = ({ accounts, cards, onSubmit, submitting }) => {
-  const { register, handleSubmit, control, formState: { errors } } = useForm<CreditCardPaymentData>({
+  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<CreditCardPaymentData>({
     resolver: zodResolver(creditCardPaymentSchema),
     defaultValues: { transaction_date: todayString() },
   });
+
+  const selectedCardId = watch('credit_card_id');
+
+  // Auto-fill payment account from DB details
+  React.useEffect(() => {
+    if (!selectedCardId) return;
+    const card = cards.find((c) => c.id === selectedCardId);
+    if (card) {
+      if (card.linked_account_id) {
+        setValue('payment_account_id', card.linked_account_id);
+      }
+    }
+  }, [selectedCardId, cards, setValue]);
 
   const submit = handleSubmit(async (data) => {
     const selectedCard = cards.find((c) => c.id === data.credit_card_id);

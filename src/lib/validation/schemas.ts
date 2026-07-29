@@ -135,14 +135,19 @@ export const loanPaymentSchema = z.object({
   loan_id: z.string().min(1, 'Loan is required'),
   payment_account_id: z.string().min(1, 'Payment account is required'),
   total_amount: vPositiveAmount('Total payment must be greater than zero'),
-  principal_amount: z.coerce.number().min(0, 'Principal must be zero or more'),
-  interest_amount: z.coerce.number().min(0, 'Interest must be zero or more'),
+  principal_amount: z.coerce.number().min(0).optional().default(0),
+  interest_amount: z.coerce.number().min(0).optional().default(0),
   fee_amount: vOptionalAmount(),
   transaction_date: vRequiredDate(),
   description: vNotes(),
 }).refine((d) => {
+  const principal = d.principal_amount ?? 0;
+  const interest = d.interest_amount ?? 0;
   const fee = d.fee_amount ?? 0;
-  return Math.abs(d.principal_amount + d.interest_amount + fee - d.total_amount) < 0.01;
+  if (principal > 0 || interest > 0) {
+    return Math.abs(principal + interest + fee - d.total_amount) < 0.01;
+  }
+  return true;
 }, {
   message: 'Principal + Interest + Fee must equal Total payment',
   path: ['total_amount'],

@@ -99,11 +99,26 @@ DECLARE
   v_principal  NUMERIC(18, 2);
   v_interest   NUMERIC(18, 2);
   v_fee        NUMERIC(18, 2);
+  
+  -- Resolved variables
+  v_dest_account_id UUID;
+  v_interest_type   TEXT;
+  v_annual_rate     NUMERIC(6, 4);
+  v_outstanding     NUMERIC(18, 2);
+  v_acc_class       account_class;
 BEGIN
   -- Step 1: Get authenticated user
   v_user_id := auth.uid();
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  -- Step 1.5: Resolve destination account if loan or credit card ID is provided
+  v_dest_account_id := p_destination_account_id;
+  IF p_loan_id IS NOT NULL THEN
+    SELECT account_id INTO v_dest_account_id FROM loans WHERE id = p_loan_id AND user_id = v_user_id;
+  ELSIF p_credit_card_id IS NOT NULL THEN
+    SELECT account_id INTO v_dest_account_id FROM credit_cards WHERE id = p_credit_card_id AND user_id = v_user_id;
   END IF;
 
   -- Step 2: Verify account ownership
@@ -114,15 +129,15 @@ BEGIN
     RAISE EXCEPTION 'ACCOUNT_OWNERSHIP: Account not found or access denied';
   END IF;
 
-  -- Step 3: Validate destination account ownership (for transfers)
-  IF p_destination_account_id IS NOT NULL THEN
+  -- Step 3: Validate destination account ownership (for transfers/payments)
+  IF v_dest_account_id IS NOT NULL THEN
     IF NOT EXISTS (
       SELECT 1 FROM financial_accounts
-      WHERE id = p_destination_account_id AND user_id = v_user_id AND is_active = TRUE
+      WHERE id = v_dest_account_id AND user_id = v_user_id AND is_active = TRUE
     ) THEN
       RAISE EXCEPTION 'ACCOUNT_OWNERSHIP: Destination account not found or access denied';
     END IF;
-    IF p_destination_account_id = p_account_id THEN
+    IF v_dest_account_id = p_account_id THEN
       RAISE EXCEPTION 'VALIDATION_ERROR: Source and destination must be different accounts';
     END IF;
   END IF;
@@ -147,19 +162,28 @@ BEGIN
     v_balance := p_amount + (-p_amount);
 
   ELSIF p_transaction_type = 'expense' THEN
+    -- Get paying account class to see if it's a credit card (liability)
+    SELECT account_class INTO v_acc_class FROM financial_accounts WHERE id = p_account_id;
+    
     -- Expense category: +amount (debit)
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, category_id, amount, entry_role)
     VALUES (v_user_id, v_tx_id, p_category_id, p_amount, 'expense_debit');
-    -- Asset account: -amount (credit)
+    -- Payment account: -amount (credit)
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
-    VALUES (v_user_id, v_tx_id, p_account_id, -p_amount, 'asset_credit');
+    VALUES (
+      v_user_id,
+      v_tx_id,
+      p_account_id,
+      -p_amount,
+      CASE WHEN v_acc_class = 'liability' THEN 'liability_credit' ELSE 'asset_credit' END
+    );
     v_balance := p_amount + (-p_amount);
 
   ELSIF p_transaction_type = 'transfer' THEN
     v_fee := COALESCE(p_fee_amount, 0);
     -- Destination account: +amount (debit / transfer in)
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
-    VALUES (v_user_id, v_tx_id, p_destination_account_id, p_amount, 'transfer_in');
+    VALUES (v_user_id, v_tx_id, v_dest_account_id, p_amount, 'transfer_in');
     -- Fee as expense (if any)
     IF v_fee > 0 THEN
       INSERT INTO ledger_entries (user_id, ledger_transaction_id, category_id, amount, entry_role)
@@ -176,17 +200,43 @@ BEGIN
     VALUES (v_user_id, v_tx_id, p_account_id, p_amount, 'asset_debit');
     -- Loan liability: -amount (liability increases)
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
-    VALUES (v_user_id, v_tx_id, p_destination_account_id, -p_amount, 'liability_credit');
+    VALUES (v_user_id, v_tx_id, v_dest_account_id, -p_amount, 'liability_credit');
     v_balance := p_amount + (-p_amount);
 
   ELSIF p_transaction_type = 'loan_payment' THEN
+    v_fee := COALESCE(p_fee_amount, 0);
     v_principal := COALESCE(p_principal_amount, 0);
-    v_interest  := COALESCE(p_interest_amount, 0);
-    v_fee       := COALESCE(p_fee_amount, 0);
+    v_interest := COALESCE(p_interest_amount, 0);
+
+    -- Auto-calculate principal vs interest split on backend if not specified
+    IF v_principal = 0 AND v_interest = 0 THEN
+      SELECT interest_type, annual_rate INTO v_interest_type, v_annual_rate FROM loans WHERE id = p_loan_id;
+      
+      IF v_interest_type = 'interest_free' THEN
+        v_interest := 0;
+        v_principal := p_amount - v_fee;
+      ELSIF v_annual_rate IS NOT NULL AND v_annual_rate > 0 THEN
+        -- Get current loan balance
+        SELECT ABS(COALESCE(balance, 0)) INTO v_outstanding FROM v_account_balances WHERE account_id = v_dest_account_id;
+        -- Interest = outstanding * (annual_rate / 12)
+        v_interest := ROUND(v_outstanding * (v_annual_rate / 12.0), 2);
+        
+        IF v_interest >= (p_amount - v_fee) THEN
+          v_interest := p_amount - v_fee;
+          v_principal := 0;
+        ELSE
+          v_principal := p_amount - v_interest - v_fee;
+        END IF;
+      ELSE
+        v_interest := 0;
+        v_principal := p_amount - v_fee;
+      END IF;
+    END IF;
+
     -- Loan liability: +principal (reduces outstanding)
     IF v_principal > 0 THEN
       INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
-      VALUES (v_user_id, v_tx_id, p_destination_account_id, v_principal, 'liability_debit');
+      VALUES (v_user_id, v_tx_id, v_dest_account_id, v_principal, 'liability_debit');
     END IF;
     -- Interest expense: +interest
     IF v_interest > 0 THEN
@@ -209,13 +259,13 @@ BEGIN
     VALUES (v_user_id, v_tx_id, p_category_id, p_amount, 'expense_debit');
     -- Credit card liability: -amount (balance increases)
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
-    VALUES (v_user_id, v_tx_id, p_destination_account_id, -p_amount, 'liability_credit');
+    VALUES (v_user_id, v_tx_id, v_dest_account_id, -p_amount, 'liability_credit');
     v_balance := p_amount + (-p_amount);
 
   ELSIF p_transaction_type = 'credit_card_payment' THEN
     -- Credit card liability: +amount (balance decreases)
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
-    VALUES (v_user_id, v_tx_id, p_destination_account_id, p_amount, 'liability_debit');
+    VALUES (v_user_id, v_tx_id, v_dest_account_id, p_amount, 'liability_debit');
     -- Bank/wallet asset: -amount
     INSERT INTO ledger_entries (user_id, ledger_transaction_id, financial_account_id, amount, entry_role)
     VALUES (v_user_id, v_tx_id, p_account_id, -p_amount, 'asset_credit');
