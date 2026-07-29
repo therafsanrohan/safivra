@@ -19,20 +19,6 @@ if (isPlaceholderConfig) {
   );
 }
 
-// Custom fetch wrapper with fast-timeout to eliminate long loading hangs
-const fastFetch: typeof fetch = (input, init) => {
-  if (isPlaceholderConfig) {
-    return Promise.reject(new TypeError('Offline placeholder configuration'));
-  }
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-  const combinedSignal = init?.signal ? init.signal : controller.signal;
-
-  return fetch(input, { ...init, signal: combinedSignal }).finally(() => {
-    clearTimeout(timeoutId);
-  });
-};
-
 export const supabase: SupabaseClient<Database> = createClient<Database>(
   supabaseUrl,
   supabaseAnonKey,
@@ -41,9 +27,6 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
       autoRefreshToken: !isPlaceholderConfig,
       persistSession: true,
       detectSessionInUrl: true,
-    },
-    global: {
-      fetch: fastFetch,
     },
   }
 );
