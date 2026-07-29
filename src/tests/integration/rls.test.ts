@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 
 /**
- * Integration Test Suite: Supabase Row Level Security (RLS) & Multi-User Isolation
+ * Integration Test Suite: Data Isolation & Multi-User Security
  *
  * Verifies that:
  * 1. User A cannot read User B accounts, loans, credit cards, or transactions.
- * 2. Database query policies enforce explicit ownership (`auth.uid() = user_id`).
+ * 2. API query filters enforce explicit ownership (`user_id` match).
  * 3. Client-side state never exposes another user's financial ledger records.
  */
 
@@ -24,7 +24,7 @@ interface TransactionRecord {
   title: string;
 }
 
-describe('Supabase RLS & Multi-User Data Isolation Policy', () => {
+describe('Data Isolation & Multi-User Security Policy', () => {
   const userA_Id = 'usr-0000-0000-0000-0001';
   const userB_Id = 'usr-0000-0000-0000-0002';
 
@@ -38,7 +38,7 @@ describe('Supabase RLS & Multi-User Data Isolation Policy', () => {
     { id: 'tx-b1', user_id: userB_Id, account_id: 'acc-b1', amount: 10000, title: 'User B Salary' },
   ];
 
-  // Helper simulating Supabase RLS row filter (relrowsecurity = true)
+  // Helper simulating server-side user_id filter (API enforces ownership)
   const applyRlsFilter = <T extends { user_id: string }>(records: T[], activeUserId: string): T[] => {
     if (!activeUserId) return [];
     return records.filter((record) => record.user_id === activeUserId);

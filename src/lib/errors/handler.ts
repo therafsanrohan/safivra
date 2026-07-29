@@ -48,7 +48,7 @@ const ERROR_MESSAGES: Record<AppErrorCode, string> = {
 };
 
 /**
- * Parse a Supabase or generic error into an AppError.
+ * Parse an API or generic error into an AppError.
  */
 export function parseError(error: unknown): AppError {
   if (!error) return { code: 'UNKNOWN', message: ERROR_MESSAGES.UNKNOWN };
@@ -56,8 +56,8 @@ export function parseError(error: unknown): AppError {
   const msg = (error as Error).message ?? String(error);
   const statusCode = (error as { status?: number }).status;
 
-  // Auth errors from Supabase
-  if (msg.includes('Invalid login credentials')) {
+  // Auth errors
+  if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
     return { code: 'AUTH_INVALID_CREDENTIALS', message: ERROR_MESSAGES.AUTH_INVALID_CREDENTIALS };
   }
   if (msg.includes('Email not confirmed')) {
@@ -85,9 +85,6 @@ export function parseError(error: unknown): AppError {
   }
 
   // Network
-  if (msg.includes('Offline placeholder configuration')) {
-    return { code: 'NETWORK_ERROR', message: 'You are using placeholder credentials. Please set your real VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the .env file.' };
-  }
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('network')) {
     return { code: 'NETWORK_ERROR', message: ERROR_MESSAGES.NETWORK_ERROR };
   }

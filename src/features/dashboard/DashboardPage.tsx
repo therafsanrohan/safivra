@@ -164,7 +164,7 @@ export const DashboardPage: React.FC = () => {
         isTransfer: tx.transaction_type === 'transfer',
       }));
 
-      setUnreadCount(notifResult.count ?? 0);
+      setUnreadCount(notifResult.data?.length ?? 0);
       setData({ accounts, monthlySummary: summary, cashflowHistory, loanOutstanding, creditOutstanding, upcomingPayments, recentTransactions });
     } catch (err: any) {
       setError(err.message || 'Could not load dashboard data');

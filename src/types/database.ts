@@ -1,6 +1,6 @@
 /**
- * TypeScript types auto-generated from Supabase schema.
- * Regenerate with: npx supabase gen types typescript --linked > src/types/database.ts
+ * TypeScript types for the Safivra database schema.
+ * These types match the MongoDB collections used by the Vercel API backend.
  */
 export type Json =
   | string
