@@ -1,20 +1,7 @@
 import { MongoClient, MongoClientOptions, Db } from 'mongodb';
 import { attachDatabasePool } from '@vercel/functions';
 
-const uri = process.env.MONGODB_URI;
-
-const options: MongoClientOptions = {
-  appName: "devrel.vercel.integration",
-  maxIdleTimeMS: 5000,
-  maxPoolSize: 10,
-};
-
 let client: MongoClient | null = null;
-if (uri) {
-  client = new MongoClient(uri, options);
-  attachDatabasePool(client);
-}
-
 let db: Db | null = null;
 
 const defaultCategories = [
@@ -60,18 +47,37 @@ const defaultCategories = [
 export async function getDb(): Promise<Db> {
   if (db) return db;
 
-  if (!client) {
+  const connectionUri = process.env.MONGODB_URI;
+  if (!connectionUri) {
     throw new Error('MONGODB_URI environment variable is missing.');
+  }
+
+  if (!client) {
+    const options: MongoClientOptions = {
+      appName: "devrel.vercel.integration",
+      maxIdleTimeMS: 5000,
+      maxPoolSize: 10,
+    };
+    client = new MongoClient(connectionUri, options);
+    try {
+      attachDatabasePool(client);
+    } catch (e) {
+      // Ignore if attachDatabasePool is not supported in non-Vercel environment
+    }
   }
 
   await client.connect();
   db = client.db();
 
   // Seed categories if database is empty
-  const count = await db.collection('transaction_categories').countDocuments();
-  if (count === 0) {
-    console.log('[MongoDB] Seeding default transaction categories...');
-    await db.collection('transaction_categories').insertMany(defaultCategories);
+  try {
+    const count = await db.collection('transaction_categories').countDocuments();
+    if (count === 0) {
+      console.log('[MongoDB] Seeding default transaction categories...');
+      await db.collection('transaction_categories').insertMany(defaultCategories);
+    }
+  } catch (err) {
+    console.error('[MongoDB] Category seed check error:', err);
   }
 
   return db;
