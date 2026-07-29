@@ -52,29 +52,5 @@ export default defineConfig({
   build: {
     target: 'es2020',
     sourcemap: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_debugger: true,
-      },
-      mangle: {
-        safari10: true,
-      },
-    },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          supabase: ['@supabase/supabase-js'],
-          charts: ['recharts'],
-          radix: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-          ],
-        },
-      },
-    },
   },
 });
