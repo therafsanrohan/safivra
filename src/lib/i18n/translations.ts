@@ -152,6 +152,44 @@ export const translations = {
       backToPlans: 'Plans',
     },
 
+    // ─── Recurring ─────────────────────────────────────────────────────────
+    recurring: {
+      pageTitle: 'Recurring Commitments',
+      pageSubtitle: 'Subscriptions, bills, rent, and scheduled income',
+      addRecurring: 'Add Recurring',
+      noCommitments: 'No recurring commitments',
+      noCommitmentsDesc: 'Add monthly internet bills, house rent, or streaming subscriptions to receive timely reminders.',
+      addItem: 'Add Item',
+      dialogTitle: 'Add Recurring Commitment',
+      dialogDesc: 'Schedule a bill, rent payment, or subscription',
+      titleLabel: 'Title',
+      titlePlaceholder: 'e.g. Internet Bill, House Rent, Netflix',
+      amountLabel: 'Amount',
+      frequencyLabel: 'Frequency',
+      nextDueLabel: 'Next Due Date',
+      saveCommitment: 'Save Commitment',
+      typeLabel: 'Transaction Type',
+      accountLabel: 'Account',
+      categoryLabel: 'Category',
+      autoPostLabel: 'Auto Post',
+      autoPostDesc: 'Automatically record transaction on due date',
+      toastAdded: 'Recurring Item Added',
+      toastAddedDesc: '{name} set for {amount}.',
+      weekly: 'Weekly',
+      monthly: 'Monthly',
+      yearly: 'Yearly',
+      expense: 'Expense',
+      income: 'Income',
+      nextDue: 'Next due',
+      backToPlans: 'Plans',
+      deleteItem: 'Delete',
+      deleteConfirm: 'Are you sure you want to delete this recurring commitment?',
+      toastDeleted: 'Recurring Item Deleted',
+      toastDeletedDesc: 'Successfully removed recurring item.',
+      noAccountWarning: 'You must create a financial account first to schedule a recurring commitment.',
+      createAccountBtn: 'Create Account',
+    },
+
     // ─── More Menu ─────────────────────────────────────────────────────────
     more: {
       title: 'More',
@@ -351,6 +389,44 @@ export const translations = {
       backToPlans: 'পরিকল্পনা',
     },
 
+    // ─── Recurring ─────────────────────────────────────────────────────────
+    recurring: {
+      pageTitle: 'নিয়মিত প্রতিশ্রুতি',
+      pageSubtitle: 'সাবস্ক্রিপশন, বিল, ভাড়া এবং নির্ধারিত আয়',
+      addRecurring: 'নিয়মিত যোগ করুন',
+      noCommitments: 'কোন নিয়মিত প্রতিশ্রুতি নেই',
+      noCommitmentsDesc: 'সময়মত অনুস্মারক পেতে মাসিক ইন্টারনেট বিল, ঘর ভাড়া বা স্ট্রিমিং সাবস্ক্রিপশন যোগ করুন।',
+      addItem: 'আইটেম যোগ করুন',
+      dialogTitle: 'নিয়মিত প্রতিশ্রুতি যোগ করুন',
+      dialogDesc: 'একটি বিল, ভাড়া প্রদান বা সাবস্ক্রিপশন নির্ধারণ করুন',
+      titleLabel: 'শিরোনাম',
+      titlePlaceholder: 'যেমন: ইন্টারনেট বিল, ঘর ভাড়া, নেটফ্লিক্স',
+      amountLabel: 'পরিমাণ',
+      frequencyLabel: 'ফ্রিকোয়েন্সি',
+      nextDueLabel: 'পরবর্তী নির্ধারিত তারিখ',
+      saveCommitment: 'প্রতিশ্রুতি সংরক্ষণ করুন',
+      typeLabel: 'লেনদেনের ধরন',
+      accountLabel: 'হিসাব',
+      categoryLabel: 'ক্যাটাগরি',
+      autoPostLabel: 'অটো পোস্ট',
+      autoPostDesc: 'নির্ধারিত তারিখে স্বয়ংক্রিয়ভাবে লেনদেন রেকর্ড করুন',
+      toastAdded: 'নিয়মিত আইটেম যোগ করা হয়েছে',
+      toastAddedDesc: '{amount} এর জন্য {name} সেট করা হয়েছে।',
+      weekly: 'সাপ্তাহিক',
+      monthly: 'মাসিক',
+      yearly: 'বার্ষিক',
+      expense: 'খরচ',
+      income: 'আয়',
+      nextDue: 'পরবর্তী বকেয়া',
+      backToPlans: 'পরিকল্পনা',
+      deleteItem: 'মুছুন',
+      deleteConfirm: 'আপনি কি নিশ্চিত যে আপনি এই নিয়মিত প্রতিশ্রুতিটি মুছতে চান?',
+      toastDeleted: 'নিয়মিত আইটেম মুছে ফেলা হয়েছে',
+      toastDeletedDesc: 'নিয়মিত আইটেমটি সফলভাবে মুছে ফেলা হয়েছে।',
+      noAccountWarning: 'নিয়মিত প্রতিশ্রুতি নির্ধারণ করতে আপনাকে প্রথমে একটি আর্থিক হিসাব তৈরি করতে হবে।',
+      createAccountBtn: 'হিসাব তৈরি করুন',
+    },
+
     // ─── More Menu ─────────────────────────────────────────────────────────
     more: {
       title: 'আরও',
@@ -403,4 +479,10 @@ export const translations = {
   },
 } as const;
 
-export type TranslationKeys = typeof translations.en;
+type DeepStringify<T> = T extends string
+  ? string
+  : T extends object
+  ? { [K in keyof T]: DeepStringify<T[K]> }
+  : T;
+
+export type TranslationKeys = DeepStringify<typeof translations.en>;

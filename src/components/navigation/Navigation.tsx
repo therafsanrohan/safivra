@@ -14,7 +14,7 @@ import { Sheet } from '@/components/ui/Dialog';
 export const BottomNav: React.FC = () => {
   const [addOpen, setAddOpen] = useState(false);
   const navigate = useNavigate();
-  const { t, toggleLocale, locale } = useLanguage();
+  const { t } = useLanguage();
 
   const navItems = [
     { to: '/', label: t.nav.home, icon: Home, end: true },
@@ -166,7 +166,7 @@ export const Sidebar: React.FC = () => {
         { to: '/accounts', label: t.nav.accounts, icon: Wallet },
         { to: '/loans', label: t.nav.loans, icon: Landmark },
         { to: '/credit-cards', label: t.nav.creditCards, icon: CreditCard },
-        { to: '/recurring', label: t.nav.recurring, icon: RefreshCw },
+        { to: '/plans/recurring', label: t.nav.recurring, icon: RefreshCw },
       ],
     },
     {
