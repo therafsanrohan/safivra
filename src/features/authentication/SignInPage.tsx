@@ -70,7 +70,7 @@ export const SignInPage: React.FC = () => {
                   setValue('email', 'demo@safivra.com');
                   setValue('password', 'Demo1234');
                 }}
-                className="text-[var(--color-accent)] font-semibold underline"
+                className="text-[var(--color-accent)] font-semibold hover:opacity-80 transition-opacity"
               >
                 Auto-fill
               </button>

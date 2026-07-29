@@ -151,13 +151,19 @@
 
   p { margin: 0; }
 
+  a, button, [role="button"] {
+    text-decoration: none !important;
+  }
+
   a {
     color: var(--color-accent);
     text-decoration: none;
+    transition: opacity var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
   }
 
   a:hover {
-    text-decoration: underline;
+    text-decoration: none !important;
+    opacity: 0.85;
   }
 
   /* ── Form Elements ───────────────────────────────────────────────────────── */

@@ -264,7 +264,7 @@ export const ErrorState: React.FC<{
     {onRetry && (
       <button
         onClick={onRetry}
-        className="mt-3 text-[var(--text-button)] text-[var(--color-accent)] font-semibold hover:underline"
+        className="mt-3 text-[var(--text-button)] text-[var(--color-accent)] font-semibold hover:opacity-80 transition-opacity"
       >
         Try again
       </button>

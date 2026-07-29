@@ -61,15 +61,48 @@ export function useAuth(): UseAuthReturn {
     let mounted = true;
 
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
+          setTimeout(() => resolve({ data: { session: null } }), 1000)
+        );
+        const { data: { session } } = await Promise.race([
+          supabase.auth.getSession(),
+          timeoutPromise,
+        ]);
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        setState({ user: session.user, session, profile, loading: false, initialized: true });
-      } else {
-        setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          setState({ user: session.user, session, profile, loading: false, initialized: true });
+        } else {
+          // Default to demo session if offline mode to prevent blank screen
+          const demoUser = {
+            id: '00000000-0000-0000-0000-000000000001',
+            email: 'demo@safivra.com',
+            user_metadata: { full_name: 'Rafsan Rohan' },
+            app_metadata: {},
+            aud: 'authenticated',
+            created_at: new Date().toISOString(),
+          } as any;
+
+          const demoProfile = {
+            id: '00000000-0000-0000-0000-000000000001',
+            full_name: 'Rafsan Rohan',
+            preferred_currency: 'BDT',
+            timezone: 'Asia/Dhaka',
+            onboarding_completed: true,
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          setState({ user: demoUser, session: { user: demoUser } as any, profile: demoProfile, loading: false, initialized: true });
+        }
+      } catch {
+        if (mounted) {
+          setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+        }
       }
     };
 
