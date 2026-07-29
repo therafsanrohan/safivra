@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Landmark } from 'lucide-react';
-import { supabase } from '@/lib/mongodb/client';
+import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDueLabel, isOverdue } from '@/lib/dates/formatter';

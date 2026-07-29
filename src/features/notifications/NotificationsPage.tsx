@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, Check } from 'lucide-react';
-import { supabase } from '@/lib/mongodb/client';
+import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatDate } from '@/lib/dates/formatter';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Target, ArrowLeft, Plus } from 'lucide-react';
-import { supabase } from '@/lib/mongodb/client';
+import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { Card, Skeleton, EmptyState, ProgressBar } from '@/components/ui/Card';

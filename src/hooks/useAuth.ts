@@ -1,25 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/mongodb/client';
+import { supabase, isPlaceholderConfig } from '@/lib/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  user_metadata: {
-    full_name?: string;
-  };
-}
-
-export interface AuthSession {
-  user: AuthUser;
-  access_token: string;
-}
-
 interface AuthState {
-  user: AuthUser | null;
-  session: AuthSession | null;
+  user: User | null;
+  session: Session | null;
   profile: Profile | null;
   loading: boolean;
   initialized: boolean;
@@ -37,22 +25,6 @@ interface AuthActions {
 
 export type UseAuthReturn = AuthState & AuthActions;
 
-function parseJwt(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      window.atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
-
 export function useAuth(): UseAuthReturn {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -63,7 +35,8 @@ export function useAuth(): UseAuthReturn {
   });
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await (supabase.from('profiles') as any)
+    const { data, error } = await supabase
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -82,98 +55,73 @@ export function useAuth(): UseAuthReturn {
     setState((prev) => ({ ...prev, profile }));
   }, [state.user?.id, fetchProfile]);
 
-  // Initialize auth state
   useEffect(() => {
     let mounted = true;
 
-    const init = async () => {
+    async function initAuth() {
       try {
-        const token = localStorage.getItem('safivra-token');
-        if (!token) {
-          if (mounted) setState({ user: null, session: null, profile: null, loading: false, initialized: true });
-          return;
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (mounted) {
+            setState({
+              user: session.user,
+              session,
+              profile,
+              loading: false,
+              initialized: true,
+            });
+          }
+        } else {
+          if (mounted) {
+            setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          }
         }
-
-        const decoded = parseJwt(token);
-        if (!decoded || (decoded.exp && decoded.exp * 1000 < Date.now())) {
-          localStorage.removeItem('safivra-token');
-          if (mounted) setState({ user: null, session: null, profile: null, loading: false, initialized: true });
-          return;
-        }
-
-        // Fetch profile using our intercepted supabase client
-        const profile = await fetchProfile(decoded.sub);
-        if (!profile) {
-          localStorage.removeItem('safivra-token');
-          if (mounted) setState({ user: null, session: null, profile: null, loading: false, initialized: true });
-          return;
-        }
-
+      } catch (err) {
         if (mounted) {
-          const user: AuthUser = {
-            id: decoded.sub,
-            email: decoded.email,
-            user_metadata: { full_name: profile.full_name || '' },
-          };
+          setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+        }
+      }
+    }
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+
+      if (session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        if (mounted) {
           setState({
-            user,
-            session: { user, access_token: token },
+            user: session.user,
+            session,
             profile,
             loading: false,
             initialized: true,
           });
         }
-      } catch {
+      } else {
         if (mounted) {
           setState({ user: null, session: null, profile: null, loading: false, initialized: true });
         }
       }
-    };
-
-    init();
+    });
 
     return () => {
       mounted = false;
+      subscription.unsubscribe();
     };
   }, [fetchProfile]);
 
   const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
-    try {
-      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
-      const res = await fetch(`${baseUrl}/api/auth/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const contentType = res.headers.get('Content-Type') || '';
-      if (!contentType.includes('application/json')) {
-        return { error: 'Backend server is not responding correctly. If on Production, please check MONGODB_URI & JWT_SECRET in Vercel Environment Variables.' };
-      }
-
-      const resData = await res.json();
-      if (!res.ok) {
-        if (resData.error === 'invalid_credentials') {
-          return { error: 'Incorrect email or password. Please try again.' };
-        }
-        return { error: resData.error || 'Failed to sign in' };
-      }
-
-      const { session, profile } = resData;
-      localStorage.setItem('safivra-token', session.access_token);
-
-      setState({
-        user: session.user,
-        session,
-        profile,
-        loading: false,
-        initialized: true,
-      });
-
-      return {};
-    } catch (err: any) {
-      return { error: err.message || 'Network error' };
+    if (isPlaceholderConfig) {
+      return { error: 'Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' };
     }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    return {};
   };
 
   const signUp = async (
@@ -181,35 +129,26 @@ export function useAuth(): UseAuthReturn {
     password: string,
     fullName: string
   ): Promise<{ error?: string }> => {
-    try {
-      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
-      const res = await fetch(`${baseUrl}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: fullName }),
-      });
-
-      const contentType = res.headers.get('Content-Type') || '';
-      if (!contentType.includes('application/json')) {
-        return { error: 'Backend server is not responding correctly. If on Production, please check MONGODB_URI & JWT_SECRET in Vercel Environment Variables.' };
-      }
-
-      const resData = await res.json();
-      if (!res.ok) {
-        if (resData.error === 'already_registered') {
-          return { error: 'An account with that email address already exists.' };
-        }
-        return { error: resData.error || 'Failed to create account' };
-      }
-
-      return {};
-    } catch (err: any) {
-      return { error: err.message || 'Network error' };
+    if (isPlaceholderConfig) {
+      return { error: 'Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' };
     }
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+
+    if (error) return { error: error.message };
+    return {};
   };
 
   const signOut = async (): Promise<void> => {
-    localStorage.removeItem('safivra-token');
+    await supabase.auth.signOut();
     setState({
       user: null,
       session: null,
@@ -220,36 +159,20 @@ export function useAuth(): UseAuthReturn {
   };
 
   const sendPasswordReset = async (email: string): Promise<{ error?: string }> => {
-    // Stubbed since we do not configure SMTP server, return positive status for safety
+    if (isPlaceholderConfig) {
+      return { error: 'Supabase credentials missing.' };
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return { error: error.message };
     return {};
   };
 
   const updatePassword = async (password: string): Promise<{ error?: string }> => {
-    try {
-      const token = localStorage.getItem('safivra-token');
-      const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
-      const res = await fetch(`${baseUrl}/api/auth/update-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({ password }),
-      });
-
-      const contentType = res.headers.get('Content-Type') || '';
-      if (!contentType.includes('application/json')) {
-        return { error: 'Backend error (non-JSON). Please run using "npx vercel dev" instead of "npm run dev" to run the local backend server.' };
-      }
-
-      const resData = await res.json();
-      if (!res.ok) {
-        return { error: resData.error || 'Failed to update password' };
-      }
-      return {};
-    } catch (err: any) {
-      return { error: err.message || 'Network error' };
-    }
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { error: error.message };
+    return {};
   };
 
   const updateProfile = async (
@@ -257,11 +180,28 @@ export function useAuth(): UseAuthReturn {
   ): Promise<{ error?: string }> => {
     if (!state.user) return { error: 'Not authenticated' };
 
-    const { error } = await (supabase.from('profiles') as any)
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', state.user.id);
+    const userId = state.user.id;
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
-    if (error) return { error: error.message };
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ ...updates, updated_at: new Date().toISOString() }),
+      }
+    );
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      return { error: (errData as any)?.message || 'Failed to update profile' };
+    }
 
     await refreshProfile();
     return {};

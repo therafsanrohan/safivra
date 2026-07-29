@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, ArrowRightLeft } from 'lucide-react';
-import { supabase } from '@/lib/mongodb/client';
+import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';

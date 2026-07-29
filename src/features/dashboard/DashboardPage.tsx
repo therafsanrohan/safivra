@@ -6,7 +6,7 @@ import {
   ReceiptText,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
-import { supabase } from '@/lib/mongodb/client';
+import { supabase } from '@/lib/supabase/client';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths, isOverdue } from '@/lib/dates/formatter';
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
@@ -164,7 +164,7 @@ export const DashboardPage: React.FC = () => {
         isTransfer: tx.transaction_type === 'transfer',
       }));
 
-      setUnreadCount(notifResult.data?.length ?? 0);
+      setUnreadCount(notifResult.count ?? 0);
       setData({ accounts, monthlySummary: summary, cashflowHistory, loanOutstanding, creditOutstanding, upcomingPayments, recentTransactions });
     } catch (err: any) {
       setError(err.message || 'Could not load dashboard data');
