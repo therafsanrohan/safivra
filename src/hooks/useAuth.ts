@@ -60,7 +60,8 @@ export function useAuth(): UseAuthReturn {
 
     async function initAuth() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const sessionRes = await supabase.auth.getSession();
+        const session = sessionRes?.data?.session;
         
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
@@ -87,7 +88,7 @@ export function useAuth(): UseAuthReturn {
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const authListener = supabase.auth?.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
 
       if (session?.user) {
@@ -108,9 +109,11 @@ export function useAuth(): UseAuthReturn {
       }
     });
 
+    const subscription = authListener?.data?.subscription;
+
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [fetchProfile]);
 

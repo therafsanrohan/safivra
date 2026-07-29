@@ -35,7 +35,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [locale, setLocale]);
 
   // Merge loaded namespaces from the i18next store for the active locale
-  const tObject = (i18n.store.data[locale] || {}) as unknown as TranslationKeys;
+  const tObject = (i18n?.store?.data?.[locale] || {}) as unknown as TranslationKeys;
 
   return (
     <LanguageContext.Provider value={{ locale, t: tObject, toggleLocale, setLocale }}>
