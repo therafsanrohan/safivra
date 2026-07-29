@@ -6,6 +6,8 @@ import commonEn from '../../locales/en/common.json';
 import commonBn from '../../locales/bn/common.json';
 import navEn from '../../locales/en/nav.json';
 import navBn from '../../locales/bn/nav.json';
+import addTransactionEn from '../../locales/en/addTransaction.json';
+import addTransactionBn from '../../locales/bn/addTransaction.json';
 
 i18n
   .use(initReactI18next)
@@ -14,14 +16,16 @@ i18n
       en: {
         common: commonEn,
         nav: navEn,
+        addTransaction: addTransactionEn,
       },
       bn: {
         common: commonBn,
         nav: navBn,
+        addTransaction: addTransactionBn,
       },
     },
     fallbackLng: 'en',
-    ns: ['common', 'nav'],
+    ns: ['common', 'nav', 'addTransaction'],
     defaultNS: 'common',
     interpolation: {
       escapeValue: false, // React already escapes values
