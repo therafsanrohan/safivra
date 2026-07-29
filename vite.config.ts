@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
         name: 'Safivra',
@@ -27,8 +27,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         globPatterns: ['**/*.{js,css,html,ico,svg}'],
-        // Do NOT cache API responses or financial data
         runtimeCaching: [],
       },
     }),
@@ -53,15 +55,10 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
       },
       mangle: {
-        toplevel: true,
-      },
-      format: {
-        comments: false,
+        safari10: true,
       },
     },
     rollupOptions: {
