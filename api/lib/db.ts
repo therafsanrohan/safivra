@@ -1,12 +1,20 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, MongoClientOptions, Db } from 'mongodb';
 import { attachDatabasePool } from '@vercel/functions';
 
 const uri = process.env.MONGODB_URI;
-if (!uri) {
-  throw new Error('MONGODB_URI environment variable is missing.');
-}
+
+const options: MongoClientOptions = {
+  appName: "devrel.vercel.integration",
+  maxIdleTimeMS: 5000,
+  maxPoolSize: 10,
+};
 
 let client: MongoClient | null = null;
+if (uri) {
+  client = new MongoClient(uri, options);
+  attachDatabasePool(client);
+}
+
 let db: Db | null = null;
 
 const defaultCategories = [
@@ -53,14 +61,10 @@ export async function getDb(): Promise<Db> {
   if (db) return db;
 
   if (!client) {
-    client = new MongoClient(uri!, {
-      maxPoolSize: 10,
-    });
-    // Hook it into Vercel database connection pool lifecycle manager
-    attachDatabasePool(client);
-    await client.connect();
+    throw new Error('MONGODB_URI environment variable is missing.');
   }
 
+  await client.connect();
   db = client.db();
 
   // Seed categories if database is empty
@@ -72,3 +76,6 @@ export async function getDb(): Promise<Db> {
 
   return db;
 }
+
+export default client;
+

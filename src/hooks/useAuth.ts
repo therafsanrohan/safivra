@@ -148,7 +148,7 @@ export function useAuth(): UseAuthReturn {
 
       const contentType = res.headers.get('Content-Type') || '';
       if (!contentType.includes('application/json')) {
-        return { error: 'Backend error (non-JSON). Please run using "npx vercel dev" instead of "npm run dev" to run the local backend server.' };
+        return { error: 'Backend server is not responding correctly. If on Production, please check MONGODB_URI & JWT_SECRET in Vercel Environment Variables.' };
       }
 
       const resData = await res.json();
@@ -191,7 +191,7 @@ export function useAuth(): UseAuthReturn {
 
       const contentType = res.headers.get('Content-Type') || '';
       if (!contentType.includes('application/json')) {
-        return { error: 'Backend error (non-JSON). Please run using "npx vercel dev" instead of "npm run dev" to run the local backend server.' };
+        return { error: 'Backend server is not responding correctly. If on Production, please check MONGODB_URI & JWT_SECRET in Vercel Environment Variables.' };
       }
 
       const resData = await res.json();
