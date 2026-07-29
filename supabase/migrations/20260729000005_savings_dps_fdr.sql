@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.savings_schemes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   scheme_name TEXT NOT NULL,
-  scheme_type TEXT NOT NULL CHECK (scheme_type IN ('dps', 'fdr', 'savings_account', 'sanchaypatra')),
+  scheme_type TEXT NOT NULL CHECK (scheme_type IN ('dps', 'fdr', 'savings_account', 'sanchaypatra', 'matir_bank')),
   institution TEXT NOT NULL,
   account_number TEXT,
   deposit_amount NUMERIC(15,2) NOT NULL DEFAULT 0.00,

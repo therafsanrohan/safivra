@@ -3,23 +3,25 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, ReceiptText, Plus, Target, MoreHorizontal,
   Wallet, Landmark, CreditCard, BarChart3, Settings,
-  Bell, HandCoins, RefreshCw, BookOpen,
+  Bell, HandCoins, RefreshCw, BookOpen, Languages,
 } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
 import { useAuthContext } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Sheet } from '@/components/ui/Dialog';
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 export const BottomNav: React.FC = () => {
   const [addOpen, setAddOpen] = useState(false);
   const navigate = useNavigate();
+  const { t, toggleLocale, locale } = useLanguage();
 
   const navItems = [
-    { to: '/', label: 'Home', icon: Home, end: true },
-    { to: '/activity', label: 'Activity', icon: ReceiptText },
-    { action: () => setAddOpen(true), label: 'Add', icon: Plus, isAction: true },
-    { to: '/plans', label: 'Plans', icon: Target },
-    { to: '/more', label: 'More', icon: MoreHorizontal },
+    { to: '/', label: t.nav.home, icon: Home, end: true },
+    { to: '/activity', label: t.nav.activity, icon: ReceiptText },
+    { action: () => setAddOpen(true), label: t.nav.add, icon: Plus, isAction: true },
+    { to: '/plans', label: t.nav.plans, icon: Target },
+    { to: '/more', label: t.nav.more, icon: MoreHorizontal },
   ];
 
   return (
@@ -104,17 +106,19 @@ const AddTransactionSheet: React.FC<{
   onOpenChange: (v: boolean) => void;
   navigate: ReturnType<typeof useNavigate>;
 }> = ({ open, onOpenChange, navigate }) => {
+  const { t } = useLanguage();
+
   const primaryActions = [
-    { label: 'Expense', icon: ReceiptText, color: 'text-[var(--color-negative)]', bg: 'bg-[var(--color-negative-soft)]', path: '/activity/add?type=expense' },
-    { label: 'Income', icon: Wallet, color: 'text-[var(--color-positive)]', bg: 'bg-[var(--color-positive-soft)]', path: '/activity/add?type=income' },
-    { label: 'Transfer', icon: HandCoins, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]', path: '/activity/add?type=transfer' },
-    { label: 'Loan Payment', icon: Landmark, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]', path: '/activity/add?type=loan_payment' },
-    { label: 'Card Payment', icon: CreditCard, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-soft)]', path: '/activity/add?type=credit_card_payment' },
-    { label: 'Adjustment', icon: BarChart3, color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-subtle)]', path: '/activity/add?type=balance_adjustment' },
+    { label: t.addTransaction.expense, icon: ReceiptText, color: 'text-[var(--color-negative)]', bg: 'bg-[var(--color-negative-soft)]', path: '/activity/add?type=expense' },
+    { label: t.addTransaction.income, icon: Wallet, color: 'text-[var(--color-positive)]', bg: 'bg-[var(--color-positive-soft)]', path: '/activity/add?type=income' },
+    { label: t.addTransaction.transfer, icon: HandCoins, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]', path: '/activity/add?type=transfer' },
+    { label: t.addTransaction.loanPayment, icon: Landmark, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]', path: '/activity/add?type=loan_payment' },
+    { label: t.addTransaction.cardPayment, icon: CreditCard, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-soft)]', path: '/activity/add?type=credit_card_payment' },
+    { label: t.addTransaction.adjustment, icon: BarChart3, color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-subtle)]', path: '/activity/add?type=balance_adjustment' },
   ];
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title="Add transaction">
+    <Sheet open={open} onOpenChange={onOpenChange} title={t.addTransaction.title}>
       <div className="grid grid-cols-3 gap-3">
         {primaryActions.map((action) => (
           <button
@@ -146,29 +150,30 @@ const AddTransactionSheet: React.FC<{
 // ─── Desktop Sidebar ──────────────────────────────────────────────────────────
 export const Sidebar: React.FC = () => {
   const { profile } = useAuthContext();
+  const { t, toggleLocale, locale } = useLanguage();
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
 
   const navGroups = [
     {
       items: [
-        { to: '/', label: 'Dashboard', icon: Home, end: true },
-        { to: '/activity', label: 'Activity', icon: ReceiptText },
+        { to: '/', label: t.nav.dashboard, icon: Home, end: true },
+        { to: '/activity', label: t.nav.activity, icon: ReceiptText },
       ],
     },
     {
-      label: 'Manage',
+      label: t.nav.manage,
       items: [
-        { to: '/accounts', label: 'Accounts', icon: Wallet },
-        { to: '/loans', label: 'Loans', icon: Landmark },
-        { to: '/credit-cards', label: 'Credit Cards', icon: CreditCard },
-        { to: '/recurring', label: 'Recurring', icon: RefreshCw },
+        { to: '/accounts', label: t.nav.accounts, icon: Wallet },
+        { to: '/loans', label: t.nav.loans, icon: Landmark },
+        { to: '/credit-cards', label: t.nav.creditCards, icon: CreditCard },
+        { to: '/recurring', label: t.nav.recurring, icon: RefreshCw },
       ],
     },
     {
-      label: 'Plan',
+      label: t.nav.plan,
       items: [
-        { to: '/plans', label: 'Plans & Goals', icon: Target },
-        { to: '/reports', label: 'Reports', icon: BookOpen },
+        { to: '/plans', label: t.nav.plansGoals, icon: Target },
+        { to: '/reports', label: t.nav.reports, icon: BookOpen },
       ],
     },
   ];
@@ -178,11 +183,24 @@ export const Sidebar: React.FC = () => {
       className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-[var(--sidebar-width)] bg-[var(--color-bg-surface)] border-r border-[var(--color-border)] z-20 overflow-y-auto"
       aria-label="Sidebar navigation"
     >
-      {/* Wordmark */}
-      <div className="px-5 py-5 border-b border-[var(--color-border)]">
+      {/* Wordmark + Language toggle */}
+      <div className="px-5 py-5 border-b border-[var(--color-border)] flex items-center justify-between">
         <span className="text-[1.125rem] font-semibold tracking-tight text-[var(--color-text-primary)]">
           {APP_CONFIG.name}
         </span>
+        <button
+          onClick={toggleLocale}
+          aria-label={locale === 'en' ? 'Switch to Bengali' : 'Switch to English'}
+          className={[
+            'flex items-center gap-1 px-2 py-0.5',
+            'rounded-full border border-[var(--color-border)]',
+            'text-[11px] font-semibold text-[var(--color-text-secondary)]',
+            'transition-colors hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]',
+          ].join(' ')}
+        >
+          <Languages size={11} />
+          {t.common.switchLang}
+        </button>
       </div>
 
       {/* Nav groups */}
@@ -244,7 +262,7 @@ export const Sidebar: React.FC = () => {
           }
         >
           <Bell size={18} strokeWidth={1.75} aria-hidden="true" />
-          Notifications
+          {t.nav.notifications}
         </NavLink>
         <NavLink
           to="/settings"
@@ -259,7 +277,7 @@ export const Sidebar: React.FC = () => {
           }
         >
           <Settings size={18} strokeWidth={1.75} aria-hidden="true" />
-          Settings
+          {t.nav.settings}
         </NavLink>
 
         {/* User */}

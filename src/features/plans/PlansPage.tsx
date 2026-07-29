@@ -1,17 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Target, RefreshCw, Trophy, ChevronRight, PiggyBank } from 'lucide-react';
+import { Target, RefreshCw, Trophy, ChevronRight, Coins } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { useLanguage } from '@/context/LanguageContext';
 
 export const PlansPage: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="page-container pt-5 space-y-5 fade-in">
       <header>
         <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-          Financial Plans
+          {t.plans.title}
         </h1>
         <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-          Budgets, recurring commitments, and savings goals
+          {t.plans.subtitle}
         </p>
       </header>
 
@@ -24,15 +27,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  Monthly Budgets
+                  {t.plans.budgets}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  Set category expense limits and track progress against spending.
+                  {t.plans.budgetsDesc}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              Manage Budgets <ChevronRight size={16} />
+              {t.plans.manageBudgets} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -41,19 +44,19 @@ export const PlansPage: React.FC = () => {
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
             <div className="space-y-3">
               <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-warning-soft)] flex items-center justify-center">
-                <PiggyBank size={20} className="text-[var(--color-warning)]" />
+                <Coins size={20} className="text-[var(--color-warning)]" />
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  Savings, DPS & FDR
+                  {t.plans.savingsDps}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  Deposit pension schemes, bank FDRs, and National Sanchaypatra.
+                  {t.plans.savingsDpsDesc}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              Manage Savings <ChevronRight size={16} />
+              {t.plans.manageSavings} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -66,15 +69,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  Recurring Commitments
+                  {t.plans.recurring}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  Subscriptions, utility bills, rent, and recurring income schedules.
+                  {t.plans.recurringDesc}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              Manage Commitments <ChevronRight size={16} />
+              {t.plans.manageRecurring} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -87,15 +90,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  Savings Goals
+                  {t.plans.goals}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  Emergency funds, Hajj/Umrah savings, gadget funds, and target dates.
+                  {t.plans.goalsDesc}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              Manage Goals <ChevronRight size={16} />
+              {t.plans.manageGoals} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>

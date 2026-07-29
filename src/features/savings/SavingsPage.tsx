@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { PiggyBank, ArrowLeft, Plus, Landmark, TrendingUp, Award, Clock } from 'lucide-react';
+import { Coins, ArrowLeft, Plus, Landmark, TrendingUp, Award, Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate, todayString } from '@/lib/dates/formatter';
 import { Card, Skeleton, EmptyState, Badge } from '@/components/ui/Card';
@@ -72,6 +73,7 @@ const DEFAULT_SCHEMES: SavingsSchemeRow[] = [
 
 export const SavingsPage: React.FC = () => {
   const { user } = useAuthContext();
+  const { t } = useLanguage();
   const { success } = useToast();
   const [schemes, setSchemes] = useState<SavingsSchemeRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,20 +152,20 @@ export const SavingsPage: React.FC = () => {
       // Fallback
     }
 
-    setSchemes((prev) => [newScheme, ...prev]);
+    setSchemes((prev: SavingsSchemeRow[]) => [newScheme, ...prev]);
     setSchemeName('');
     setInstitution('');
     setShowAddDialog(false);
     success('Savings Scheme Added', `${newScheme.scheme_name} registered successfully.`);
   };
 
-  const filteredSchemes = schemes.filter((s) => {
+  const filteredSchemes = schemes.filter((s: SavingsSchemeRow) => {
     if (activeTab === 'all') return true;
     return s.scheme_type === activeTab;
   });
 
-  const totalDeposit = schemes.reduce((sum, s) => sum + Number(s.deposit_amount), 0);
-  const totalMaturity = schemes.reduce((sum, s) => sum + Number(s.maturity_amount), 0);
+  const totalDeposit = schemes.reduce((sum: number, s: SavingsSchemeRow) => sum + Number(s.deposit_amount), 0);
+  const totalMaturity = schemes.reduce((sum: number, s: SavingsSchemeRow) => sum + Number(s.maturity_amount), 0);
 
   if (loading) {
     return (
@@ -178,21 +180,21 @@ export const SavingsPage: React.FC = () => {
     <div className="page-container pt-4 space-y-5 fade-in">
       <div className="flex items-center justify-between">
         <Link to="/plans" className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
-          <ArrowLeft size={18} /> Plans
+          <ArrowLeft size={18} /> {t.savings.backToPlans}
         </Link>
       </div>
 
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            Savings, DPS & FDR
+            {t.savings.pageTitle}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            Track Deposit Pension Schemes, Fixed Deposits, and Sanchaypatra
+            {t.savings.pageSubtitle}
           </p>
         </div>
         <Button size="sm" onClick={() => setShowAddDialog(true)} className="gap-1">
-          <Plus size={16} /> Add Scheme
+          <Plus size={16} /> {t.savings.addScheme}
         </Button>
       </header>
 
@@ -200,7 +202,7 @@ export const SavingsPage: React.FC = () => {
       <div className="grid grid-cols-2 gap-3">
         <Card padding="sm" className="space-y-1">
           <div className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-            <PiggyBank size={15} /> Total Deposit
+            <Coins size={15} /> {t.savings.totalDeposit}
           </div>
           <p className="text-[var(--text-section)] font-bold text-[var(--color-text-primary)]" data-financial>
             {formatCurrency(totalDeposit)}
@@ -209,7 +211,7 @@ export const SavingsPage: React.FC = () => {
 
         <Card padding="sm" className="space-y-1">
           <div className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-positive)]">
-            <TrendingUp size={15} /> Maturity Estimate
+            <TrendingUp size={15} /> {t.savings.maturityEstimate}
           </div>
           <p className="text-[var(--text-section)] font-bold text-[var(--color-positive)]" data-financial>
             {formatCurrency(totalMaturity)}
@@ -220,24 +222,24 @@ export const SavingsPage: React.FC = () => {
       {/* Filter Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList fullWidth>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="dps">DPS</TabsTrigger>
-          <TabsTrigger value="fdr">FDR</TabsTrigger>
-          <TabsTrigger value="sanchaypatra">Sanchaypatra</TabsTrigger>
+          <TabsTrigger value="all">{t.savings.tabAll}</TabsTrigger>
+          <TabsTrigger value="dps">{t.savings.tabDps}</TabsTrigger>
+          <TabsTrigger value="fdr">{t.savings.tabFdr}</TabsTrigger>
+          <TabsTrigger value="sanchaypatra">{t.savings.tabSanchaypatra}</TabsTrigger>
         </TabsList>
       </Tabs>
 
       {/* Scheme List */}
       {filteredSchemes.length === 0 ? (
         <EmptyState
-          icon={<PiggyBank size={22} />}
-          title="No schemes found"
-          description="Add your DPS installments, bank FDRs, or National Sanchaypatra to monitor growth."
-          action={<Button size="sm" onClick={() => setShowAddDialog(true)}>Add Scheme</Button>}
+          icon={<Coins size={22} />}
+          title={t.savings.noSchemes}
+          description={t.savings.noSchemesDesc}
+          action={<Button size="sm" onClick={() => setShowAddDialog(true)}>{t.savings.addScheme}</Button>}
         />
       ) : (
         <div className="space-y-4">
-          {filteredSchemes.map((s) => (
+          {filteredSchemes.map((s: SavingsSchemeRow) => (
             <Card key={s.id} className="space-y-3">
               <div className="flex items-start justify-between">
                 <div>
@@ -250,16 +252,16 @@ export const SavingsPage: React.FC = () => {
                     </Badge>
                   </div>
                   <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] flex items-center gap-1 mt-0.5">
-                    <Landmark size={13} /> {s.institution} • {s.interest_rate}% p.a.
+                    <Landmark size={13} /> {s.institution} • {s.interest_rate > 0 ? `${s.interest_rate}${t.savings.profit}` : t.savings.noProfit}
                   </p>
                 </div>
                 <div className="text-right">
                   <span className="font-semibold tabular-nums text-[var(--text-body)]" data-financial>
-                    {formatCurrency(s.deposit_amount)} {s.scheme_type === 'dps' ? '/mo' : ''}
+                    {formatCurrency(s.deposit_amount)} {s.scheme_type === 'dps' ? t.savings.perMonth : ''}
                   </span>
                   {s.maturity_amount > 0 && (
                     <p className="text-[var(--text-secondary)] text-[var(--color-positive)] font-medium">
-                      Est. {formatCurrency(s.maturity_amount)}
+                      {t.savings.estimated} {formatCurrency(s.maturity_amount)}
                     </p>
                   )}
                 </div>
@@ -268,10 +270,10 @@ export const SavingsPage: React.FC = () => {
               {s.maturity_date && (
                 <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
                   <span className="flex items-center gap-1">
-                    <Clock size={13} /> Maturity Date: {formatDate(s.maturity_date)}
+                    <Clock size={13} /> {t.savings.maturesOn} {formatDate(s.maturity_date)}
                   </span>
                   <span className="flex items-center gap-1 font-medium text-[var(--color-accent)]">
-                    <Award size={13} /> {s.status}
+                    <Award size={13} /> {s.status === 'active' ? t.savings.statusActive : s.status === 'matured' ? t.savings.statusMatured : t.savings.statusClosed}
                   </span>
                 </div>
               )}
@@ -284,49 +286,49 @@ export const SavingsPage: React.FC = () => {
       <Dialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        title="Add Savings / DPS / FDR Scheme"
-        description="Register a new savings commitment or investment deposit"
+        title={t.savings.dialogTitle}
+        description={t.savings.dialogDesc}
       >
         <form onSubmit={handleAddScheme} className="space-y-4 pt-2">
           <Input
-            label="Scheme Title"
+            label={t.savings.schemeTitle}
             required
-            placeholder="e.g. City Bank 5-Yr DPS, BRAC FDR"
+            placeholder={t.savings.schemeTitlePlaceholder}
             value={schemeName}
             onChange={(e) => setSchemeName(e.target.value)}
           />
           <Select
-            label="Scheme Type"
+            label={t.savings.schemeType}
             value={schemeType}
             onValueChange={(val) => setSchemeType(val as any)}
             options={[
-              { value: 'dps', label: 'DPS (Deposit Pension Scheme)' },
-              { value: 'fdr', label: 'FDR (Fixed Deposit Receipt)' },
-              { value: 'sanchaypatra', label: 'Sanchaypatra (National Savings Certificate)' },
-              { value: 'savings_account', label: 'High Yield Savings Account' },
+              { value: 'dps', label: t.savings.dpsLabel },
+              { value: 'fdr', label: t.savings.fdrLabel },
+              { value: 'sanchaypatra', label: t.savings.sanchaypataLabel },
+              { value: 'savings_account', label: t.savings.savingsLabel },
             ]}
           />
           <Input
-            label="Bank / Financial Institution"
+            label={t.savings.institution}
             required
-            placeholder="e.g. City Bank, BRAC Bank, National Savings Bureau"
+            placeholder={t.savings.institutionPlaceholder}
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
           />
           <CurrencyInput
-            label={schemeType === 'dps' ? 'Monthly Deposit Amount' : 'Principal Investment Amount'}
+            label={schemeType === 'dps' ? t.savings.monthlyDeposit : t.savings.principalAmount}
             required
             value={depositAmount}
             onChange={setDepositAmount}
           />
           <CurrencyInput
-            label="Estimated Maturity Value"
+            label={t.savings.maturityValue}
             optional
             value={maturityAmount}
             onChange={setMaturityAmount}
           />
           <Input
-            label="Interest Rate (% p.a.)"
+            label={t.savings.interestRate}
             type="number"
             step="0.1"
             required
@@ -335,14 +337,14 @@ export const SavingsPage: React.FC = () => {
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Start Date"
+              label={t.savings.startDate}
               type="date"
               required
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
             <Input
-              label="Maturity Date"
+              label={t.savings.maturityDate}
               type="date"
               optional
               value={maturityDate}
@@ -350,7 +352,7 @@ export const SavingsPage: React.FC = () => {
             />
           </div>
           <Button type="submit" fullWidth className="mt-4">
-            Save Savings Scheme
+            {t.savings.saveScheme}
           </Button>
         </form>
       </Dialog>

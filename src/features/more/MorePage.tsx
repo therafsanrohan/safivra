@@ -2,38 +2,40 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight, PiggyBank
+  Settings, Bell, LogOut, ChevronRight, Coins, Languages,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { APP_CONFIG } from '@/config/app';
 import { Card } from '@/components/ui/Card';
 
 export const MorePage: React.FC = () => {
   const { profile, signOut } = useAuthContext();
+  const { t, toggleLocale, locale } = useLanguage();
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
 
   const menuSections = [
     {
-      title: 'Financial Accounts',
+      title: t.more.financialAccounts,
       items: [
-        { to: '/accounts', label: 'Accounts & Wallets', icon: Wallet },
-        { to: '/loans', label: 'Loans & Debts', icon: Landmark },
-        { to: '/credit-cards', label: 'Credit Cards', icon: CreditCard },
+        { to: '/accounts', label: t.more.accountsWallets, icon: Wallet },
+        { to: '/loans', label: t.more.loansDebts, icon: Landmark },
+        { to: '/credit-cards', label: t.creditCards.title, icon: CreditCard },
       ],
     },
     {
-      title: 'Planning & Analytics',
+      title: t.more.planningAnalytics,
       items: [
-        { to: '/plans/savings', label: 'Savings, DPS & FDR', icon: PiggyBank },
-        { to: '/plans/recurring', label: 'Recurring Commitments', icon: RefreshCw },
-        { to: '/reports', label: 'Reports & Exports', icon: BookOpen },
-        { to: '/notifications', label: 'Notifications', icon: Bell },
+        { to: '/plans/savings', label: t.more.savingsDps, icon: Coins },
+        { to: '/plans/recurring', label: t.more.recurringCommitments, icon: RefreshCw },
+        { to: '/reports', label: t.more.reportsExports, icon: BookOpen },
+        { to: '/notifications', label: t.nav.notifications, icon: Bell },
       ],
     },
     {
-      title: 'App Settings',
+      title: t.more.appSection,
       items: [
-        { to: '/settings', label: 'Profile & Security', icon: Settings },
+        { to: '/settings', label: t.nav.settings, icon: Settings },
       ],
     },
   ];
@@ -86,12 +88,30 @@ export const MorePage: React.FC = () => {
         </div>
       ))}
 
+      {/* Language Switcher */}
+      <Card padding="none">
+        <button
+          onClick={toggleLocale}
+          className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Languages size={18} className="text-[var(--color-text-secondary)]" />
+            <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+              {t.settings.language}
+            </span>
+          </div>
+          <span className="text-[var(--text-secondary)] font-medium text-[var(--color-accent)]">
+            {locale === 'en' ? 'বাংলা' : 'English'}
+          </span>
+        </button>
+      </Card>
+
       {/* Sign Out Button */}
       <button
         onClick={signOut}
         className="w-full flex items-center justify-center gap-2 p-3.5 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] text-[var(--color-negative)] font-medium hover:bg-red-100 transition-colors"
       >
-        <LogOut size={18} /> Sign Out of {APP_CONFIG.name}
+        <LogOut size={18} /> {t.more.signOut}
       </button>
     </div>
   );
