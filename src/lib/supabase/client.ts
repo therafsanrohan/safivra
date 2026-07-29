@@ -4,18 +4,22 @@ import type { Database } from '@/types/database';
 const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+export const isDemoMode = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+
 export const isPlaceholderConfig =
   !rawUrl ||
   !rawKey ||
   rawUrl.includes('placeholder-project') ||
   rawKey.includes('placeholder');
 
+// Use placeholder values to avoid createClient throwing immediately on empty strings.
+// But we will block operation and show errors if isPlaceholderConfig && !isDemoMode.
 const supabaseUrl = isPlaceholderConfig ? 'https://placeholder-project.supabase.co' : rawUrl;
 const supabaseAnonKey = isPlaceholderConfig ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' : rawKey;
 
 if (isPlaceholderConfig) {
   console.warn(
-    '[Safivra] Operating in Demo/Placeholder mode. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment for real Supabase database access.'
+    `[Safivra] Supabase config is placeholder. Demo mode is ${isDemoMode ? 'ENABLED' : 'DISABLED'}.`
   );
 }
 

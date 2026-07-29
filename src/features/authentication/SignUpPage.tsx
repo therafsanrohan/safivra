@@ -23,11 +23,18 @@ const PasswordRequirement: React.FC<{ met: boolean; label: string }> = ({ met, l
   </li>
 );
 
+import { isPlaceholderConfig, isDemoMode } from '@/lib/supabase/client';
+
 export const SignUpPage: React.FC = () => {
   const { signUp } = useAuthContext();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState('');
+  const [serverError, setServerError] = useState(() => {
+    if (isPlaceholderConfig && !isDemoMode) {
+      return 'Supabase configuration is missing or invalid. Please check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.';
+    }
+    return '';
+  });
   const [done, setDone] = useState(false);
 
   const {
@@ -192,6 +199,7 @@ export const SignUpPage: React.FC = () => {
             fullWidth
             size="lg"
             loading={isSubmitting}
+            disabled={isPlaceholderConfig && !isDemoMode}
           >
             Create account
           </Button>
