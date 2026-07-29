@@ -117,6 +117,7 @@ export const DashboardPage: React.FC = () => {
         p_year: now.getFullYear(),
         p_month: now.getMonth() + 1,
       } as unknown as never);
+      if (summaryResult.error) throw summaryResult.error;
       const summary: MonthlySummary = (summaryResult.data as MonthlySummary | null) ?? { income: 0, expense: 0, net: 0 };
 
       // Get 6-month cashflow for chart
@@ -127,6 +128,7 @@ export const DashboardPage: React.FC = () => {
             p_year: m.year,
             p_month: m.month,
           } as unknown as never);
+          if (s.error) throw s.error;
           const ms: MonthlySummary = (s.data as MonthlySummary | null) ?? { income: 0, expense: 0, net: 0 };
           return { label: m.label, income: ms.income, expense: ms.expense };
         })

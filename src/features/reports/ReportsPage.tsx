@@ -32,8 +32,8 @@ export const ReportsPage: React.FC = () => {
 
       if (rpcErr) throw rpcErr;
       setSummary((data as unknown as ReportSummary) ?? { income: 0, expense: 0, net: 0 });
-    } catch {
-      setSummary({ income: 185000, expense: 64200, net: 120800 });
+    } catch (err: any) {
+      setError(err.message || 'Could not load monthly summary');
     } finally {
       setLoading(false);
     }

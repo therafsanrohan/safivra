@@ -12,6 +12,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      window.addEventListener('vite:preloadError', (event) => {
+        const lastReload = sessionStorage.getItem('safivra_last_preload_reload');
+        const now = Date.now();
+        if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+          sessionStorage.setItem('safivra_last_preload_reload', now.toString());
+          console.warn('Preload error detected, reloading page to load latest bundle:', event);
+          window.location.reload();
+        }
+      });
+    </script>
     <title>Safivra — Personal Financial Management</title>
   </head>
   <body>

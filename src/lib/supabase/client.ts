@@ -10,7 +10,9 @@ export const isPlaceholderConfig =
   !rawUrl ||
   !rawKey ||
   rawUrl.includes('placeholder-project') ||
-  rawKey.includes('placeholder');
+  rawUrl.includes('your-project-id') ||
+  rawKey.includes('placeholder') ||
+  rawKey.includes('your-supabase-anon-key');
 
 // Use placeholder values to avoid createClient throwing immediately on empty strings.
 // But we will block operation and show errors if isPlaceholderConfig && !isDemoMode.
