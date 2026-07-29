@@ -51,7 +51,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
  * Redirects authenticated users away from auth pages.
  */
 export const GuestGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile, loading, initialized } = useAuthContext();
+  const { user, loading, initialized } = useAuthContext();
   const location = useLocation();
 
   if (!initialized || loading) {

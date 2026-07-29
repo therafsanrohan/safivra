@@ -3,12 +3,11 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, ReceiptText, Plus, Target, MoreHorizontal,
   Wallet, Landmark, CreditCard, BarChart3, Settings,
-  Bell, HandCoins, RefreshCw, BookOpen, X,
+  Bell, HandCoins, RefreshCw, BookOpen,
 } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
 import { useAuthContext } from '@/context/AuthContext';
 import { Sheet } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 export const BottomNav: React.FC = () => {
@@ -146,7 +145,7 @@ const AddTransactionSheet: React.FC<{
 
 // ─── Desktop Sidebar ──────────────────────────────────────────────────────────
 export const Sidebar: React.FC = () => {
-  const { profile, signOut } = useAuthContext();
+  const { profile } = useAuthContext();
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
 
   const navGroups = [

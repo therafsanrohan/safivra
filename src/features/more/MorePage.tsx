@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, Shield, ChevronRight
+  Settings, Bell, LogOut, ChevronRight
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { APP_CONFIG } from '@/config/app';

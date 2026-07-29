@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Landmark, Calendar, ChevronRight } from 'lucide-react';
+import { Plus, Landmark } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
-import { formatDate, formatDueLabel, isOverdue } from '@/lib/dates/formatter';
+import { formatDueLabel, isOverdue } from '@/lib/dates/formatter';
 import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -58,7 +58,6 @@ export const LoansPage: React.FC = () => {
   }, [fetchLoans]);
 
   const activeLoans = loans.filter((l) => l.status === 'active');
-  const paidLoans = loans.filter((l) => l.status === 'paid');
 
   const totalOutstanding = activeLoans.reduce((sum, l) => {
     const bal = l.account?.balance ? Math.abs(Number(l.account.balance)) : Number(l.original_principal);

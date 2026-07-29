@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Plus, Calendar } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';

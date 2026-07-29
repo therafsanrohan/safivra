@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, CreditCard, ChevronRight } from 'lucide-react';
+import { Plus, CreditCard } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';

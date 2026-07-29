@@ -3,7 +3,6 @@ import {
   vEmail,
   vPassword,
   vPositiveAmount,
-  signInSchema,
   signUpSchema,
 } from '../../lib/validation/schemas';
 

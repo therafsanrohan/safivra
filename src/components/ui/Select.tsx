@@ -46,7 +46,8 @@ export const Select: React.FC<SelectProps> = ({
   id,
   className = '',
 }) => {
-  const inputId = id ?? React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
   const errId = error ? `${inputId}-err` : undefined;
 
   const allOptions = groups

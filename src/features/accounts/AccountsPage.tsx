@@ -4,7 +4,6 @@ import { Plus, Wallet, Landmark, CreditCard, TrendingUp, ChevronRight, Eye, EyeO
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
-import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { Database } from '@/types/database';
@@ -31,7 +30,7 @@ export const AccountsPage: React.FC = () => {
         .order('name');
       if (error) throw error;
       setAccounts((data as AccountBalance[]) ?? []);
-    } catch (err) {
+    } catch {
       setAccounts([
         {
           account_id: 'acc-1',

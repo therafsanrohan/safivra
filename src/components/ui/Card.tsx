@@ -343,7 +343,8 @@ export const Switch: React.FC<SwitchProps> = ({
   disabled,
   id,
 }) => {
-  const switchId = id ?? React.useId();
+  const generatedId = React.useId();
+  const switchId = id || generatedId;
   return (
     <div className="flex items-start justify-between gap-4">
       {(label || description) && (

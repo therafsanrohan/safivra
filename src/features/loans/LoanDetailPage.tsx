@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Landmark, Calendar, Plus, TrendingDown } from 'lucide-react';
+import { ArrowLeft, Landmark, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
-import { formatDate, formatDueLabel } from '@/lib/dates/formatter';
+import { formatDate } from '@/lib/dates/formatter';
 import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';

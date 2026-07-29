@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Edit3, Trash2, TrendingUp, TrendingDown, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, ArrowRightLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';
 import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import type { Database } from '@/types/database';
 
 type AccountBalance = Database['public']['Views']['v_account_balances']['Row'];

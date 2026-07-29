@@ -379,7 +379,7 @@ const LoanPaymentForm: React.FC<{
   onSubmit: (type: TransactionType, params: Record<string, unknown>) => Promise<void>;
   submitting: boolean;
 }> = ({ accounts, loans, categories, onSubmit, submitting }) => {
-  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<LoanPaymentData>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<LoanPaymentData>({
     resolver: zodResolver(loanPaymentSchema),
     defaultValues: { transaction_date: todayString(), fee_amount: 0, interest_amount: 0, principal_amount: 0 },
   });

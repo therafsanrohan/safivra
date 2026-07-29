@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Target, ArrowLeft } from 'lucide-react';
+import { Target, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState, ProgressBar } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 
 interface BudgetRow {
   id: string;

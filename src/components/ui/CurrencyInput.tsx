@@ -45,7 +45,8 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
     },
     ref
   ) => {
-    const inputId = id ?? React.useId();
+    const generatedId = React.useId();
+    const inputId = id || generatedId;
     const errId = error ? `${inputId}-err` : undefined;
     const symbol = APP_CONFIG.currency.symbol;
 

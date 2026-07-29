@@ -9,7 +9,6 @@ import { useAuthContext } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths, isOverdue } from '@/lib/dates/formatter';
-import { parseError } from '@/lib/errors/handler';
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import {
@@ -167,7 +166,7 @@ export const DashboardPage: React.FC = () => {
 
       setUnreadCount(notifResult.count ?? 0);
       setData({ accounts, monthlySummary: summary, cashflowHistory, loanOutstanding, creditOutstanding, upcomingPayments, recentTransactions });
-    } catch (err) {
+    } catch {
       // Fallback demo data for preview / local evaluation when database is unconfigured
       const sampleAccounts: AccountBalance[] = [
         {
