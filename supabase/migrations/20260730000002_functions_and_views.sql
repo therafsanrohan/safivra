@@ -66,8 +66,19 @@ BEGIN
   )
   ON CONFLICT (id) DO NOTHING;
 
-  INSERT INTO public.user_preferences (user_id)
-  VALUES (NEW.id)
+  INSERT INTO public.user_preferences (
+    user_id, language, preferred_currency, timezone, theme, balance_privacy, start_of_week, notification_upcoming_days
+  )
+  VALUES (
+    NEW.id,
+    'en',
+    COALESCE(NEW.raw_user_meta_data->>'preferred_currency', 'BDT'),
+    COALESCE(NEW.raw_user_meta_data->>'timezone', 'Asia/Dhaka'),
+    'light',
+    FALSE,
+    0,
+    3
+  )
   ON CONFLICT (user_id) DO NOTHING;
 
   RETURN NEW;

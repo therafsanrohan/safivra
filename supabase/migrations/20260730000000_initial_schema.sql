@@ -130,6 +130,10 @@ CREATE TRIGGER trg_profiles_updated_at
 CREATE TABLE IF NOT EXISTS public.user_preferences (
   id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id                     UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  language                    TEXT NOT NULL DEFAULT 'en',
+  preferred_currency          TEXT NOT NULL DEFAULT 'BDT',
+  timezone                    TEXT NOT NULL DEFAULT 'Asia/Dhaka',
+  theme                       TEXT NOT NULL DEFAULT 'light',
   balance_privacy             BOOLEAN NOT NULL DEFAULT FALSE,
   start_of_week               SMALLINT NOT NULL DEFAULT 0,
   default_account_id          UUID,

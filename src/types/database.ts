@@ -1,6 +1,5 @@
 /**
  * TypeScript types for the Safivra database schema.
- * These types match the MongoDB collections used by the Vercel API backend.
  */
 export type Json =
   | string
@@ -48,6 +47,10 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
+          language: string;
+          preferred_currency: string;
+          timezone: string;
+          theme: string;
           balance_privacy: boolean;
           start_of_week: number;
           default_account_id: string | null;
@@ -58,6 +61,10 @@ export type Database = {
         Insert: {
           id?: string;
           user_id: string;
+          language?: string;
+          preferred_currency?: string;
+          timezone?: string;
+          theme?: string;
           balance_privacy?: boolean;
           start_of_week?: number;
           default_account_id?: string | null;
@@ -66,6 +73,10 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          language?: string;
+          preferred_currency?: string;
+          timezone?: string;
+          theme?: string;
           balance_privacy?: boolean;
           start_of_week?: number;
           default_account_id?: string | null;

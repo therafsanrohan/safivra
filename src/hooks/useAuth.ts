@@ -4,11 +4,13 @@ import type { User, Session } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
+type UserPreferences = Database['public']['Tables']['user_preferences']['Row'];
 
 interface AuthState {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  preferences: UserPreferences | null;
   loading: boolean;
   initialized: boolean;
 }
@@ -20,10 +22,13 @@ interface AuthActions {
   sendPasswordReset: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
   updateProfile: (updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone'>>) => Promise<{ error?: string }>;
+  updatePreferences: (updates: Database['public']['Tables']['user_preferences']['Update']) => Promise<{ error?: string }>;
   refreshProfile: () => Promise<void>;
 }
 
 export type UseAuthReturn = AuthState & AuthActions;
+
+let demoLoggedIn = false;
 
 const DEMO_USER: User = {
   id: 'demo-user-id',
@@ -53,11 +58,27 @@ const DEMO_PROFILE: Profile = {
   updated_at: new Date().toISOString(),
 };
 
+const DEMO_PREFERENCES: UserPreferences = {
+  id: 'demo-pref-id',
+  user_id: 'demo-user-id',
+  language: 'en',
+  preferred_currency: 'BDT',
+  timezone: 'Asia/Dhaka',
+  theme: 'light',
+  balance_privacy: false,
+  start_of_week: 0,
+  default_account_id: null,
+  notification_upcoming_days: 3,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 export function useAuth(): UseAuthReturn {
   const [state, setState] = useState<AuthState>({
     user: null,
     session: null,
     profile: null,
+    preferences: null,
     loading: true,
     initialized: false,
   });
@@ -80,12 +101,33 @@ export function useAuth(): UseAuthReturn {
     return data;
   }, []);
 
+  const fetchPreferences = useCallback(async (userId: string) => {
+    if (isPlaceholderConfig && isDemoMode && userId === 'demo-user-id') {
+      return DEMO_PREFERENCES;
+    }
+
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('[Auth] Failed to fetch preferences:', error.message);
+      return null;
+    }
+    return data;
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     const userId = state.user?.id;
     if (!userId) return;
-    const profile = await fetchProfile(userId);
-    setState((prev) => ({ ...prev, profile }));
-  }, [state.user?.id, fetchProfile]);
+    const [profile, preferences] = await Promise.all([
+      fetchProfile(userId),
+      fetchPreferences(userId)
+    ]);
+    setState((prev) => ({ ...prev, profile, preferences }));
+  }, [state.user?.id, fetchProfile, fetchPreferences]);
 
   useEffect(() => {
     let mounted = true;
@@ -93,18 +135,18 @@ export function useAuth(): UseAuthReturn {
     async function initAuth() {
       // 1. If in Demo Mode (VITE_ENABLE_DEMO_MODE=true) and config is placeholder, load demo session if present
       if (isPlaceholderConfig && isDemoMode) {
-        const isDemoLoggedIn = localStorage.getItem('safivra_demo_logged_in') === 'true';
         if (mounted) {
-          if (isDemoLoggedIn) {
+          if (demoLoggedIn) {
             setState({
               user: DEMO_USER,
               session: DEMO_SESSION,
               profile: DEMO_PROFILE,
+              preferences: DEMO_PREFERENCES,
               loading: false,
               initialized: true,
             });
           } else {
-            setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+            setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
           }
         }
         return;
@@ -113,7 +155,7 @@ export function useAuth(): UseAuthReturn {
       // 2. If credentials are placeholder and demo mode is disabled, keep visitor logged out
       if (isPlaceholderConfig && !isDemoMode) {
         if (mounted) {
-          setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
         }
         return;
       }
@@ -123,24 +165,28 @@ export function useAuth(): UseAuthReturn {
         const session = sessionRes?.data?.session;
         
         if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
+          const [profile, preferences] = await Promise.all([
+            fetchProfile(session.user.id),
+            fetchPreferences(session.user.id)
+          ]);
           if (mounted) {
             setState({
               user: session.user,
               session,
               profile,
+              preferences,
               loading: false,
               initialized: true,
             });
           }
         } else {
           if (mounted) {
-            setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+            setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
           }
         }
       } catch (err) {
         if (mounted) {
-          setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
         }
       }
     }
@@ -158,19 +204,23 @@ export function useAuth(): UseAuthReturn {
       if (!mounted) return;
 
       if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
+        const [profile, preferences] = await Promise.all([
+          fetchProfile(session.user.id),
+          fetchPreferences(session.user.id)
+        ]);
         if (mounted) {
           setState({
             user: session.user,
             session,
             profile,
+            preferences,
             loading: false,
             initialized: true,
           });
         }
       } else {
         if (mounted) {
-          setState({ user: null, session: null, profile: null, loading: false, initialized: true });
+          setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
         }
       }
     });
@@ -186,11 +236,12 @@ export function useAuth(): UseAuthReturn {
   const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
     if (isPlaceholderConfig) {
       if (isDemoMode) {
-        localStorage.setItem('safivra_demo_logged_in', 'true');
+        demoLoggedIn = true;
         setState({
           user: DEMO_USER,
           session: DEMO_SESSION,
           profile: DEMO_PROFILE,
+          preferences: DEMO_PREFERENCES,
           loading: false,
           initialized: true,
         });
@@ -211,11 +262,12 @@ export function useAuth(): UseAuthReturn {
   ): Promise<{ error?: string }> => {
     if (isPlaceholderConfig) {
       if (isDemoMode) {
-        localStorage.setItem('safivra_demo_logged_in', 'true');
+        demoLoggedIn = true;
         setState({
           user: DEMO_USER,
           session: DEMO_SESSION,
           profile: DEMO_PROFILE,
+          preferences: DEMO_PREFERENCES,
           loading: false,
           initialized: true,
         });
@@ -240,7 +292,7 @@ export function useAuth(): UseAuthReturn {
 
   const signOut = async (): Promise<void> => {
     if (isPlaceholderConfig && isDemoMode) {
-      localStorage.removeItem('safivra_demo_logged_in');
+      demoLoggedIn = false;
     } else {
       await supabase.auth.signOut();
     }
@@ -248,6 +300,7 @@ export function useAuth(): UseAuthReturn {
       user: null,
       session: null,
       profile: null,
+      preferences: null,
       loading: false,
       initialized: true,
     });
@@ -307,6 +360,38 @@ export function useAuth(): UseAuthReturn {
     return {};
   };
 
+  const updatePreferences = async (
+    updates: Database['public']['Tables']['user_preferences']['Update']
+  ): Promise<{ error?: string }> => {
+    if (!state.user) return { error: 'Not authenticated' };
+
+    if (isPlaceholderConfig && isDemoMode) {
+      setState(prev => ({
+        ...prev,
+        preferences: prev.preferences ? { ...prev.preferences, ...updates } : null
+      }));
+      return {};
+    }
+
+    const { error } = await supabase
+      .from('user_preferences')
+      // @ts-ignore
+      .update(updates)
+      .eq('user_id', state.user.id);
+
+    if (error) {
+      console.error('[Auth] Failed to update preferences:', error.message);
+      return { error: error.message };
+    }
+
+    setState(prev => ({
+      ...prev,
+      preferences: prev.preferences ? { ...prev.preferences, ...updates } : null
+    }));
+
+    return {};
+  };
+
   return {
     ...state,
     signIn,
@@ -315,6 +400,7 @@ export function useAuth(): UseAuthReturn {
     sendPasswordReset,
     updatePassword,
     updateProfile,
+    updatePreferences,
     refreshProfile,
   };
 }

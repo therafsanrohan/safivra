@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { type Locale, type TranslationKeys } from '@/lib/i18n/translations';
 import i18n from '@/i18n';
+import { useAuthContext } from '@/context/AuthContext';
 
 interface LanguageContextValue {
   locale: Locale;
@@ -11,34 +12,41 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-const STORAGE_KEY = 'safivra_locale';
-
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return (saved === 'bn' || saved === 'en') ? saved : 'en';
-  });
+  const { preferences, updatePreferences } = useAuthContext();
+  
+  // Internal state for immediate UI updates and unauthenticated users
+  const [localLocale, setLocalLocale] = useState<Locale>('en');
 
-  // Ensure i18next matches the initial language state
+  // Sync with cloud preference if available
   useEffect(() => {
-    i18n.changeLanguage(locale);
-  }, [locale]);
+    if (preferences?.language && (preferences.language === 'en' || preferences.language === 'bn')) {
+      setLocalLocale(preferences.language as Locale);
+    }
+  }, [preferences?.language]);
+
+  useEffect(() => {
+    i18n.changeLanguage(localLocale);
+  }, [localLocale]);
 
   const setLocale = useCallback(async (next: Locale) => {
+    setLocalLocale(next);
     await i18n.changeLanguage(next);
-    setLocaleState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-  }, []);
+    if (updatePreferences) {
+      updatePreferences({ language: next }).catch(err => {
+        console.error('[Language] Failed to sync to cloud:', err);
+      });
+    }
+  }, [updatePreferences]);
 
   const toggleLocale = useCallback(() => {
-    setLocale(locale === 'en' ? 'bn' : 'en');
-  }, [locale, setLocale]);
+    setLocale(localLocale === 'en' ? 'bn' : 'en');
+  }, [localLocale, setLocale]);
 
-  // Merge loaded namespaces from the i18next store for the active locale
-  const tObject = (i18n?.store?.data?.[locale] || {}) as unknown as TranslationKeys;
+  const tObject = (i18n?.store?.data?.[localLocale] || {}) as unknown as TranslationKeys;
 
   return (
-    <LanguageContext.Provider value={{ locale, t: tObject, toggleLocale, setLocale }}>
+    <LanguageContext.Provider value={{ locale: localLocale, t: tObject, toggleLocale, setLocale }}>
       {children}
     </LanguageContext.Provider>
   );
