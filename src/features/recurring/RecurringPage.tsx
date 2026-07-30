@@ -31,41 +31,7 @@ interface RecurringRow {
   transaction_categories?: { name: string } | null;
 }
 
-const getMockRecurring = (lang: string): RecurringRow[] => [
-  {
-    id: 'rec-1',
-    name: lang === 'bn' ? 'বাড়ি ভাড়া (গুলশান)' : 'House Rent (Gulshan)',
-    transaction_type: 'expense',
-    amount: 45000,
-    frequency: 'monthly',
-    next_occurrence: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
-    is_active: true,
-    account_id: '',
-    auto_post: false,
-  },
-  {
-    id: 'rec-2',
-    name: lang === 'bn' ? 'ফাইবার ইন্টারনেট ১০০ এমবিপিএস (ডটইন্টারনেট)' : 'Fiber Internet 100Mbps (DotInternet)',
-    transaction_type: 'expense',
-    amount: 1500,
-    frequency: 'monthly',
-    next_occurrence: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0],
-    is_active: true,
-    account_id: '',
-    auto_post: false,
-  },
-  {
-    id: 'rec-3',
-    name: lang === 'bn' ? 'মাসিক বেতন ক্রেডিট' : 'Monthly Salary Credit',
-    transaction_type: 'income',
-    amount: 185000,
-    frequency: 'monthly',
-    next_occurrence: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-    is_active: true,
-    account_id: '',
-    auto_post: false,
-  },
-];
+
 
 export const RecurringPage: React.FC = () => {
   const { user } = useAuthContext();
@@ -117,13 +83,13 @@ export const RecurringPage: React.FC = () => {
       if (fetchErr) throw fetchErr;
 
       if (!data || data.length === 0) {
-        setItems(getMockRecurring(locale));
+        setItems([]);
       } else {
         setItems(data as unknown as RecurringRow[]);
       }
     } catch (err) {
       showError('Could not load recurring commitments', parseError(err).message);
-      setItems(getMockRecurring(locale));
+      setItems([]);
     } finally {
       setLoading(false);
     }

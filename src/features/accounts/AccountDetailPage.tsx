@@ -89,7 +89,10 @@ export const AccountDetailPage: React.FC = () => {
     if (deleteConfirmation !== 'DELETE' || !id) return;
     setIsDeleting(true);
     try {
-      const { error } = await supabase.from('financial_accounts').delete().eq('id', id);
+      const { error } = await supabase.rpc('delete_financial_record', {
+        p_record_type: 'account',
+        p_record_id: id,
+      });
       if (error) throw error;
       success('Account deleted successfully');
       navigate('/accounts');

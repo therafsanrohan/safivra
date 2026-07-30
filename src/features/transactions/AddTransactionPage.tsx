@@ -206,6 +206,7 @@ const ExpenseForm: React.FC<{
             label="Amount"
             required
             size="lg"
+            info="Enter the exact amount"
             error={errors.amount?.message}
             value={field.value}
             onChange={field.onChange}
@@ -252,6 +253,7 @@ const ExpenseForm: React.FC<{
       <Input
         label="Merchant"
         optional
+        info="Where you spent the money (e.g. Daraz, Pathao)"
         placeholder="e.g. Pathao, Shajgoj, Daraz"
         {...register('merchant')}
       />

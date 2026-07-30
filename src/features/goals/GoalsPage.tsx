@@ -21,33 +21,6 @@ interface GoalRow {
   status: string;
 }
 
-const DEFAULT_GOALS: GoalRow[] = [
-  {
-    id: 'goal-1',
-    name: '6-Month Emergency Reserve',
-    target_amount: 300000,
-    current_amount: 250000,
-    target_date: '2026-12-31',
-    status: 'in_progress',
-  },
-  {
-    id: 'goal-2',
-    name: 'Umrah Pilgrimage Fund',
-    target_amount: 200000,
-    current_amount: 145000,
-    target_date: '2027-03-31',
-    status: 'in_progress',
-  },
-  {
-    id: 'goal-3',
-    name: 'MacBook M3 Pro Tech Upgrade',
-    target_amount: 280000,
-    current_amount: 190000,
-    target_date: '2026-10-15',
-    status: 'in_progress',
-  },
-];
-
 export const GoalsPage: React.FC = () => {
   const { user } = useAuthContext();
   const { success } = useToast();
@@ -73,12 +46,12 @@ export const GoalsPage: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (fetchErr || !data || data.length === 0) {
-        setGoals(DEFAULT_GOALS);
+        setGoals([]);
       } else {
-        setGoals((data as GoalRow[]) ?? DEFAULT_GOALS);
+        setGoals((data as GoalRow[]) ?? []);
       }
     } catch {
-      setGoals(DEFAULT_GOALS);
+      setGoals([]);
     } finally {
       setLoading(false);
     }

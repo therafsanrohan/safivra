@@ -39,6 +39,9 @@ export const TransactionDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [voiding, setVoiding] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadTransaction = useCallback(async () => {
     if (!user || !id) return;
@@ -96,6 +99,24 @@ export const TransactionDetailPage: React.FC = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!id || !tx || deleteConfirmation !== 'DELETE') return;
+    setIsDeleting(true);
+    try {
+      const { error: delErr } = await supabase.rpc('delete_financial_record', {
+        p_record_type: 'transaction',
+        p_record_id: id,
+      });
+      if (delErr) throw delErr;
+      success('Transaction Deleted', 'The transaction has been permanently deleted.');
+      navigate('/activity');
+    } catch (err) {
+      showError('Could not delete transaction', parseError(err).message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-container pt-5 space-y-4">
@@ -147,6 +168,26 @@ export const TransactionDetailPage: React.FC = () => {
               {formatDate(tx.transaction_date)} {tx.transaction_time ? `· ${tx.transaction_time}` : ''}
             </p>
           </div>
+          <div className="flex gap-2">
+            {tx.status !== 'voided' && (
+              <Button
+                variant="outline"
+                size="sm"
+                loading={voiding}
+                onClick={handleVoid}
+                className="text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]"
+              >
+                <Ban size={16} /> Void
+              </Button>
+            )}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
 
         {tx.merchant && (
@@ -196,17 +237,49 @@ export const TransactionDetailPage: React.FC = () => {
         </Card>
       </section>
 
-      {!isVoided && (
-        <div className="pt-2">
-          <Button
-            variant="destructive"
-            fullWidth
-            loading={voiding}
-            onClick={handleVoid}
-            className="gap-2"
-          >
-            <Ban size={18} /> Void Transaction
-          </Button>
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--color-bg-surface)] w-full max-w-sm rounded-[var(--radius-card)] shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-5">
+              <h2 className="text-[var(--text-section)] font-bold text-[var(--color-text-primary)] mb-2">Delete Transaction?</h2>
+              <p className="text-[var(--text-body)] text-[var(--color-text-secondary)] mb-4">
+                This will permanently delete the transaction and reverse its effects on your account balances. This action cannot be undone.
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
+                  Type <span className="font-mono text-[var(--color-negative)] font-bold">DELETE</span> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded-[var(--radius-input)] focus:border-[var(--color-negative)] focus:ring-1 focus:ring-[var(--color-negative)] text-[var(--color-text-primary)] bg-[var(--color-bg-surface)] outline-none"
+                  placeholder="DELETE"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setDeleteConfirmation('');
+                  }}
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  loading={isDeleting}
+                  disabled={deleteConfirmation !== 'DELETE'}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -10,6 +10,7 @@ interface CurrencyInputProps {
   error?: string;
   required?: boolean;
   optional?: boolean;
+  info?: string;
   placeholder?: string;
   disabled?: boolean;
   id?: string;
@@ -36,6 +37,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
       error,
       required,
       optional,
+      info,
       placeholder = '0',
       disabled,
       id,
@@ -89,7 +91,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
     return (
       <div className="w-full">
         {label && (
-          <Label htmlFor={inputId} required={required} optional={optional}>
+          <Label htmlFor={inputId} required={required} optional={optional} info={info}>
             {label}
           </Label>
         )}

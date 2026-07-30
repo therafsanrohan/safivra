@@ -46,18 +46,11 @@ export const LoanDetailPage: React.FC = () => {
     if (!loan || deleteConfirmation !== 'DELETE') return;
     setIsDeleting(true);
     try {
-      if (loan.account_id) {
-        // Deleting the financial account will cascade and delete the loan
-        const { error: delErr } = await (supabase.from('financial_accounts') as any)
-          .delete()
-          .eq('id', loan.account_id);
-        if (delErr) throw delErr;
-      } else {
-        const { error: delErr } = await (supabase.from('loans') as any)
-          .delete()
-          .eq('id', loan.id);
-        if (delErr) throw delErr;
-      }
+      const { error: delErr } = await supabase.rpc('delete_financial_record', {
+        p_record_type: 'loan',
+        p_record_id: loan.id,
+      });
+      if (delErr) throw delErr;
       
       success('Loan Deleted', 'The loan has been permanently deleted.');
       navigate('/loans');

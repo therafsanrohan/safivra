@@ -22,35 +22,6 @@ interface BudgetRow {
   is_active: boolean;
 }
 
-const DEFAULT_BUDGETS: BudgetRow[] = [
-  {
-    id: 'b-1',
-    name: 'Food & Dining Out',
-    period_type: 'monthly',
-    total_limit: 25000,
-    spent: 14200,
-    alert_threshold: 80,
-    is_active: true,
-  },
-  {
-    id: 'b-2',
-    name: 'Household Groceries',
-    period_type: 'monthly',
-    total_limit: 35000,
-    spent: 28400,
-    alert_threshold: 85,
-    is_active: true,
-  },
-  {
-    id: 'b-3',
-    name: 'Shopping & Apparel',
-    period_type: 'monthly',
-    total_limit: 15000,
-    spent: 6500,
-    alert_threshold: 75,
-    is_active: true,
-  },
-];
 
 export const BudgetsPage: React.FC = () => {
   const { user } = useAuthContext();
@@ -76,12 +47,12 @@ export const BudgetsPage: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (fetchErr || !data || data.length === 0) {
-        setBudgets(DEFAULT_BUDGETS);
+        setBudgets([]);
       } else {
-        setBudgets((data as BudgetRow[]) ?? DEFAULT_BUDGETS);
+        setBudgets((data as BudgetRow[]) ?? []);
       }
     } catch {
-      setBudgets(DEFAULT_BUDGETS);
+      setBudgets([]);
     } finally {
       setLoading(false);
     }

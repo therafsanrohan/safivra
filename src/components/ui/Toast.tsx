@@ -46,7 +46,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       <ToastPrimitive.Provider swipeDirection="right">
         {children}
         <ToastPrimitive.Viewport
-          className="fixed bottom-[calc(var(--nav-height)+var(--space-4))] right-4 z-50 flex flex-col gap-2 w-[calc(100vw-2rem)] max-w-sm"
+          className="fixed bottom-[calc(var(--nav-height)+var(--space-4))] right-4 z-[100] flex flex-col gap-2 w-[calc(100vw-2rem)] max-w-sm"
           aria-label="Notifications"
         />
         {toasts.map((t) => (

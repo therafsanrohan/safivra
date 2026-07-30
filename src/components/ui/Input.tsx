@@ -1,10 +1,13 @@
 import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 
+import { InfoPopover } from './InfoPopover';
+
 // ─── Label ────────────────────────────────────────────────────────────────────
 interface LabelProps extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> {
   required?: boolean;
   optional?: boolean;
+  info?: string;
 }
 
 export const Label = React.forwardRef<
@@ -31,6 +34,11 @@ export const Label = React.forwardRef<
     {optional && !required && (
       <span className="ml-1 text-[var(--color-text-muted)] font-normal text-[11px]">
         (optional)
+      </span>
+    )}
+    {info && (
+      <span className="ml-1.5 inline-flex">
+        <InfoPopover content={info} />
       </span>
     )}
   </LabelPrimitive.Root>
@@ -71,6 +79,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   required?: boolean;
   optional?: boolean;
+  info?: string;
   leftElement?: React.ReactNode;
   rightElement?: React.ReactNode;
 }
@@ -83,6 +92,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       error,
       required,
       optional,
+      info,
       leftElement,
       rightElement,
       id,
@@ -99,7 +109,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <Label htmlFor={inputId} required={required} optional={optional}>
+          <Label htmlFor={inputId} required={required} optional={optional} info={info}>
             {label}
           </Label>
         )}

@@ -26,6 +26,7 @@ interface SelectProps {
   error?: string;
   required?: boolean;
   optional?: boolean;
+  info?: string;
   disabled?: boolean;
   id?: string;
   className?: string;
@@ -42,6 +43,7 @@ export const Select: React.FC<SelectProps> = ({
   error,
   required,
   optional,
+  info,
   disabled,
   id,
   className = '',
@@ -58,7 +60,7 @@ export const Select: React.FC<SelectProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <Label htmlFor={inputId} required={required} optional={optional}>
+        <Label htmlFor={inputId} required={required} optional={optional} info={info}>
           {label}
         </Label>
       )}

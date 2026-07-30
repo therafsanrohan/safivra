@@ -30,48 +30,6 @@ export interface SavingsSchemeRow {
   status: 'active' | 'matured' | 'closed';
 }
 
-const DEFAULT_SCHEMES: SavingsSchemeRow[] = [
-  {
-    id: 'sch-1',
-    scheme_name: 'City Bank High Yield DPS',
-    scheme_type: 'dps',
-    institution: 'City Bank Ltd',
-    account_number: 'DPS-984321',
-    deposit_amount: 10000,
-    maturity_amount: 680000,
-    interest_rate: 8.5,
-    start_date: '2024-01-01',
-    maturity_date: '2029-01-01',
-    status: 'active',
-  },
-  {
-    id: 'sch-2',
-    scheme_name: 'DBBL 1-Year FDR',
-    scheme_type: 'fdr',
-    institution: 'Dutch-Bangla Bank',
-    account_number: 'FDR-554210',
-    deposit_amount: 250000,
-    maturity_amount: 272500,
-    interest_rate: 9.0,
-    start_date: '2025-06-15',
-    maturity_date: '2026-06-15',
-    status: 'active',
-  },
-  {
-    id: 'sch-3',
-    scheme_name: '5-Year Bangladesh Sanchaypatra',
-    scheme_type: 'sanchaypatra',
-    institution: 'National Savings Bureau',
-    account_number: 'SNP-778921',
-    deposit_amount: 500000,
-    maturity_amount: 780000,
-    interest_rate: 11.2,
-    start_date: '2023-03-01',
-    maturity_date: '2028-03-01',
-    status: 'active',
-  },
-];
-
 export const SavingsPage: React.FC = () => {
   const { user } = useAuthContext();
   const { t } = useLanguage();
@@ -97,19 +55,19 @@ export const SavingsPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchErr } = await supabase
         .from('savings_schemes')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error || !data || data.length === 0) {
-        setSchemes(DEFAULT_SCHEMES);
+      if (fetchErr || !data || data.length === 0) {
+        setSchemes([]);
       } else {
-        setSchemes((data as SavingsSchemeRow[]) ?? DEFAULT_SCHEMES);
+        setSchemes((data as SavingsSchemeRow[]) ?? []);
       }
     } catch {
-      setSchemes(DEFAULT_SCHEMES);
+      setSchemes([]);
     } finally {
       setLoading(false);
     }

@@ -44,24 +44,11 @@ export const CardDetailPage: React.FC = () => {
     if (!card || deleteConfirmation !== 'DELETE') return;
     setIsDeleting(true);
     try {
-      // Deleting the financial account will cascade and delete the credit card
-      // We don't have account_id in FullCard interface directly yet, but we can query it or just delete the card record directly since it has CASCADE? Wait, no, deleting card doesn't cascade to account. Deleting account cascades to card.
-      // So let's delete the card first, and it will be enough. No, it will leave the financial_account orphaned.
-      // Let me just add account_id to the query and delete the account.
-      
-      const { data: cardRecord } = await (supabase.from('credit_cards') as any).select('account_id').eq('id', card.id).single();
-      
-      if (cardRecord?.account_id) {
-        const { error: delErr } = await (supabase.from('financial_accounts') as any)
-          .delete()
-          .eq('id', cardRecord.account_id);
-        if (delErr) throw delErr;
-      } else {
-        const { error: delErr } = await (supabase.from('credit_cards') as any)
-          .delete()
-          .eq('id', card.id);
-        if (delErr) throw delErr;
-      }
+      const { error: delErr } = await supabase.rpc('delete_financial_record', {
+        p_record_type: 'credit_card',
+        p_record_id: card.id,
+      });
+      if (delErr) throw delErr;
       
       success('Card Deleted', 'The credit card has been permanently deleted.');
       navigate('/credit-cards');
