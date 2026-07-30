@@ -9,6 +9,8 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { Spinner } from '@/components/ui/Card';
 
 // Lazy-loaded routes to reduce initial bundle
+import { PublicLayout } from '@/layouts/PublicLayout';
+
 const ResetPasswordPage   = lazy(() => import('@/features/authentication/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
 const VerifyEmailPage     = lazy(() => import('@/features/authentication/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
 const OnboardingPage      = lazy(() => import('@/features/onboarding/OnboardingPage').then((m) => ({ default: m.OnboardingPage })));
@@ -33,7 +35,14 @@ const ReportsPage         = lazy(() => import('@/features/reports/ReportsPage').
 const NotificationsPage   = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
 const SettingsPage        = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const MorePage            = lazy(() => import('@/features/more/MorePage').then((m) => ({ default: m.MorePage })));
-const NotFoundPage        = lazy(() => import('@/components/ui/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+const ErrorPage           = lazy(() => import('@/pages/ErrorPage').then((m) => ({ default: m.ErrorPage })));
+const NotFoundPage        = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+
+// Public Pages
+const LandingPage         = lazy(() => import('@/features/marketing/pages/LandingPage').then((m) => ({ default: m.LandingPage })));
+const PrivacyPolicyPage   = lazy(() => import('@/pages/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage })));
+const TermsOfUsePage      = lazy(() => import('@/pages/TermsOfUsePage').then((m) => ({ default: m.TermsOfUsePage })));
+const SecurityPage        = lazy(() => import('@/pages/SecurityPage').then((m) => ({ default: m.SecurityPage })));
 
 const PageLoader: React.FC = () => (
   <div className="min-h-svh flex items-center justify-center bg-[var(--color-bg-page)]">
@@ -42,6 +51,18 @@ const PageLoader: React.FC = () => (
 );
 
 const router = createBrowserRouter([
+  // Public routes
+  {
+    path: '/',
+    element: <PublicLayout />,
+    errorElement: <Suspense fallback={<PageLoader />}><ErrorPage /></Suspense>,
+    children: [
+      { index: true, element: <Suspense fallback={<PageLoader />}><LandingPage /></Suspense> },
+      { path: 'privacy-policy', element: <Suspense fallback={<PageLoader />}><PrivacyPolicyPage /></Suspense> },
+      { path: 'terms-of-use', element: <Suspense fallback={<PageLoader />}><TermsOfUsePage /></Suspense> },
+      { path: 'security', element: <Suspense fallback={<PageLoader />}><SecurityPage /></Suspense> },
+    ],
+  },
   // Guest-only auth routes
   {
     path: '/auth',
@@ -83,12 +104,13 @@ const router = createBrowserRouter([
 
   // Main authenticated app
   {
-    path: '/',
+    path: '/dashboard',
     element: (
       <AuthGuard>
         <AppLayout />
       </AuthGuard>
     ),
+    errorElement: <Suspense fallback={<PageLoader />}><ErrorPage /></Suspense>,
     children: [
       { index: true, element: <DashboardPage /> },
 
@@ -142,7 +164,7 @@ const router = createBrowserRouter([
       // More (mobile menu)
       { path: 'more', element: <Suspense fallback={<PageLoader />}><MorePage /></Suspense> },
 
-      // Fallback
+      // Fallback inside dashboard
       { path: '*', element: <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense> },
     ],
   },

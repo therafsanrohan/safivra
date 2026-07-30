@@ -63,9 +63,9 @@ export const GuestGuard: React.FC<{ children: React.ReactNode }> = ({ children }
   }
 
   if (user) {
-    const from = (location.state as { from?: string })?.from ?? '/';
+    const from = (location.state as { from?: string })?.from ?? '/dashboard';
     // Prevent open redirect: only allow relative paths
-    const safePath = from.startsWith('/') ? from : '/';
+    const safePath = from.startsWith('/') ? from : '/dashboard';
     return <Navigate to={safePath} replace />;
   }
 
