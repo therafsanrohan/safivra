@@ -169,20 +169,33 @@ export function useAuth(): UseAuthReturn {
     password: string,
     fullName: string
   ): Promise<{ error?: string }> => {
-
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
+      });
 
-    if (error) return { error: error.message };
-    return {};
+      if (error) {
+        let msg = error.message;
+        if (!msg || msg === '{}' || msg === '[object Object]') {
+          msg = 'Signup failed: ' + JSON.stringify(error);
+        }
+        return { error: msg };
+      }
+      return {};
+    } catch (err: any) {
+      console.error('SignUp Error:', err);
+      let errMsg = err.message || JSON.stringify(err);
+      if (errMsg === '{}' || errMsg === '[object Object]') {
+        errMsg = 'An unexpected error occurred during signup.';
+      }
+      return { error: errMsg };
+    }
   };
 
   const signOut = async (): Promise<void> => {
