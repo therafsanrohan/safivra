@@ -92,7 +92,7 @@ export const AccountDetailPage: React.FC = () => {
       const { error } = await supabase.rpc('delete_financial_record', {
         p_record_type: 'account',
         p_record_id: id,
-      });
+      } as any);
       if (error) throw error;
       success('Account deleted successfully');
       navigate('/accounts');

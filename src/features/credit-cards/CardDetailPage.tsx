@@ -47,7 +47,7 @@ export const CardDetailPage: React.FC = () => {
       const { error: delErr } = await supabase.rpc('delete_financial_record', {
         p_record_type: 'credit_card',
         p_record_id: card.id,
-      });
+      } as any);
       if (delErr) throw delErr;
       
       success('Card Deleted', 'The credit card has been permanently deleted.');

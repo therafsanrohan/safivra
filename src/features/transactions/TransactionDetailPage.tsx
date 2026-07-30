@@ -106,7 +106,7 @@ export const TransactionDetailPage: React.FC = () => {
       const { error: delErr } = await supabase.rpc('delete_financial_record', {
         p_record_type: 'transaction',
         p_record_id: id,
-      });
+      } as any);
       if (delErr) throw delErr;
       success('Transaction Deleted', 'The transaction has been permanently deleted.');
       navigate('/activity');

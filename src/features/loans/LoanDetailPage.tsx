@@ -49,7 +49,7 @@ export const LoanDetailPage: React.FC = () => {
       const { error: delErr } = await supabase.rpc('delete_financial_record', {
         p_record_type: 'loan',
         p_record_id: loan.id,
-      });
+      } as any);
       if (delErr) throw delErr;
       
       success('Loan Deleted', 'The loan has been permanently deleted.');

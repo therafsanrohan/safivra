@@ -668,6 +668,13 @@ export type Database = {
         Args: { p_year: number; p_month: number };
         Returns: { income: number; expense: number; net: number };
       };
+      delete_financial_record: {
+        Args: {
+          p_record_type: string;
+          p_record_id: string;
+        };
+        Returns: { success: boolean };
+      };
     };
     Enums: {
       account_type: AccountType;
