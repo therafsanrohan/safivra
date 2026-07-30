@@ -112,7 +112,7 @@ export function useAuth(): UseAuthReturn {
             setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
           }
         }
-      } catch (err) {
+      } catch {
         if (mounted) {
           setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
         }

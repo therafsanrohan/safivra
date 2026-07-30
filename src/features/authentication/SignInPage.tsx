@@ -19,7 +19,6 @@ export const SignInPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SignInData>({
     resolver: zodResolver(signInSchema),

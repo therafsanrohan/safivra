@@ -67,6 +67,7 @@ export class CapacitorPlatformAdapter implements SafivraPlatformAdapter {
     this.NetworkPlugin = Network;
 
     // Initialize adapters mapping to dynamic plugins
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     this.storage = {
@@ -101,7 +102,7 @@ export class CapacitorPlatformAdapter implements SafivraPlatformAdapter {
     };
 
     this.files = {
-      async save(filename: string, content: string, mimeType: string): Promise<void> {
+      async save(filename: string, content: string, _mimeType: string): Promise<void> {
         // We write to Documents or Data folder, or use Filesystem plugin to save a file
         const { Directory, Encoding } = await import('@capacitor/filesystem');
         await self.Filesystem.writeFile({

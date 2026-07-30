@@ -72,7 +72,7 @@ export const AddAccountPage: React.FC = () => {
           opening_balance: data.opening_balance,
           opening_balance_date: data.opening_balance_date,
           last_four: data.last_four || null,
-          credit_limit: data.credit_limit || null,
+          credit_limit: data.credit_limit ? String(data.credit_limit) : null,
           include_in_total: data.include_in_total,
           include_in_net_worth: data.include_in_net_worth,
           notes: data.notes || null,
@@ -84,19 +84,25 @@ export const AddAccountPage: React.FC = () => {
 
       // Post opening balance transaction if > 0
       if (data.opening_balance > 0 && newAccount) {
-        await supabase.rpc('post_transaction', {
+        const { error: rpcError } = await supabase.rpc('post_transaction', {
           p_transaction_type: 'opening_balance',
           p_transaction_date: data.opening_balance_date,
           p_title: `Opening Balance — ${data.name}`,
           p_amount: data.opening_balance,
           p_account_id: newAccount.id,
         } as unknown as never);
+        if (rpcError) throw rpcError;
       }
 
       success('Account created', `${data.name} has been added successfully.`);
       navigate('/accounts');
-    } catch (err) {
-      showError('Failed to create account', parseError(err).message);
+    } catch (err: any) {
+      console.error(err);
+      let errMsg = parseError(err).message;
+      if (errMsg === 'An unexpected error occurred. Please try again.' && err && typeof err === 'object') {
+        errMsg = err.message || JSON.stringify(err);
+      }
+      showError('Failed to create account', errMsg);
     } finally {
       setSubmitting(false);
     }

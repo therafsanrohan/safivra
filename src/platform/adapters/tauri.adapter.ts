@@ -47,6 +47,7 @@ export class TauriPlatformAdapter implements SafivraPlatformAdapter {
   }
 
   async initialize(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     // Dynamically load Tauri APIs if running in Tauri container

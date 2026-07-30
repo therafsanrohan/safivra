@@ -16,7 +16,7 @@ export const PwaUpdatePrompt: React.FC = () => {
 
   return (
     <div 
-      className="fixed bottom-20 right-4 left-4 md:left-auto md:w-96 z-50 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-4 shadow-xl flex flex-col gap-3 fade-in"
+      className="fixed bottom-24 right-4 left-4 md:bottom-6 md:right-6 md:left-auto md:w-96 z-[60] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-4 shadow-xl flex flex-col gap-3 fade-in"
       role="alert"
     >
       <div>
