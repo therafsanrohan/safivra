@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Landmark, Plus } from 'lucide-react';
+import { ArrowLeft, Landmark, Plus, Settings } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
+import { useToast } from '@/components/ui/Toast';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';
 import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
+import { Input } from '@/components/ui/Input';
 
 interface FullLoan {
   id: string;
@@ -23,24 +26,47 @@ interface FullLoan {
   account: {
     balance: string;
   } | null;
-  payments: Array<{
-    id: string;
-    payment_date: string;
-    total_amount: number;
-    principal_amount: number;
-    interest_amount: number;
-    fee_amount: number;
-  }>;
 }
 
 export const LoanDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { success, error: showError } = useToast();
 
   const [loan, setLoan] = useState<FullLoan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!loan || deleteConfirmation !== 'DELETE') return;
+    setIsDeleting(true);
+    try {
+      if (loan.account_id) {
+        // Deleting the financial account will cascade and delete the loan
+        const { error: delErr } = await (supabase.from('financial_accounts') as any)
+          .delete()
+          .eq('id', loan.account_id);
+        if (delErr) throw delErr;
+      } else {
+        const { error: delErr } = await (supabase.from('loans') as any)
+          .delete()
+          .eq('id', loan.id);
+        if (delErr) throw delErr;
+      }
+      
+      success('Loan Deleted', 'The loan has been permanently deleted.');
+      navigate('/loans');
+    } catch (err) {
+      showError('Failed to delete loan', parseError(err).message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const loadLoanDetail = useCallback(async () => {
     if (!user || !id) return;
@@ -52,8 +78,7 @@ export const LoanDetailPage: React.FC = () => {
         .from('loans')
         .select(`
           id, name, lender_name, loan_type, original_principal, annual_rate, monthly_installment, next_payment_date, status, account_id,
-          account:financial_accounts!loans_account_id_fkey(balance),
-          payments:loan_payments(id, payment_date, total_amount, principal_amount, interest_amount, fee_amount)
+          account:financial_accounts!loans_account_id_fkey(balance)
         `)
         .eq('id', id)
         .eq('user_id', user.id)
@@ -94,7 +119,7 @@ export const LoanDetailPage: React.FC = () => {
   const outstanding = loan.account?.balance ? Math.abs(Number(loan.account.balance)) : original;
   const paidPrincipal = Math.max(0, original - outstanding);
   const pct = Math.round((paidPrincipal / original) * 100);
-  const payments = loan.payments ?? [];
+  const payments: any[] = [];
 
   return (
     <div className="page-container pt-4 space-y-5 fade-in">
@@ -106,11 +131,20 @@ export const LoanDetailPage: React.FC = () => {
         >
           <ArrowLeft size={18} /> Loans
         </button>
-        <Link to={`/activity/add?type=loan_payment`}>
-          <Button size="sm" className="gap-1">
-            <Plus size={16} /> Record Payment
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-negative)]"
+            aria-label="Delete Loan"
+          >
+            <Settings size={18} /> Settings
+          </button>
+          <Link to={`/activity/add?type=loan_payment`}>
+            <Button size="sm" className="gap-1">
+              <Plus size={16} /> Record Payment
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Loan Overview Header */}
@@ -196,6 +230,49 @@ export const LoanDetailPage: React.FC = () => {
           </Card>
         )}
       </section>
+
+      <Dialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open);
+          if (!open) setDeleteConfirmation('');
+        }}
+        title="Delete Loan"
+      >
+        <div className="space-y-4">
+          <p className="text-[var(--text-body)] text-[var(--color-text-secondary)]">
+            Are you sure you want to delete <strong>{loan.name}</strong>? This action cannot be undone and will delete all associated payment history.
+          </p>
+          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+            Type <strong>DELETE</strong> below to confirm.
+          </p>
+          <Input
+            value={deleteConfirmation}
+            onChange={(e) => setDeleteConfirmation(e.target.value)}
+            placeholder="DELETE"
+            autoComplete="off"
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="bg-[var(--color-negative)] hover:bg-[var(--color-negative)]/90 text-white"
+              fullWidth
+              disabled={deleteConfirmation !== 'DELETE'}
+              loading={isDeleting}
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };

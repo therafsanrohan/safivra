@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Plus } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus, Settings } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
+import { useToast } from '@/components/ui/Toast';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';
 import { parseError } from '@/lib/errors/handler';
 import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
+import { Input } from '@/components/ui/Input';
 
 interface FullCard {
   id: string;
@@ -21,21 +24,53 @@ interface FullCard {
   account: {
     balance: string;
   } | null;
-  payments: Array<{
-    id: string;
-    payment_date: string;
-    amount: number;
-  }>;
 }
 
 export const CardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { success, error: showError } = useToast();
 
   const [card, setCard] = useState<FullCard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!card || deleteConfirmation !== 'DELETE') return;
+    setIsDeleting(true);
+    try {
+      // Deleting the financial account will cascade and delete the credit card
+      // We don't have account_id in FullCard interface directly yet, but we can query it or just delete the card record directly since it has CASCADE? Wait, no, deleting card doesn't cascade to account. Deleting account cascades to card.
+      // So let's delete the card first, and it will be enough. No, it will leave the financial_account orphaned.
+      // Let me just add account_id to the query and delete the account.
+      
+      const { data: cardRecord } = await (supabase.from('credit_cards') as any).select('account_id').eq('id', card.id).single();
+      
+      if (cardRecord?.account_id) {
+        const { error: delErr } = await (supabase.from('financial_accounts') as any)
+          .delete()
+          .eq('id', cardRecord.account_id);
+        if (delErr) throw delErr;
+      } else {
+        const { error: delErr } = await (supabase.from('credit_cards') as any)
+          .delete()
+          .eq('id', card.id);
+        if (delErr) throw delErr;
+      }
+      
+      success('Card Deleted', 'The credit card has been permanently deleted.');
+      navigate('/credit-cards');
+    } catch (err) {
+      showError('Failed to delete card', parseError(err).message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const loadCardDetail = useCallback(async () => {
     if (!user || !id) return;
@@ -47,8 +82,7 @@ export const CardDetailPage: React.FC = () => {
         .from('credit_cards')
         .select(`
           id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status,
-          account:financial_accounts!credit_cards_account_id_fkey(balance),
-          payments:credit_card_payments(id, payment_date, amount)
+          account:financial_accounts!credit_cards_account_id_fkey(balance)
         `)
         .eq('id', id)
         .eq('user_id', user.id)
@@ -89,7 +123,7 @@ export const CardDetailPage: React.FC = () => {
   const limit = Number(card.credit_limit);
   const available = Math.max(0, limit - outstanding);
   const pct = limit > 0 ? Math.round((outstanding / limit) * 100) : 0;
-  const payments = card.payments ?? [];
+  const payments: any[] = [];
 
   return (
     <div className="page-container pt-4 space-y-5 fade-in">
@@ -101,11 +135,20 @@ export const CardDetailPage: React.FC = () => {
         >
           <ArrowLeft size={18} /> Cards
         </button>
-        <Link to={`/activity/add?type=credit_card_payment`}>
-          <Button size="sm" className="gap-1">
-            <Plus size={16} /> Pay Card
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-negative)]"
+            aria-label="Delete Card"
+          >
+            <Settings size={18} /> Settings
+          </button>
+          <Link to={`/activity/add?type=credit_card_payment`}>
+            <Button size="sm" className="gap-1">
+              <Plus size={16} /> Record Payment
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="space-y-4">
@@ -190,6 +233,49 @@ export const CardDetailPage: React.FC = () => {
           </Card>
         )}
       </section>
+
+      <Dialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open);
+          if (!open) setDeleteConfirmation('');
+        }}
+        title="Delete Credit Card"
+      >
+        <div className="space-y-4">
+          <p className="text-[var(--text-body)] text-[var(--color-text-secondary)]">
+            Are you sure you want to delete <strong>{card.nickname}</strong>? This action cannot be undone and will delete all associated payment history.
+          </p>
+          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+            Type <strong>DELETE</strong> below to confirm.
+          </p>
+          <Input
+            value={deleteConfirmation}
+            onChange={(e) => setDeleteConfirmation(e.target.value)}
+            placeholder="DELETE"
+            autoComplete="off"
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="bg-[var(--color-negative)] hover:bg-[var(--color-negative)]/90 text-white"
+              fullWidth
+              disabled={deleteConfirmation !== 'DELETE'}
+              loading={isDeleting}
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };

@@ -45,19 +45,7 @@ export const CreditCardsPage: React.FC = () => {
       if (fetchErr) throw fetchErr;
       setCards((data as unknown as CardRow[]) ?? []);
     } catch {
-      setCards([
-        {
-          id: 'card-1',
-          nickname: 'City Bank AMEX Platinum',
-          issuer: 'City Bank',
-          last_four: '4321',
-          credit_limit: 100000,
-          statement_day: 15,
-          payment_due_day: 5,
-          status: 'active',
-          account: { balance: '-34200.00' },
-        },
-      ]);
+      setCards([]);
     } finally {
       setLoading(false);
     }
