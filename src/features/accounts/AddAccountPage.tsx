@@ -27,8 +27,6 @@ const ACCOUNT_TYPES: Array<{ value: AccountType; label: string; class: AccountCl
   { value: 'investment', label: 'Stocks / Mutual Funds / Gold', class: 'asset' },
   { value: 'receivable', label: 'Receivable / Money Lent', class: 'asset' },
   { value: 'other_asset', label: 'Other Asset', class: 'asset' },
-  { value: 'credit_card', label: 'Credit Card', class: 'liability' },
-  { value: 'loan', label: 'Loan / Debt Liability', class: 'liability' },
   { value: 'other_liability', label: 'Other Liability', class: 'liability' },
 ];
 

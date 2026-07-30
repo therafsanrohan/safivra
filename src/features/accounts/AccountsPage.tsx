@@ -45,6 +45,11 @@ export const AccountsPage: React.FC = () => {
   const assetAccounts = accounts.filter((a) => a.account_class === 'asset' && a.is_active);
   const liabilityAccounts = accounts.filter((a) => a.account_class === 'liability' && a.is_active);
 
+  const displayAssetAccounts = assetAccounts;
+  const displayLiabilityAccounts = liabilityAccounts.filter(
+    (a) => !['loan', 'credit_card'].includes(a.account_type)
+  );
+
   const totalAssetBalance = assetAccounts.reduce((sum, a) => sum + Number(a.balance), 0);
   const totalLiabilityBalance = liabilityAccounts.reduce((sum, a) => sum + Math.abs(Number(a.balance)), 0);
 
@@ -118,26 +123,28 @@ export const AccountsPage: React.FC = () => {
         </div>
       </Card>
 
+      {displayAssetAccounts.length === 0 && displayLiabilityAccounts.length === 0 && (
+        <EmptyState
+          icon={<CreditCard size={24} />}
+          title="No accounts found"
+          description="You haven't added any financial accounts yet."
+          action={
+            <Link to="/accounts/add">
+              <Button size="sm" className="mt-2">Add your first account</Button>
+            </Link>
+          }
+        />
+      )}
+
       {/* Assets Section */}
-      <section className="space-y-3">
-        <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          Asset Accounts ({assetAccounts.length})
-        </h2>
-        {assetAccounts.length === 0 ? (
-          <EmptyState
-            icon={<Wallet size={20} />}
-            title="No asset accounts"
-            description="Add your bank accounts, bKash, Nagad, or cash."
-            action={
-              <Link to="/accounts/add">
-                <Button size="sm">Add Account</Button>
-              </Link>
-            }
-          />
-        ) : (
+      {displayAssetAccounts.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+            Asset Accounts ({displayAssetAccounts.length})
+          </h2>
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
-              {assetAccounts.map((acc) => (
+              {displayAssetAccounts.map((acc) => (
                 <Link
                   key={acc.account_id}
                   to={`/accounts/${acc.account_id}`}
@@ -166,18 +173,18 @@ export const AccountsPage: React.FC = () => {
               ))}
             </div>
           </Card>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* Liabilities Section */}
-      {liabilityAccounts.length > 0 && (
+      {displayLiabilityAccounts.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-            Liability Accounts ({liabilityAccounts.length})
+            Liability Accounts ({displayLiabilityAccounts.length})
           </h2>
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
-              {liabilityAccounts.map((acc) => (
+              {displayLiabilityAccounts.map((acc) => (
                 <Link
                   key={acc.account_id}
                   to={`/accounts/${acc.account_id}`}
