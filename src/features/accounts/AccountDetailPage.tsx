@@ -6,6 +6,12 @@ import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
+import { Input } from '@/components/ui/Input';
+import { useToast } from '@/components/ui/Toast';
+import { Settings, Trash2 } from 'lucide-react';
+import { EditAccountModal } from './EditAccountModal';
 import type { Database } from '@/types/database';
 
 type AccountBalance = Database['public']['Views']['v_account_balances']['Row'];
@@ -32,6 +38,11 @@ export const AccountDetailPage: React.FC = () => {
   const [entries, setEntries] = useState<LedgerEntryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { success, error: showError } = useToast();
 
   const loadAccountDetail = useCallback(async () => {
     if (!user || !id) return;
@@ -74,6 +85,21 @@ export const AccountDetailPage: React.FC = () => {
     loadAccountDetail();
   }, [loadAccountDetail]);
 
+  const handleDelete = async () => {
+    if (deleteConfirmation !== 'DELETE' || !id) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from('financial_accounts').delete().eq('id', id);
+      if (error) throw error;
+      success('Account deleted successfully');
+      navigate('/accounts');
+    } catch (err: any) {
+      showError('Failed to delete account', err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-container pt-5 space-y-4">
@@ -104,6 +130,13 @@ export const AccountDetailPage: React.FC = () => {
           aria-label="Go back"
         >
           <ArrowLeft size={18} /> Accounts
+        </button>
+        <button
+          onClick={() => setIsEditModalOpen(true)}
+          className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+          aria-label="Account Settings"
+        >
+          <Settings size={18} /> Settings
         </button>
       </div>
 
@@ -186,6 +219,81 @@ export const AccountDetailPage: React.FC = () => {
           </Card>
         )}
       </section>
+
+      {/* Danger Zone */}
+      <section className="space-y-3 pt-6 border-t border-[var(--color-border)] mt-8">
+        <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-negative)]">
+          Danger Zone
+        </h2>
+        <Card className="border-[var(--color-negative-soft)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-[var(--color-text-primary)]">Delete Account</p>
+              <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
+                Permanently delete this account and remove it from your balances. Warning: This cannot be undone.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="text-[var(--color-negative)] border-[var(--color-negative-soft)] hover:bg-[var(--color-negative-soft)] shrink-0"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              <Trash2 size={16} />
+              Delete Account
+            </Button>
+          </div>
+        </Card>
+      </section>
+
+      <EditAccountModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        account={account}
+        onSuccess={loadAccountDetail}
+      />
+
+      <Dialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open);
+          if (!open) setDeleteConfirmation('');
+        }}
+        title="Delete Account"
+      >
+        <div className="space-y-4">
+          <p className="text-[var(--text-body)] text-[var(--color-text-secondary)]">
+            Are you sure you want to delete <strong>{account.name}</strong>? This action cannot be undone and may affect your ledger history.
+          </p>
+          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+            Type <strong>DELETE</strong> below to confirm.
+          </p>
+          <Input
+            value={deleteConfirmation}
+            onChange={(e) => setDeleteConfirmation(e.target.value)}
+            placeholder="DELETE"
+            autoComplete="off"
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="bg-[var(--color-negative)] hover:bg-[var(--color-negative)]/90 text-white"
+              fullWidth
+              disabled={deleteConfirmation !== 'DELETE'}
+              loading={isDeleting}
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };
