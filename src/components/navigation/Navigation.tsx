@@ -9,6 +9,7 @@ import { APP_CONFIG } from '@/config/app';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Sheet } from '@/components/ui/Dialog';
+import { Logo } from '@/components/ui/Logo';
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 export const BottomNav: React.FC = () => {
@@ -185,9 +186,7 @@ export const Sidebar: React.FC = () => {
     >
       {/* Wordmark + Language toggle */}
       <div className="px-5 py-5 border-b border-[var(--color-border)] flex items-center justify-between">
-        <span className="text-[1.125rem] font-semibold tracking-tight text-[var(--color-text-primary)]">
-          {APP_CONFIG.name}
-        </span>
+        <Logo textClassName="text-[1.125rem] tracking-tight" />
         <button
           onClick={toggleLocale}
           aria-label={locale === 'en' ? 'Switch to Bengali' : 'Switch to English'}

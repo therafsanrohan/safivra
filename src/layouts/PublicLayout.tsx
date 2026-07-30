@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
+import { Logo } from '@/components/ui/Logo';
 import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 
@@ -13,9 +14,7 @@ export const PublicLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">
-              {/* Safivra Logo placeholder */}
-              <div className="w-8 h-8 bg-[var(--color-accent)] rounded-lg flex items-center justify-center text-white font-bold text-xl">S</div>
-              <span className="text-xl font-bold text-[var(--color-text-primary)]">Safivra</span>
+              <Logo textClassName="text-xl" />
             </Link>
           </div>
           
@@ -95,8 +94,7 @@ export const PublicLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 bg-[var(--color-accent)] rounded flex items-center justify-center text-white font-bold text-sm">S</div>
-              <span className="text-lg font-bold text-[var(--color-text-primary)]">Safivra</span>
+              <Logo textClassName="text-lg" />
             </div>
             <p className="text-sm text-[var(--color-text-secondary)]">Your money, finally makes sense.</p>
           </div>

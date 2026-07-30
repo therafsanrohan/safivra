@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { forgotPasswordSchema, type ForgotPasswordData } from '@/lib/validation/schemas';
 import { useAuthContext } from '@/context/AuthContext';
+import { Logo } from '@/components/ui/Logo';
 import { APP_CONFIG } from '@/config/app';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -53,10 +54,8 @@ export const ForgotPasswordPage: React.FC = () => {
   return (
     <div className="min-h-svh flex flex-col items-center justify-center bg-[var(--color-bg-page)] px-5 py-12">
       <div className="w-full max-w-sm">
-        <div className="mb-10 text-center">
-          <span className="text-2xl font-semibold tracking-tight text-[var(--color-text-primary)]">
-            {APP_CONFIG.name}
-          </span>
+        <div className="mb-10 text-center flex justify-center">
+          <Logo textClassName="text-2xl tracking-tight" />
         </div>
 
         <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)] mb-1">

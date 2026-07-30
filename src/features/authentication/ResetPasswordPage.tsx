@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { resetPasswordSchema, type ResetPasswordData } from '@/lib/validation/schemas';
 import { useAuthContext } from '@/context/AuthContext';
 import { APP_CONFIG } from '@/config/app';
+import { Logo } from '@/components/ui/Logo';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { CheckCircle } from 'lucide-react';
@@ -41,8 +42,10 @@ export const ResetPasswordPage: React.FC = () => {
   return (
     <div className="min-h-svh flex flex-col items-center justify-center bg-[var(--color-bg-page)] px-5 py-12">
       <div className="w-full max-w-sm">
-        <div className="mb-10 text-center"><span className="text-2xl font-semibold">{APP_CONFIG.name}</span></div>
-        <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)] mb-1">Set new password</h1>
+        <div className="mb-10 text-center flex justify-center">
+          <Logo textClassName="text-2xl tracking-tight" />
+        </div>
+        <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)] mb-2">Set new password</h1>
         <p className="text-[var(--text-body)] text-[var(--color-text-secondary)] mb-8">Enter and confirm your new password.</p>
         {serverError && <div role="alert" className="mb-5 p-3 rounded-[var(--radius-input)] bg-[var(--color-negative-soft)] text-[var(--color-negative)] text-[var(--text-secondary)]">{serverError}</div>}
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
