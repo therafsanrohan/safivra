@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
+import { getPlatform } from '@/platform';
 
 const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -24,8 +25,6 @@ if (isPlaceholderConfig) {
     `[Safivra] Supabase config is placeholder. Demo mode is ${isDemoMode ? 'ENABLED' : 'DISABLED'}.`
   );
 }
-
-import { getPlatform } from '@/platform';
 
 const cookieStorage = {
   getItem: (key: string): string | null => {
