@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { AppLayout } from '@/layouts/AppLayout';
 import { AuthGuard, GuestGuard } from '@/features/authentication/AuthGuard';
 import { SignInPage } from '@/features/authentication/SignInPage';
 import { SignUpPage } from '@/features/authentication/SignUpPage';
@@ -39,7 +39,7 @@ const ErrorPage           = lazy(() => import('@/pages/ErrorPage').then((m) => (
 const NotFoundPage        = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 // Public Pages
-const LandingPage         = lazy(() => import('@/features/marketing/pages/LandingPage').then((m) => ({ default: m.LandingPage })));
+const LandingPage         = lazy(() => import('@/pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const PrivacyPolicyPage   = lazy(() => import('@/pages/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage })));
 const TermsOfUsePage      = lazy(() => import('@/pages/TermsOfUsePage').then((m) => ({ default: m.TermsOfUsePage })));
 const SecurityPage        = lazy(() => import('@/pages/SecurityPage').then((m) => ({ default: m.SecurityPage })));

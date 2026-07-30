@@ -1,18 +1,20 @@
-# Safivra — Personal Financial Management Web Application
+# Safivra — Cross-Platform Financial Management
 
-Safivra is a premium, mobile-first, privacy-respecting Personal Financial Management (PFM) web application tailored specifically for Bangladeshi users. Built with React, TypeScript, Tailwind CSS, and Supabase Postgres.
+Safivra is a premium, privacy-respecting Personal Financial Management (PFM) system tailored for Bangladeshi users (BDT). Built with React, TypeScript, Tailwind CSS, Supabase, Capacitor (Mobile), and Tauri (Desktop).
 
 ---
 
 ## 🌟 Key Features
 
-1. **Strict Double-Entry Ledger Engine**
+1. **100% Cross-Platform Ready**
+   - **Web & PWA:** Fully responsive layout with Service Worker precaching.
+   - **Mobile (Android/iOS):** Native mobile shell using Capacitor.
+   - **Desktop (macOS/Windows):** Lightweight native desktop apps using Tauri.
+   - Uses an internal `PlatformContext` to automatically adapt UI patterns (like Back Buttons and Notifications) for the active environment.
+
+2. **Strict Double-Entry Ledger Engine**
    - Implements balanced debit/credit posting (`post_transaction` RPC function).
    - Accounts serve as views over posted ledger entries — preventing manual balance drift.
-
-2. **Regional Localization (Bangladesh / BDT / Asia/Dhaka)**
-   - Currencies formatted using `en-BD` locale with `৳` symbol and tabular numbers.
-   - All dates and times synchronized to the `Asia/Dhaka` timezone.
 
 3. **Complete Financial Accounts & Commitments**
    - Liquid Asset accounts (Cash, Bank, bKash, Nagad, Savings, Investments).
@@ -22,9 +24,9 @@ Safivra is a premium, mobile-first, privacy-respecting Personal Financial Manage
 
 4. **Security & Privacy**
    - Supabase Row Level Security (RLS) on all tables.
-   - Password strength validation and email verification guards.
+   - Secure HTTP headers (CSP, XSS Protection, Strict-Transport-Security) via Vercel configuration.
    - Balance Privacy mode for hiding values in public.
-   - Client-side CSV transaction exports.
+   - See `SECURITY.md` for our vulnerability reporting policy.
 
 ---
 
@@ -33,6 +35,8 @@ Safivra is a premium, mobile-first, privacy-respecting Personal Financial Manage
 ### 1. Prerequisites
 - Node.js 18+
 - Supabase project URL & Anon Key
+- (Optional) Android Studio / Xcode for Mobile builds
+- (Optional) Rust for Tauri Desktop builds
 
 ### 2. Setup Environment
 Copy `.env.example` to `.env.local` and add your Supabase project credentials:
@@ -48,7 +52,7 @@ Run the SQL scripts in `supabase/migrations/` sequentially in your Supabase SQL 
 3. `20260729000003_functions.sql`
 4. `20260729000004_seed_categories.sql`
 
-### 4. Run Locally
+### 4. Run Locally (Web)
 ```bash
 # Install dependencies
 npm install
@@ -57,13 +61,29 @@ npm install
 npm run dev
 
 # Run unit test suite
-npm test
+npm run typecheck && npm test
 
 # Build production bundle
 npm run build
 ```
 
----
+### 5. Build for Mobile (Capacitor)
+```bash
+# Sync web assets to native directories
+npx cap sync
 
-## 📱 PWA Support
-Safivra includes Service Worker precaching via Vite PWA and can be installed directly to your home screen on iOS and Android.
+# Open Android Studio
+npx cap open android
+
+# Open Xcode
+npx cap open ios
+```
+
+### 6. Build for Desktop (Tauri)
+```bash
+# Start desktop development server
+npm run tauri dev
+
+# Build production desktop installer
+npm run tauri build
+```
