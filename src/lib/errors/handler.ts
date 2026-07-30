@@ -1,4 +1,4 @@
-import { isPlaceholderConfig } from '@/lib/supabase/client';
+
 
 /**
  * Centralized error handling.
@@ -87,12 +87,7 @@ export function parseError(error: unknown): AppError {
   }
 
   // Network & Placeholder errors
-  if (isPlaceholderConfig) {
-    return {
-      code: 'NETWORK_ERROR',
-      message: 'Supabase credentials missing on Vercel. Please add VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY in Vercel Environment Variables and Redeploy.',
-    };
-  }
+
   if (msg.includes('Offline placeholder configuration') || msg.includes('placeholder')) {
     return {
       code: 'NETWORK_ERROR',

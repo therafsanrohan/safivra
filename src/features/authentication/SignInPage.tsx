@@ -9,18 +9,12 @@ import { APP_CONFIG } from '@/config/app';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
-import { isPlaceholderConfig, isDemoMode } from '@/lib/supabase/client';
 
 export const SignInPage: React.FC = () => {
   const { signIn } = useAuthContext();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState(() => {
-    if (isPlaceholderConfig && !isDemoMode) {
-      return 'Supabase configuration is missing or invalid. Please check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.';
-    }
-    return '';
-  });
+  const [serverError, setServerError] = useState('');
 
   const {
     register,
@@ -117,7 +111,7 @@ export const SignInPage: React.FC = () => {
               fullWidth
               size="lg"
               loading={isSubmitting}
-              disabled={isPlaceholderConfig && !isDemoMode}
+              disabled={isSubmitting}
               className="mt-2"
             >
               Sign in

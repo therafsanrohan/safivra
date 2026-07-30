@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, isPlaceholderConfig, isDemoMode } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
@@ -28,50 +28,7 @@ interface AuthActions {
 
 export type UseAuthReturn = AuthState & AuthActions;
 
-let demoLoggedIn = false;
 
-const DEMO_USER: User = {
-  id: 'demo-user-id',
-  email: 'demo@safivra.com',
-  app_metadata: {},
-  user_metadata: { full_name: 'Demo User' },
-  aud: 'authenticated',
-  created_at: new Date().toISOString(),
-};
-
-const DEMO_SESSION: Session = {
-  access_token: 'demo-token',
-  token_type: 'bearer',
-  expires_in: 3600,
-  refresh_token: 'demo-refresh-token',
-  user: DEMO_USER,
-};
-
-const DEMO_PROFILE: Profile = {
-  id: 'demo-user-id',
-  full_name: 'Demo User',
-  preferred_currency: 'BDT',
-  timezone: 'Asia/Dhaka',
-  onboarding_completed: true,
-  avatar_url: null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
-
-const DEMO_PREFERENCES: UserPreferences = {
-  id: 'demo-pref-id',
-  user_id: 'demo-user-id',
-  language: 'en',
-  preferred_currency: 'BDT',
-  timezone: 'Asia/Dhaka',
-  theme: 'light',
-  balance_privacy: false,
-  start_of_week: 0,
-  default_account_id: null,
-  notification_upcoming_days: 3,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
 
 export function useAuth(): UseAuthReturn {
   const [state, setState] = useState<AuthState>({
@@ -84,9 +41,7 @@ export function useAuth(): UseAuthReturn {
   });
 
   const fetchProfile = useCallback(async (userId: string) => {
-    if (isPlaceholderConfig && isDemoMode && userId === 'demo-user-id') {
-      return DEMO_PROFILE;
-    }
+
 
     const { data, error } = await supabase
       .from('profiles')
@@ -102,9 +57,7 @@ export function useAuth(): UseAuthReturn {
   }, []);
 
   const fetchPreferences = useCallback(async (userId: string) => {
-    if (isPlaceholderConfig && isDemoMode && userId === 'demo-user-id') {
-      return DEMO_PREFERENCES;
-    }
+
 
     const { data, error } = await supabase
       .from('user_preferences')
@@ -133,32 +86,7 @@ export function useAuth(): UseAuthReturn {
     let mounted = true;
 
     async function initAuth() {
-      // 1. If in Demo Mode (VITE_ENABLE_DEMO_MODE=true) and config is placeholder, load demo session if present
-      if (isPlaceholderConfig && isDemoMode) {
-        if (mounted) {
-          if (demoLoggedIn) {
-            setState({
-              user: DEMO_USER,
-              session: DEMO_SESSION,
-              profile: DEMO_PROFILE,
-              preferences: DEMO_PREFERENCES,
-              loading: false,
-              initialized: true,
-            });
-          } else {
-            setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
-          }
-        }
-        return;
-      }
 
-      // 2. If credentials are placeholder and demo mode is disabled, keep visitor logged out
-      if (isPlaceholderConfig && !isDemoMode) {
-        if (mounted) {
-          setState({ user: null, session: null, profile: null, preferences: null, loading: false, initialized: true });
-        }
-        return;
-      }
 
       try {
         const sessionRes = await supabase.auth.getSession();
@@ -193,12 +121,7 @@ export function useAuth(): UseAuthReturn {
 
     initAuth();
 
-    // Do not listen to auth state changes if we are operating in pure offline placeholder demo mode
-    if (isPlaceholderConfig && isDemoMode) {
-      return () => {
-        mounted = false;
-      };
-    }
+
 
     const authListener = supabase.auth?.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
@@ -234,21 +157,7 @@ export function useAuth(): UseAuthReturn {
   }, [fetchProfile]);
 
   const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
-    if (isPlaceholderConfig) {
-      if (isDemoMode) {
-        demoLoggedIn = true;
-        setState({
-          user: DEMO_USER,
-          session: DEMO_SESSION,
-          profile: DEMO_PROFILE,
-          preferences: DEMO_PREFERENCES,
-          loading: false,
-          initialized: true,
-        });
-        return {};
-      }
-      return { error: 'Supabase credentials missing or invalid. Please check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' };
-    }
+
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: error.message };
@@ -260,21 +169,7 @@ export function useAuth(): UseAuthReturn {
     password: string,
     fullName: string
   ): Promise<{ error?: string }> => {
-    if (isPlaceholderConfig) {
-      if (isDemoMode) {
-        demoLoggedIn = true;
-        setState({
-          user: DEMO_USER,
-          session: DEMO_SESSION,
-          profile: DEMO_PROFILE,
-          preferences: DEMO_PREFERENCES,
-          loading: false,
-          initialized: true,
-        });
-        return {};
-      }
-      return { error: 'Supabase credentials missing or invalid. Please check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' };
-    }
+
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -291,11 +186,7 @@ export function useAuth(): UseAuthReturn {
   };
 
   const signOut = async (): Promise<void> => {
-    if (isPlaceholderConfig && isDemoMode) {
-      demoLoggedIn = false;
-    } else {
-      await supabase.auth.signOut();
-    }
+    await supabase.auth.signOut();
     setState({
       user: null,
       session: null,
@@ -307,9 +198,7 @@ export function useAuth(): UseAuthReturn {
   };
 
   const sendPasswordReset = async (email: string): Promise<{ error?: string }> => {
-    if (isPlaceholderConfig) {
-      return { error: 'Supabase credentials missing.' };
-    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
@@ -328,10 +217,7 @@ export function useAuth(): UseAuthReturn {
   ): Promise<{ error?: string }> => {
     if (!state.user) return { error: 'Not authenticated' };
 
-    if (isPlaceholderConfig && isDemoMode) {
-      // Mock update local profile
-      return {};
-    }
+
 
     const userId = state.user.id;
     const token = (await supabase.auth.getSession()).data.session?.access_token;
@@ -365,13 +251,7 @@ export function useAuth(): UseAuthReturn {
   ): Promise<{ error?: string }> => {
     if (!state.user) return { error: 'Not authenticated' };
 
-    if (isPlaceholderConfig && isDemoMode) {
-      setState(prev => ({
-        ...prev,
-        preferences: prev.preferences ? { ...prev.preferences, ...updates } : null
-      }));
-      return {};
-    }
+
 
     const { error } = await supabase
       .from('user_preferences')
