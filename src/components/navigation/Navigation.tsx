@@ -18,11 +18,11 @@ export const BottomNav: React.FC = () => {
   const { t } = useLanguage();
 
   const navItems = [
-    { to: '/', label: t.nav.home, icon: Home, end: true },
-    { to: '/activity', label: t.nav.activity, icon: ReceiptText },
+    { to: '/dashboard', label: t.nav.home, icon: Home, end: true },
+    { to: '/dashboard/activity', label: t.nav.activity, icon: ReceiptText },
     { action: () => setAddOpen(true), label: t.nav.add, icon: Plus, isAction: true },
-    { to: '/plans', label: t.nav.plans, icon: Target },
-    { to: '/more', label: t.nav.more, icon: MoreHorizontal },
+    { to: '/dashboard/plans', label: t.nav.plans, icon: Target },
+    { to: '/dashboard/more', label: t.nav.more, icon: MoreHorizontal },
   ];
 
   return (
@@ -110,12 +110,12 @@ const AddTransactionSheet: React.FC<{
   const { t } = useLanguage();
 
   const primaryActions = [
-    { label: t.addTransaction.expense, icon: ReceiptText, color: 'text-[var(--color-negative)]', bg: 'bg-[var(--color-negative-soft)]', path: '/activity/add?type=expense' },
-    { label: t.addTransaction.income, icon: Wallet, color: 'text-[var(--color-positive)]', bg: 'bg-[var(--color-positive-soft)]', path: '/activity/add?type=income' },
-    { label: t.addTransaction.transfer, icon: HandCoins, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]', path: '/activity/add?type=transfer' },
-    { label: t.addTransaction.loanPayment, icon: Landmark, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]', path: '/activity/add?type=loan_payment' },
-    { label: t.addTransaction.cardPayment, icon: CreditCard, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-soft)]', path: '/activity/add?type=credit_card_payment' },
-    { label: t.addTransaction.adjustment, icon: BarChart3, color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-subtle)]', path: '/activity/add?type=balance_adjustment' },
+    { label: t.addTransaction.expense, icon: ReceiptText, color: 'text-[var(--color-negative)]', bg: 'bg-[var(--color-negative-soft)]', path: '/dashboard/activity/add?type=expense' },
+    { label: t.addTransaction.income, icon: Wallet, color: 'text-[var(--color-positive)]', bg: 'bg-[var(--color-positive-soft)]', path: '/dashboard/activity/add?type=income' },
+    { label: t.addTransaction.transfer, icon: HandCoins, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]', path: '/dashboard/activity/add?type=transfer' },
+    { label: t.addTransaction.loanPayment, icon: Landmark, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]', path: '/dashboard/activity/add?type=loan_payment' },
+    { label: t.addTransaction.cardPayment, icon: CreditCard, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-soft)]', path: '/dashboard/activity/add?type=credit_card_payment' },
+    { label: t.addTransaction.adjustment, icon: BarChart3, color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-subtle)]', path: '/dashboard/activity/add?type=balance_adjustment' },
   ];
 
   return (
@@ -157,24 +157,24 @@ export const Sidebar: React.FC = () => {
   const navGroups = [
     {
       items: [
-        { to: '/', label: t.nav.dashboard, icon: Home, end: true },
-        { to: '/activity', label: t.nav.activity, icon: ReceiptText },
+        { to: '/dashboard', label: t.nav.dashboard, icon: Home, end: true },
+        { to: '/dashboard/activity', label: t.nav.activity, icon: ReceiptText },
       ],
     },
     {
       label: t.nav.manage,
       items: [
-        { to: '/accounts', label: t.nav.accounts, icon: Wallet },
-        { to: '/loans', label: t.nav.loans, icon: Landmark },
-        { to: '/credit-cards', label: t.nav.creditCards, icon: CreditCard },
-        { to: '/plans/recurring', label: t.nav.recurring, icon: RefreshCw },
+        { to: '/dashboard/accounts', label: t.nav.accounts, icon: Wallet },
+        { to: '/dashboard/loans', label: t.nav.loans, icon: Landmark },
+        { to: '/dashboard/credit-cards', label: t.nav.creditCards, icon: CreditCard },
+        { to: '/dashboard/plans/recurring', label: t.nav.recurring, icon: RefreshCw },
       ],
     },
     {
       label: t.nav.plan,
       items: [
-        { to: '/plans', label: t.nav.plansGoals, icon: Target },
-        { to: '/reports', label: t.nav.reports, icon: BookOpen },
+        { to: '/dashboard/plans', label: t.nav.plansGoals, icon: Target },
+        { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
       ],
     },
   ];
@@ -249,7 +249,7 @@ export const Sidebar: React.FC = () => {
       {/* Footer */}
       <div className="px-3 py-4 border-t border-[var(--color-border)] space-y-1">
         <NavLink
-          to="/notifications"
+          to="/dashboard/notifications"
           className={({ isActive }) =>
             [
               'flex items-center gap-2.5 px-2 py-2 rounded-[var(--radius-button)]',
@@ -264,7 +264,7 @@ export const Sidebar: React.FC = () => {
           {t.nav.notifications}
         </NavLink>
         <NavLink
-          to="/settings"
+          to="/dashboard/settings"
           className={({ isActive }) =>
             [
               'flex items-center gap-2.5 px-2 py-2 rounded-[var(--radius-button)]',

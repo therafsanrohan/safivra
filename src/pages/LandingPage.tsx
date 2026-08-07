@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { SEO } from '@/components/ui/SEO';
 import {
@@ -16,6 +17,12 @@ import {
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
+  const { user } = useAuthContext();
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <>
       <SEO />

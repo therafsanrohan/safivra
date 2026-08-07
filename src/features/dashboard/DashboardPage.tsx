@@ -207,7 +207,7 @@ export const DashboardPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            to="/notifications"
+            to="/dashboard/notifications"
             className="relative w-10 h-10 flex items-center justify-center rounded-[var(--radius-button)] hover:bg-[var(--color-bg-subtle)] transition-colors"
             aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
           >
@@ -219,7 +219,7 @@ export const DashboardPage: React.FC = () => {
             )}
           </Link>
           <Link
-            to="/settings"
+            to="/dashboard/settings"
             className="w-9 h-9 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center"
             aria-label="Profile settings"
           >
@@ -255,8 +255,8 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-2 gap-3">
         <SummaryCard label="Income" value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
         <SummaryCard label="Expense" value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
-        <SummaryCard label="Loan" value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/loans" />
-        <SummaryCard label="Credit" value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/credit-cards" />
+        <SummaryCard label="Loan" value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
+        <SummaryCard label="Credit" value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
       </div>
 
       {/* Net Worth */}
@@ -295,20 +295,20 @@ export const DashboardPage: React.FC = () => {
       <Card padding="none">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">Accounts</h2>
-          <Link to="/accounts" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">View all</Link>
+          <Link to="/dashboard/accounts" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">View all</Link>
         </div>
         {liquidAccounts.length === 0 ? (
           <EmptyState
             icon={<Wallet size={22} />}
             title="No accounts yet"
             description="Add your first account to track balances."
-            action={<Link to="/accounts/add"><Button size="sm">Add account</Button></Link>}
+            action={<Link to="/dashboard/accounts/add"><Button size="sm">Add account</Button></Link>}
             className="py-8"
           />
         ) : (
           <div className="divide-y divide-[var(--color-border)]" role="list">
             {liquidAccounts.slice(0, 5).map((acc) => (
-              <Link key={acc.account_id} to={`/accounts/${acc.account_id}`} role="listitem"
+              <Link key={acc.account_id} to={`/dashboard/accounts/${acc.account_id}`} role="listitem"
                 className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                 aria-label={`${acc.name}: ${formatCurrency(Number(acc.balance))}`}
               >
@@ -362,7 +362,7 @@ export const DashboardPage: React.FC = () => {
       <Card padding="none">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">Recent Activity</h2>
-          <Link to="/activity" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">View all</Link>
+          <Link to="/dashboard/activity" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">View all</Link>
         </div>
         {(!data || data.recentTransactions.length === 0) ? (
           <EmptyState
@@ -374,7 +374,7 @@ export const DashboardPage: React.FC = () => {
         ) : (
           <div className="divide-y divide-[var(--color-border)]" role="list">
             {data.recentTransactions.map((tx) => (
-              <Link key={tx.id} to={`/activity/${tx.id}`}
+              <Link key={tx.id} to={`/dashboard/activity/${tx.id}`}
                 className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                 role="listitem"
               >
