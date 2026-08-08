@@ -88,7 +88,7 @@ export const AddTransactionPage: React.FC = () => {
       } as unknown as never);
       if (error) throw error;
       success(`${txInfo.label} recorded`, 'Transaction saved successfully.');
-      navigate('/activity');
+      navigate('/dashboard/activity');
     } catch (err) {
       showError('Could not save transaction', parseError(err).message);
     } finally {

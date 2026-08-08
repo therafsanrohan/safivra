@@ -11,6 +11,7 @@ import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/co
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';
+import { CurrencyInput } from '@/components/ui/CurrencyInput';
 
 interface FullCard {
   id: string;
@@ -40,6 +41,13 @@ export const CardDetailPage: React.FC = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editNickname, setEditNickname] = useState('');
+  const [editLimit, setEditLimit] = useState(0);
+  const [editStatementDay, setEditStatementDay] = useState<string | number>('');
+  const [editPaymentDay, setEditPaymentDay] = useState<string | number>('');
+  const [isEditing, setIsEditing] = useState(false);
+
   const handleDelete = async () => {
     if (!card || deleteConfirmation !== 'DELETE') return;
     setIsDeleting(true);
@@ -51,11 +59,41 @@ export const CardDetailPage: React.FC = () => {
       if (delErr) throw delErr;
       
       success('Card Deleted', 'The credit card has been permanently deleted.');
-      navigate('/credit-cards');
+      navigate('/dashboard/credit-cards');
     } catch (err) {
       showError('Failed to delete card', parseError(err).message);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!card || !editNickname.trim()) return;
+    setIsEditing(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('credit_cards')
+        .update({
+          nickname: editNickname.trim(),
+          credit_limit: editLimit > 0 ? editLimit : card.credit_limit,
+          statement_day: editStatementDay ? Number(editStatementDay) : null,
+          payment_due_day: editPaymentDay ? Number(editPaymentDay) : null,
+        })
+        .eq('id', card.id)
+        .eq('user_id', user!.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      setCard(prev => prev ? { ...prev, ...data } : null);
+      success('Card Updated', 'Credit card details updated successfully.');
+      setIsEditModalOpen(false);
+    } catch (err) {
+      showError('Failed to update card', parseError(err).message);
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -124,13 +162,26 @@ export const CardDetailPage: React.FC = () => {
         </button>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => {
+              setEditNickname(card?.nickname || '');
+              setEditLimit(card?.credit_limit ? Number(card.credit_limit) : 0);
+              setEditStatementDay(card?.statement_day || '');
+              setEditPaymentDay(card?.payment_due_day || '');
+              setIsEditModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
+            aria-label="Edit Card"
+          >
+            <Settings size={18} /> Edit
+          </button>
+          <button
             onClick={() => setIsDeleteModalOpen(true)}
             className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-negative)]"
             aria-label="Delete Card"
           >
-            <Settings size={18} /> Settings
+            <Settings size={18} /> Delete
           </button>
-          <Link to={`/activity/add?type=credit_card_payment`}>
+          <Link to={`/dashboard/activity/add?type=credit_card_payment`}>
             <Button size="sm" className="gap-1">
               <Plus size={16} /> Record Payment
             </Button>
@@ -193,7 +244,7 @@ export const CardDetailPage: React.FC = () => {
             title="No card payments recorded"
             description="Card repayments will appear here."
             action={
-              <Link to="/activity/add?type=credit_card_payment">
+              <Link to="/dashboard/activity/add?type=credit_card_payment">
                 <Button size="sm">Pay Card Bill</Button>
               </Link>
             }
@@ -262,6 +313,59 @@ export const CardDetailPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      <Dialog
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        title="Edit Card Details"
+      >
+        <form onSubmit={handleEdit} className="space-y-4">
+          <Input
+            label="Card Nickname"
+            required
+            value={editNickname}
+            onChange={(e) => setEditNickname(e.target.value)}
+          />
+          <CurrencyInput
+            label="Credit Limit"
+            required
+            value={editLimit}
+            onChange={setEditLimit}
+          />
+          <Input
+            label="Statement Day (1-31)"
+            type="number"
+            min="1" max="31"
+            optional
+            value={editStatementDay}
+            onChange={(e) => setEditStatementDay(e.target.value)}
+          />
+          <Input
+            label="Payment Due Day (1-31)"
+            type="number"
+            min="1" max="31"
+            optional
+            value={editPaymentDay}
+            onChange={(e) => setEditPaymentDay(e.target.value)}
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              loading={isEditing}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
       </Dialog>
     </div>
   );

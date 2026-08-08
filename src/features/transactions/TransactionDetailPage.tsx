@@ -109,7 +109,7 @@ export const TransactionDetailPage: React.FC = () => {
       } as any);
       if (delErr) throw delErr;
       success('Transaction Deleted', 'The transaction has been permanently deleted.');
-      navigate('/activity');
+      navigate('/dashboard/activity');
     } catch (err) {
       showError('Could not delete transaction', parseError(err).message);
     } finally {

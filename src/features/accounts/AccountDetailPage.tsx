@@ -95,7 +95,7 @@ export const AccountDetailPage: React.FC = () => {
       } as any);
       if (error) throw error;
       success('Account deleted successfully');
-      navigate('/accounts');
+      navigate('/dashboard/accounts');
     } catch (err: any) {
       showError('Failed to delete account', err.message);
     } finally {

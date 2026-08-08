@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, ArrowLeft, Plus } from 'lucide-react';
+import { Trophy, ArrowLeft, Plus, Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/Input';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { Dialog } from '@/components/ui/Dialog';
 import { useToast } from '@/components/ui/Toast';
+import { parseError } from '@/lib/errors/handler';
 
 interface GoalRow {
   id: string;
@@ -23,10 +24,14 @@ interface GoalRow {
 
 export const GoalsPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { success } = useToast();
+  const { success, error: showError } = useToast();
   const [goals, setGoals] = useState<GoalRow[]>([]);
   const [loading, setLoading] = useState(true);
+  
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<GoalRow | null>(null);
 
   // Form state
   const [name, setName] = useState('');
@@ -45,17 +50,15 @@ export const GoalsPage: React.FC = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (fetchErr || !data || data.length === 0) {
-        setGoals([]);
-      } else {
-        setGoals((data as GoalRow[]) ?? []);
-      }
-    } catch {
+      if (fetchErr) throw fetchErr;
+      setGoals((data as GoalRow[]) ?? []);
+    } catch (err) {
+      showError('Failed to load goals', parseError(err).message);
       setGoals([]);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, showError]);
 
   useEffect(() => {
     fetchGoals();
@@ -65,34 +68,85 @@ export const GoalsPage: React.FC = () => {
     e.preventDefault();
     if (!name.trim() || targetAmount <= 0 || !user) return;
 
-    const newG: GoalRow = {
-      id: `goal-${Date.now()}`,
-      name: name.trim(),
-      target_amount: targetAmount,
-      current_amount: currentAmount,
-      target_date: targetDate,
-      status: 'in_progress',
-    };
-
     try {
-      await (supabase.from('savings_goals') as any).insert({
+      const { data, error } = await supabase.from('savings_goals').insert({
         user_id: user.id,
         name: name.trim(),
         target_amount: targetAmount,
         current_amount: currentAmount,
-        target_date: targetDate,
+        target_date: targetDate || null,
         status: 'in_progress',
-      });
-    } catch {
-      // Fallback
-    }
+      }).select().single();
 
-    setGoals((prev) => [newG, ...prev]);
-    setName('');
-    setTargetAmount(100000);
-    setCurrentAmount(10000);
-    setShowAddDialog(false);
-    success('Goal Created', `${newG.name} goal set for ${formatCurrency(targetAmount)}.`);
+      if (error) throw error;
+
+      setGoals((prev) => [data, ...prev]);
+      setName('');
+      setTargetAmount(100000);
+      setCurrentAmount(10000);
+      setTargetDate(todayString());
+      setShowAddDialog(false);
+      success('Goal Created', `${data.name} goal set for ${formatCurrency(targetAmount)}.`);
+    } catch (err) {
+      showError('Failed to create goal', parseError(err).message);
+    }
+  };
+
+  const handleEditGoal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedGoal || !name.trim() || targetAmount <= 0 || !user) return;
+
+    try {
+      const { data, error } = await supabase.from('savings_goals').update({
+        name: name.trim(),
+        target_amount: targetAmount,
+        current_amount: currentAmount,
+        target_date: targetDate || null,
+      })
+      .eq('id', selectedGoal.id)
+      .eq('user_id', user.id)
+      .select().single();
+
+      if (error) throw error;
+
+      setGoals((prev) => prev.map((g) => g.id === data.id ? data : g));
+      setShowEditDialog(false);
+      success('Goal Updated', `${data.name} updated successfully.`);
+    } catch (err) {
+      showError('Failed to update goal', parseError(err).message);
+    }
+  };
+
+  const handleDeleteGoal = async () => {
+    if (!selectedGoal || !user) return;
+
+    try {
+      const { error } = await supabase.from('savings_goals').delete()
+        .eq('id', selectedGoal.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setGoals((prev) => prev.filter((g) => g.id !== selectedGoal.id));
+      setShowDeleteDialog(false);
+      success('Goal Deleted', `${selectedGoal.name} has been removed.`);
+    } catch (err) {
+      showError('Failed to delete goal', parseError(err).message);
+    }
+  };
+
+  const openEdit = (g: GoalRow) => {
+    setSelectedGoal(g);
+    setName(g.name);
+    setTargetAmount(Number(g.target_amount));
+    setCurrentAmount(Number(g.current_amount));
+    setTargetDate(g.target_date || '');
+    setShowEditDialog(true);
+  };
+
+  const openDelete = (g: GoalRow) => {
+    setSelectedGoal(g);
+    setShowDeleteDialog(true);
   };
 
   if (loading) {
@@ -107,7 +161,7 @@ export const GoalsPage: React.FC = () => {
   return (
     <div className="page-container pt-4 space-y-5 fade-in">
       <div className="flex items-center justify-between">
-        <Link to="/plans" className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
+        <Link to="/dashboard/plans" className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
           <ArrowLeft size={18} /> Plans
         </Link>
       </div>
@@ -121,7 +175,13 @@ export const GoalsPage: React.FC = () => {
             Emergency funds, Umrah savings, and milestone targets
           </p>
         </div>
-        <Button size="sm" onClick={() => setShowAddDialog(true)} className="gap-1">
+        <Button size="sm" onClick={() => {
+          setName('');
+          setTargetAmount(100000);
+          setCurrentAmount(10000);
+          setTargetDate(todayString());
+          setShowAddDialog(true);
+        }} className="gap-1">
           <Plus size={16} /> Add Goal
         </Button>
       </header>
@@ -131,7 +191,13 @@ export const GoalsPage: React.FC = () => {
           icon={<Trophy size={22} />}
           title="No savings goals set"
           description="Create savings targets for emergency funds, travel, or big purchases."
-          action={<Button size="sm" onClick={() => setShowAddDialog(true)}>Create Goal</Button>}
+          action={<Button size="sm" onClick={() => {
+            setName('');
+            setTargetAmount(100000);
+            setCurrentAmount(10000);
+            setTargetDate(todayString());
+            setShowAddDialog(true);
+          }}>Create Goal</Button>}
         />
       ) : (
         <div className="space-y-4">
@@ -153,13 +219,21 @@ export const GoalsPage: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  <div className="text-right">
+                  <div className="flex flex-col items-end gap-1">
                     <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-positive)]" data-financial>
                       {formatCurrency(current)}
                     </span>
                     <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
                       of {formatCurrency(target)}
                     </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button onClick={() => openEdit(g)} className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Goal">
+                        <Edit2 size={16} />
+                      </button>
+                      <button onClick={() => openDelete(g)} className="text-[var(--color-text-secondary)] hover:text-[var(--color-negative)] transition-colors p-1" title="Delete Goal">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <ProgressBar value={pct} showValue variant="positive" label="Goal Progress" />
@@ -207,6 +281,63 @@ export const GoalsPage: React.FC = () => {
             Save Goal
           </Button>
         </form>
+      </Dialog>
+      
+      {/* Edit Goal Dialog */}
+      <Dialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        title="Edit Savings Goal"
+        description="Update your goal target and current saved amount"
+      >
+        <form onSubmit={handleEditGoal} className="space-y-4 pt-2">
+          <Input
+            label="Goal Name"
+            required
+            placeholder="e.g. Emergency Reserve, Hajj Fund, Laptop"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <CurrencyInput
+            label="Target Amount"
+            required
+            value={targetAmount}
+            onChange={setTargetAmount}
+          />
+          <CurrencyInput
+            label="Current Saved Amount"
+            optional
+            value={currentAmount}
+            onChange={setCurrentAmount}
+          />
+          <Input
+            label="Target Date"
+            type="date"
+            optional
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+          />
+          <Button type="submit" fullWidth className="mt-4">
+            Update Goal
+          </Button>
+        </form>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Goal"
+        description="Are you sure you want to delete this savings goal? This action cannot be undone."
+      >
+        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[var(--color-border)]">
+          <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
+            Cancel
+          </Button>
+          <Button type="button" variant="danger" onClick={handleDeleteGoal} className="flex-1">
+            Delete Goal
+          </Button>
+        </div>
       </Dialog>
     </div>
   );

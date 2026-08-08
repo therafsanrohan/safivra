@@ -85,7 +85,7 @@ export const AccountsPage: React.FC = () => {
             Manage your liquid assets and liabilities
           </p>
         </div>
-        <Link to="/accounts/add">
+        <Link to="/dashboard/accounts/add">
           <Button size="sm" className="gap-1">
             <Plus size={16} /> Add Account
           </Button>
@@ -129,7 +129,7 @@ export const AccountsPage: React.FC = () => {
           title="No accounts found"
           description="You haven't added any financial accounts yet."
           action={
-            <Link to="/accounts/add">
+            <Link to="/dashboard/accounts/add">
               <Button size="sm" className="mt-2">Add your first account</Button>
             </Link>
           }

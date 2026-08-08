@@ -11,6 +11,7 @@ import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/co
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';
+import { CurrencyInput } from '@/components/ui/CurrencyInput';
 
 interface FullLoan {
   id: string;
@@ -42,6 +43,12 @@ export const LoanDetailPage: React.FC = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editRate, setEditRate] = useState<string | number>('');
+  const [editInstallment, setEditInstallment] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+
   const handleDelete = async () => {
     if (!loan || deleteConfirmation !== 'DELETE') return;
     setIsDeleting(true);
@@ -53,11 +60,40 @@ export const LoanDetailPage: React.FC = () => {
       if (delErr) throw delErr;
       
       success('Loan Deleted', 'The loan has been permanently deleted.');
-      navigate('/loans');
+      navigate('/dashboard/loans');
     } catch (err) {
       showError('Failed to delete loan', parseError(err).message);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loan || !editName.trim()) return;
+    setIsEditing(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('loans')
+        .update({
+          name: editName.trim(),
+          annual_rate: editRate ? Number(editRate) : null,
+          monthly_installment: editInstallment > 0 ? editInstallment : null,
+        })
+        .eq('id', loan.id)
+        .eq('user_id', user!.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      setLoan(prev => prev ? { ...prev, ...data } : null);
+      success('Loan Updated', 'Loan details updated successfully.');
+      setIsEditModalOpen(false);
+    } catch (err) {
+      showError('Failed to update loan', parseError(err).message);
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -126,13 +162,25 @@ export const LoanDetailPage: React.FC = () => {
         </button>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => {
+              setEditName(loan?.name || '');
+              setEditRate(loan?.annual_rate || '');
+              setEditInstallment(loan?.monthly_installment ? Number(loan.monthly_installment) : 0);
+              setIsEditModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
+            aria-label="Edit Loan"
+          >
+            <Settings size={18} /> Edit
+          </button>
+          <button
             onClick={() => setIsDeleteModalOpen(true)}
             className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-negative)]"
             aria-label="Delete Loan"
           >
-            <Settings size={18} /> Settings
+            <Settings size={18} /> Delete
           </button>
-          <Link to={`/activity/add?type=loan_payment`}>
+          <Link to={`/dashboard/activity/add?type=loan_payment`}>
             <Button size="sm" className="gap-1">
               <Plus size={16} /> Record Payment
             </Button>
@@ -196,7 +244,7 @@ export const LoanDetailPage: React.FC = () => {
             title="No payments recorded"
             description="Installment payments will appear here as they are posted."
             action={
-              <Link to="/activity/add?type=loan_payment">
+              <Link to="/dashboard/activity/add?type=loan_payment">
                 <Button size="sm">Record Payment</Button>
               </Link>
             }
@@ -265,6 +313,51 @@ export const LoanDetailPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      <Dialog
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        title="Edit Loan Details"
+      >
+        <form onSubmit={handleEdit} className="space-y-4">
+          <Input
+            label="Loan Name"
+            required
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          <Input
+            label="Annual Interest Rate (%)"
+            type="number"
+            step="0.01"
+            optional
+            value={editRate}
+            onChange={(e) => setEditRate(e.target.value)}
+          />
+          <CurrencyInput
+            label="Monthly Installment (EMI)"
+            optional
+            value={editInstallment}
+            onChange={setEditInstallment}
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              loading={isEditing}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
       </Dialog>
     </div>
   );

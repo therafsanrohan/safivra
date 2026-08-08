@@ -93,7 +93,7 @@ export const CreditCardsPage: React.FC = () => {
             Track card statements, utilization, and due dates
           </p>
         </div>
-        <Link to="/credit-cards/add">
+        <Link to="/dashboard/credit-cards/add">
           <Button size="sm" className="gap-1">
             <Plus size={16} /> Add Card
           </Button>
@@ -123,7 +123,7 @@ export const CreditCardsPage: React.FC = () => {
             title="No credit cards added"
             description="Add your Visa, Mastercard, or AMEX credit cards to monitor utilization."
             action={
-              <Link to="/credit-cards/add">
+              <Link to="/dashboard/credit-cards/add">
                 <Button size="sm">Add Card</Button>
               </Link>
             }

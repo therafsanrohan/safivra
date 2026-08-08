@@ -82,7 +82,7 @@ export const AddCardPage: React.FC = () => {
       }
 
       success('Credit card added', `${data.nickname} created successfully.`);
-      navigate('/credit-cards');
+      navigate('/dashboard/credit-cards');
     } catch (err) {
       showError('Failed to add credit card', parseError(err).message);
     } finally {

@@ -95,7 +95,7 @@ export const LoansPage: React.FC = () => {
             Track principal, interest, and payment schedules
           </p>
         </div>
-        <Link to="/loans/add">
+        <Link to="/dashboard/loans/add">
           <Button size="sm" className="gap-1">
             <Plus size={16} /> Add Loan
           </Button>
@@ -125,7 +125,7 @@ export const LoansPage: React.FC = () => {
             title="No active loans"
             description="Add personal, bank, or education loans to track repayment schedules."
             action={
-              <Link to="/loans/add">
+              <Link to="/dashboard/loans/add">
                 <Button size="sm">Add Loan</Button>
               </Link>
             }

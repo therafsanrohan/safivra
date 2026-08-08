@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Plus, Trash2, Edit2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -31,8 +31,6 @@ interface RecurringRow {
   transaction_categories?: { name: string } | null;
 }
 
-
-
 export const RecurringPage: React.FC = () => {
   const { user } = useAuthContext();
   const { t, locale } = useLanguage();
@@ -40,7 +38,11 @@ export const RecurringPage: React.FC = () => {
   const { success, error: showError } = useToast();
   const [items, setItems] = useState<RecurringRow[]>([]);
   const [loading, setLoading] = useState(true);
+  
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<RecurringRow | null>(null);
 
   // Reference Data
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([]);
@@ -172,11 +174,7 @@ export const RecurringPage: React.FC = () => {
       if (insertErr) throw insertErr;
 
       if (data) {
-        setItems((prev) => {
-          // Remove mock items if any
-          const realItems = prev.filter((item) => !item.id.startsWith('rec-'));
-          return [...realItems, data as unknown as RecurringRow];
-        });
+        setItems((prev) => [...prev, data as unknown as RecurringRow]);
       }
 
       setName('');
@@ -195,27 +193,88 @@ export const RecurringPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm(t.recurring.deleteConfirm)) return;
+  const handleEditRecurring = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedItem || !name.trim() || amount <= 0 || !user || !accountId) return;
 
-    if (id.startsWith('rec-')) {
-      setItems((prev) => prev.filter((item) => item.id !== id));
-      success(t.recurring.toastDeleted, t.recurring.toastDeletedDesc);
-      return;
+    try {
+      const { data, error: updateErr } = await (supabase.from('recurring_templates') as any)
+        .update({
+          name: name.trim(),
+          transaction_type: type,
+          amount,
+          frequency,
+          next_occurrence: nextDate,
+          account_id: accountId,
+          category_id: categoryId || null,
+          auto_post: autoPost,
+        })
+        .eq('id', selectedItem.id)
+        .eq('user_id', user.id)
+        .select(`
+          id,
+          name,
+          transaction_type,
+          amount,
+          frequency,
+          next_occurrence,
+          is_active,
+          account_id,
+          category_id,
+          auto_post,
+          financial_accounts (name),
+          transaction_categories (name)
+        `)
+        .single();
+
+      if (updateErr) throw updateErr;
+
+      if (data) {
+        setItems((prev) => prev.map((item) => item.id === data.id ? data as unknown as RecurringRow : item));
+      }
+
+      setShowEditDialog(false);
+      success('Commitment Updated', `Successfully updated ${name.trim()}.`);
+    } catch (err) {
+      showError('Could not update commitment', parseError(err).message);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedItem) return;
 
     try {
       const { error: delErr } = await (supabase.from('recurring_templates') as any)
         .update({ is_active: false })
-        .eq('id', id);
+        .eq('id', selectedItem.id)
+        .eq('user_id', user!.id);
 
       if (delErr) throw delErr;
 
-      setItems((prev) => prev.filter((item) => item.id !== id));
+      setItems((prev) => prev.filter((item) => item.id !== selectedItem.id));
+      setShowDeleteDialog(false);
       success(t.recurring.toastDeleted, t.recurring.toastDeletedDesc);
     } catch (err) {
       showError('Could not delete item', parseError(err).message);
     }
+  };
+
+  const openEdit = (item: RecurringRow) => {
+    setSelectedItem(item);
+    setName(item.name);
+    setAmount(Number(item.amount));
+    setType(item.transaction_type);
+    setFrequency(item.frequency);
+    setAccountId(item.account_id);
+    setCategoryId(item.category_id || '');
+    setNextDate(item.next_occurrence);
+    setAutoPost(item.auto_post);
+    setShowEditDialog(true);
+  };
+
+  const openDelete = (item: RecurringRow) => {
+    setSelectedItem(item);
+    setShowDeleteDialog(true);
   };
 
   const filteredCategories = categories.filter((c) => c.category_type === type);
@@ -232,7 +291,7 @@ export const RecurringPage: React.FC = () => {
   return (
     <div className="page-container pt-4 space-y-5 fade-in">
       <div className="flex items-center justify-between">
-        <Link to="/plans" className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
+        <Link to="/dashboard/plans" className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
           <ArrowLeft size={18} /> {t.recurring.backToPlans}
         </Link>
       </div>
@@ -246,7 +305,14 @@ export const RecurringPage: React.FC = () => {
             {t.recurring.pageSubtitle}
           </p>
         </div>
-        <Button size="sm" onClick={() => setShowAddDialog(true)} className="gap-1">
+        <Button size="sm" onClick={() => {
+          setName('');
+          setAmount(1500);
+          setCategoryId('');
+          setNextDate(todayString());
+          setAutoPost(false);
+          setShowAddDialog(true);
+        }} className="gap-1">
           <Plus size={16} /> {t.recurring.addRecurring}
         </Button>
       </header>
@@ -256,7 +322,14 @@ export const RecurringPage: React.FC = () => {
           icon={<RefreshCw size={22} />}
           title={t.recurring.noCommitments}
           description={t.recurring.noCommitmentsDesc}
-          action={<Button size="sm" onClick={() => setShowAddDialog(true)}>{t.recurring.addItem}</Button>}
+          action={<Button size="sm" onClick={() => {
+            setName('');
+            setAmount(1500);
+            setCategoryId('');
+            setNextDate(todayString());
+            setAutoPost(false);
+            setShowAddDialog(true);
+          }}>{t.recurring.addItem}</Button>}
         />
       ) : (
         <Card padding="none">
@@ -297,12 +370,19 @@ export const RecurringPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={['font-semibold tabular-nums text-[var(--text-body)]', item.transaction_type === 'income' ? 'text-[var(--color-positive)]' : 'text-[var(--color-text-primary)]'].join(' ')} data-financial>
+                <div className="flex items-center gap-2">
+                  <span className={['font-semibold tabular-nums text-[var(--text-body)] pr-2', item.transaction_type === 'income' ? 'text-[var(--color-positive)]' : 'text-[var(--color-text-primary)]'].join(' ')} data-financial>
                     {item.transaction_type === 'income' ? '+' : ''}{formatCurrency(Number(item.amount))}
                   </span>
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => openEdit(item)}
+                    className="p-1 rounded-[var(--radius-button)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-bg-subtle)] transition-colors"
+                    aria-label="Edit commitment"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => openDelete(item)}
                     className="p-1 rounded-[var(--radius-button)] text-[var(--color-text-muted)] hover:text-[var(--color-negative)] hover:bg-[var(--color-bg-subtle)] transition-colors"
                     aria-label="Delete commitment"
                   >
@@ -327,7 +407,7 @@ export const RecurringPage: React.FC = () => {
             <p className="text-[var(--text-body)] text-[var(--color-text-secondary)] leading-relaxed">
               {t.recurring.noAccountWarning}
             </p>
-            <Link to="/accounts/add" onClick={() => setShowAddDialog(false)} className="block">
+            <Link to="/dashboard/accounts/add" onClick={() => setShowAddDialog(false)} className="block">
               <Button fullWidth>{t.recurring.createAccountBtn}</Button>
             </Link>
           </div>
@@ -410,6 +490,100 @@ export const RecurringPage: React.FC = () => {
             </Button>
           </form>
         )}
+      </Dialog>
+
+      {/* Edit Recurring Dialog */}
+      <Dialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        title="Edit Commitment"
+        description="Update details of your recurring commitment"
+      >
+        <form onSubmit={handleEditRecurring} className="space-y-4 pt-2">
+          <Input
+            label={t.recurring.titleLabel}
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <CurrencyInput
+            label={t.recurring.amountLabel}
+            required
+            value={amount}
+            onChange={setAmount}
+          />
+          <Select
+            label={t.recurring.typeLabel}
+            value={type}
+            onValueChange={handleTypeChange}
+            options={[
+              { value: 'expense', label: t.recurring.expense },
+              { value: 'income', label: t.recurring.income },
+            ]}
+          />
+          <Select
+            label={t.recurring.frequencyLabel}
+            value={frequency}
+            onValueChange={setFrequency}
+            options={[
+              { value: 'weekly', label: t.recurring.weekly },
+              { value: 'monthly', label: t.recurring.monthly },
+              { value: 'yearly', label: t.recurring.yearly },
+            ]}
+          />
+          <Select
+            label={t.recurring.accountLabel}
+            value={accountId}
+            onValueChange={setAccountId}
+            options={accounts.map((acc) => ({ value: acc.id, label: acc.name }))}
+            required
+          />
+          {filteredCategories.length > 0 && (
+            <Select
+              label={t.recurring.categoryLabel}
+              value={categoryId}
+              onValueChange={setCategoryId}
+              options={[
+                { value: '', label: 'None' },
+                ...filteredCategories.map((cat) => ({ value: cat.id, label: cat.name }))
+              ]}
+              optional
+            />
+          )}
+          <Input
+            label={t.recurring.nextDueLabel}
+            type="date"
+            required
+            value={nextDate}
+            onChange={(e) => setNextDate(e.target.value)}
+          />
+          <Switch
+            label={t.recurring.autoPostLabel}
+            description={t.recurring.autoPostDesc}
+            checked={autoPost}
+            onCheckedChange={setAutoPost}
+          />
+          <Button type="submit" fullWidth className="mt-4">
+            Update Commitment
+          </Button>
+        </form>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Commitment"
+        description="Are you sure you want to delete this recurring commitment? This action cannot be undone."
+      >
+        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[var(--color-border)]">
+          <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
+            Cancel
+          </Button>
+          <Button type="button" variant="danger" onClick={handleDelete} className="flex-1">
+            Delete
+          </Button>
+        </div>
       </Dialog>
     </div>
   );

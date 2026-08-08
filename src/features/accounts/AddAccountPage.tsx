@@ -93,7 +93,7 @@ export const AddAccountPage: React.FC = () => {
       }
 
       success('Account created', `${data.name} has been added successfully.`);
-      navigate('/accounts');
+      navigate('/dashboard/accounts');
     } catch (err: any) {
       console.error(err);
       let errMsg = parseError(err).message;

@@ -94,7 +94,7 @@ export const AddLoanPage: React.FC = () => {
       }
 
       success('Loan added', `${data.name} recorded successfully.`);
-      navigate('/loans');
+      navigate('/dashboard/loans');
     } catch (err) {
       showError('Failed to record loan', parseError(err).message);
     } finally {

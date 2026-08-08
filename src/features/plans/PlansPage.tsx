@@ -30,7 +30,7 @@ export const PlansPage: React.FC = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/plans/budgets" className="block">
+        <Link to="/dashboard/plans/budgets" className="block">
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
             <div className="space-y-3">
               <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-accent-soft)] flex items-center justify-center">
@@ -51,7 +51,7 @@ export const PlansPage: React.FC = () => {
           </Card>
         </Link>
 
-        <Link to="/plans/savings" className="block">
+        <Link to="/dashboard/plans/savings" className="block">
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
             <div className="space-y-3">
               <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-warning-soft)] flex items-center justify-center">
@@ -72,7 +72,7 @@ export const PlansPage: React.FC = () => {
           </Card>
         </Link>
 
-        <Link to="/plans/recurring" className="block">
+        <Link to="/dashboard/plans/recurring" className="block">
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
             <div className="space-y-3">
               <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-info-soft)] flex items-center justify-center">
@@ -93,7 +93,7 @@ export const PlansPage: React.FC = () => {
           </Card>
         </Link>
 
-        <Link to="/plans/goals" className="block">
+        <Link to="/dashboard/plans/goals" className="block">
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
             <div className="space-y-3">
               <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-positive-soft)] flex items-center justify-center">

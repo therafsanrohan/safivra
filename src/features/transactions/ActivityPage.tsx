@@ -109,7 +109,7 @@ export const ActivityPage: React.FC = () => {
             All posted ledger transactions
           </p>
         </div>
-        <Link to="/activity/add">
+        <Link to="/dashboard/activity/add">
           <Button size="sm" className="gap-1">
             <Plus size={16} /> Record
           </Button>
@@ -150,7 +150,7 @@ export const ActivityPage: React.FC = () => {
           description={searchQuery ? 'Try adjusting your search query or filter.' : 'Record your first transaction to get started.'}
           action={
             !searchQuery ? (
-              <Link to="/activity/add">
+              <Link to="/dashboard/activity/add">
                 <Button size="sm">Add Transaction</Button>
               </Link>
             ) : undefined
