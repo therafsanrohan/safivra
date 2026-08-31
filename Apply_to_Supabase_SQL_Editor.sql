@@ -72,7 +72,7 @@ SELECT
   fa.is_archived,
   CASE fa.account_class
     WHEN 'asset' THEN (
-      fa.opening_balance + COALESCE((
+      COALESCE((
         SELECT SUM(CASE
           WHEN le.entry_role IN ('asset_debit', 'transfer_in')  THEN  le.amount
           WHEN le.entry_role IN ('asset_credit','transfer_out','fee_expense') THEN -le.amount
@@ -84,7 +84,7 @@ SELECT
       ), 0)
     )
     WHEN 'liability' THEN (
-      fa.opening_balance + COALESCE((
+      COALESCE((
         SELECT SUM(CASE
           WHEN le.entry_role = 'liability_credit'  THEN  le.amount
           WHEN le.entry_role = 'liability_debit'   THEN -le.amount
@@ -95,7 +95,7 @@ SELECT
         WHERE le.financial_account_id = fa.id AND lt.status = 'posted'
       ), 0)
     )
-    ELSE fa.opening_balance
+    ELSE 0
   END::TEXT AS balance
 FROM public.financial_accounts fa;
 

@@ -215,20 +215,40 @@ export const TransactionDetailPage: React.FC = () => {
           <div className="divide-y divide-[var(--color-border)]" role="list">
             {entries.map((entry) => {
               const amount = Number(entry.amount);
-              const targetName = entry.financial_account?.name || entry.category?.name || 'Account/Category';
+              
+              let targetName = entry.financial_account?.name || entry.category?.name;
+              if (!targetName) {
+                if (entry.entry_role.includes('equity')) {
+                  targetName = 'Opening Equity / Capital';
+                } else if (entry.entry_role.includes('fee')) {
+                  targetName = 'Bank Fees & Charges';
+                } else if (entry.entry_role.includes('transfer')) {
+                  targetName = 'Linked Transfer Account';
+                } else {
+                  targetName = 'General Ledger';
+                }
+              }
+
+              const isDebit = entry.entry_role.includes('debit') || entry.entry_role === 'transfer_in';
+              const roleLabel = entry.entry_role.replace(/_/g, ' ');
 
               return (
                 <div key={entry.id} className="flex items-center justify-between px-5 py-3.5" role="listitem">
-                  <div>
-                    <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
-                      {targetName}
-                    </p>
-                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] capitalize">
-                      {entry.entry_role.replace(/_/g, ' ')}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <span className={['px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide', isDebit ? 'bg-[var(--color-info-soft)] text-[var(--color-info)]' : 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'].join(' ')}>
+                      {isDebit ? 'Debit' : 'Credit'}
+                    </span>
+                    <div>
+                      <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                        {targetName}
+                      </p>
+                      <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] capitalize text-xs">
+                        {roleLabel}
+                      </p>
+                    </div>
                   </div>
-                  <span className={['font-semibold tabular-nums', amount >= 0 ? 'text-[var(--color-positive)]' : 'text-[var(--color-negative)]'].join(' ')} data-financial>
-                    {amount >= 0 ? '+' : ''}{formatCurrency(amount)}
+                  <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
+                    {formatCurrency(amount)}
                   </span>
                 </div>
               );
