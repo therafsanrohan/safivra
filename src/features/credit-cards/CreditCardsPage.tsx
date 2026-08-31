@@ -71,11 +71,12 @@ export const CreditCardsPage: React.FC = () => {
     fetchCards();
   }, [fetchCards]);
 
-  const activeCards = cards.filter((c) => c.status === 'active');
-  const totalOutstanding = activeCards.reduce((sum, c) => {
+  const displayCards = cards.filter((c) => c.status !== 'archived');
+  const activeCards = cards.filter((c) => c.status === 'active' || !c.status);
+  const totalOutstanding = displayCards.reduce((sum, c) => {
     return sum + (c.account?.balance ? Math.abs(Number(c.account.balance)) : 0);
   }, 0);
-  const totalLimit = activeCards.reduce((sum, c) => sum + Number(c.credit_limit), 0);
+  const totalLimit = displayCards.reduce((sum, c) => sum + Number(c.credit_limit), 0);
 
   if (loading) {
     return (
@@ -130,10 +131,10 @@ export const CreditCardsPage: React.FC = () => {
       {/* Cards List */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          {t.creditCards.myCards} ({activeCards.length})
+          {t.creditCards.myCards} ({displayCards.length})
         </h2>
 
-        {activeCards.length === 0 ? (
+        {displayCards.length === 0 ? (
           <EmptyState
             icon={<CreditCard size={22} />}
             title={t.creditCards.noCards}
@@ -147,7 +148,7 @@ export const CreditCardsPage: React.FC = () => {
         ) : (
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
-              {activeCards.map((card) => {
+              {displayCards.map((card) => {
                 const outstanding = card.account?.balance ? Math.abs(Number(card.account.balance)) : 0;
                 const limit = Number(card.credit_limit);
                 const utilizationPct = limit > 0 ? Math.round((outstanding / limit) * 100) : 0;

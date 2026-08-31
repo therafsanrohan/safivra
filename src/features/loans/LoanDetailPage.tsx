@@ -55,8 +55,10 @@ export const LoanDetailPage: React.FC = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
+  const [editLender, setEditLender] = useState('');
   const [editRate, setEditRate] = useState<string | number>('');
   const [editInstallment, setEditInstallment] = useState(0);
+  const [editNextPaymentDate, setEditNextPaymentDate] = useState('');
   const [isEditing, setIsEditing] = useState(false);
 
   const handleDelete = async () => {
@@ -87,13 +89,15 @@ export const LoanDetailPage: React.FC = () => {
       const { data, error } = await (supabase.from('loans') as any)
         .update({
           name: editName.trim(),
+          lender_name: editLender.trim() || loan.lender_name,
           annual_rate: editRate ? Number(editRate).toString() : null,
           monthly_installment: editInstallment > 0 ? editInstallment.toString() : null,
+          next_payment_date: editNextPaymentDate || null,
         })
         .eq('id', loan.id)
         .eq('user_id', user!.id)
         .select()
-        .single();
+        .maybeSingle();
         
       if (error) throw error;
       setLoan(prev => prev ? { ...prev, ...data } : null);
@@ -116,9 +120,13 @@ export const LoanDetailPage: React.FC = () => {
         .select('id, name, lender_name, loan_type, original_principal, annual_rate, monthly_installment, next_payment_date, status, account_id')
         .eq('id', id)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (fetchErr) throw fetchErr;
+      if (!data) {
+        setError('Loan not found');
+        return;
+      }
       const loanData = (data as unknown as FullLoan) ?? null;
 
       if (loanData?.account_id) {
@@ -126,7 +134,7 @@ export const LoanDetailPage: React.FC = () => {
           (supabase.from('v_account_balances') as any)
             .select('balance')
             .eq('account_id', loanData.account_id)
-            .single(),
+            .maybeSingle(),
           (supabase.from('ledger_entries') as any)
             .select(`
               id, amount, entry_role, created_at,
@@ -139,11 +147,11 @@ export const LoanDetailPage: React.FC = () => {
             .order('created_at', { ascending: false }),
         ]);
 
-        if (balRes.data) {
+        if (balRes?.data) {
           loanData.account = { balance: balRes.data.balance };
         }
 
-        if (payRes.data) {
+        if (payRes?.data) {
           const list = (payRes.data as any[])
             .filter((p) => p.ledger_transaction?.status === 'posted')
             .map((p) => ({
@@ -207,8 +215,10 @@ export const LoanDetailPage: React.FC = () => {
           <button
             onClick={() => {
               setEditName(loan?.name || '');
+              setEditLender(loan?.lender_name || '');
               setEditRate(loan?.annual_rate || '');
               setEditInstallment(loan?.monthly_installment ? Number(loan.monthly_installment) : 0);
+              setEditNextPaymentDate(loan?.next_payment_date || '');
               setIsEditModalOpen(true);
             }}
             className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] text-sm font-medium"
@@ -375,6 +385,18 @@ export const LoanDetailPage: React.FC = () => {
             onChange={(e) => setEditName(e.target.value)}
           />
           <Input
+            label="Lender / Bank Name"
+            required
+            value={editLender}
+            onChange={(e) => setEditLender(e.target.value)}
+          />
+          <CurrencyInput
+            label="Monthly Installment (EMI)"
+            optional
+            value={editInstallment}
+            onChange={setEditInstallment}
+          />
+          <Input
             label="Annual Interest Rate (%)"
             type="number"
             step="0.01"
@@ -382,11 +404,12 @@ export const LoanDetailPage: React.FC = () => {
             value={editRate}
             onChange={(e) => setEditRate(e.target.value)}
           />
-          <CurrencyInput
-            label="Monthly Installment (EMI)"
+          <Input
+            label="Next Payment Due Date"
+            type="date"
             optional
-            value={editInstallment}
-            onChange={setEditInstallment}
+            value={editNextPaymentDate}
+            onChange={(e) => setEditNextPaymentDate(e.target.value)}
           />
           <div className="flex gap-3 pt-2">
             <Button

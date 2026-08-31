@@ -38,12 +38,10 @@ export const AccountsPage: React.FC = () => {
         (supabase.from('loans') as any)
           .select('id, name, lender_name, loan_type, original_principal, monthly_installment, account_id, status')
           .eq('user_id', user.id)
-          .eq('status', 'active')
           .order('created_at', { ascending: false }),
         (supabase.from('credit_cards') as any)
           .select('id, nickname, issuer, credit_limit, account_id, status')
           .eq('user_id', user.id)
-          .eq('status', 'active')
           .order('created_at', { ascending: false }),
       ]);
 

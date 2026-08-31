@@ -73,9 +73,10 @@ export const LoansPage: React.FC = () => {
     fetchLoans();
   }, [fetchLoans]);
 
-  const activeLoans = loans.filter((l) => l.status === 'active');
+  const displayLoans = loans.filter((l) => l.status !== 'archived');
+  const activeLoans = loans.filter((l) => l.status === 'active' || !l.status);
 
-  const totalOutstanding = activeLoans.reduce((sum, l) => {
+  const totalOutstanding = displayLoans.reduce((sum, l) => {
     const bal = l.account?.balance ? Math.abs(Number(l.account.balance)) : Number(l.original_principal);
     return sum + bal;
   }, 0);
@@ -127,8 +128,8 @@ export const LoansPage: React.FC = () => {
         </p>
         <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] mt-2">
           {locale === 'bn' 
-            ? `${activeLoans.length}${t.loans.activeCountText}`
-            : `Across ${activeLoans.length} active loan${activeLoans.length === 1 ? '' : 's'}`
+            ? `${displayLoans.length}${t.loans.activeCountText}`
+            : `Across ${displayLoans.length} loan${displayLoans.length === 1 ? '' : 's'}`
           }
         </p>
       </Card>
@@ -136,10 +137,10 @@ export const LoansPage: React.FC = () => {
       {/* Active Loans */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          {t.loans.activeLoans} ({activeLoans.length})
+          {t.loans.activeLoans} ({displayLoans.length})
         </h2>
 
-        {activeLoans.length === 0 ? (
+        {displayLoans.length === 0 ? (
           <EmptyState
             icon={<Landmark size={22} />}
             title={t.loans.noLoans}
@@ -153,7 +154,7 @@ export const LoansPage: React.FC = () => {
         ) : (
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
-              {activeLoans.map((loan) => {
+              {displayLoans.map((loan) => {
                 const outstanding = loan.account?.balance ? Math.abs(Number(loan.account.balance)) : Number(loan.original_principal);
                 const original = Number(loan.original_principal);
                 const paid = Math.max(0, original - outstanding);

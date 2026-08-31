@@ -55,6 +55,8 @@ export const CardDetailPage: React.FC = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editNickname, setEditNickname] = useState('');
+  const [editIssuer, setEditIssuer] = useState('');
+  const [editLastFour, setEditLastFour] = useState('');
   const [editLimit, setEditLimit] = useState(0);
   const [editStatementDay, setEditStatementDay] = useState<string | number>('');
   const [editPaymentDay, setEditPaymentDay] = useState<string | number>('');
@@ -88,6 +90,8 @@ export const CardDetailPage: React.FC = () => {
       const { data, error } = await (supabase.from('credit_cards') as any)
         .update({
           nickname: editNickname.trim(),
+          issuer: editIssuer.trim() || card.issuer,
+          last_four: editLastFour.trim() || null,
           credit_limit: (editLimit > 0 ? editLimit : Number(card.credit_limit)).toString(),
           statement_day: editStatementDay ? Number(editStatementDay) : null,
           payment_due_day: editPaymentDay ? Number(editPaymentDay) : null,
@@ -95,7 +99,7 @@ export const CardDetailPage: React.FC = () => {
         .eq('id', card.id)
         .eq('user_id', user!.id)
         .select()
-        .single();
+        .maybeSingle();
         
       if (error) throw error;
       setCard(prev => prev ? { ...prev, ...data } : null);
@@ -118,9 +122,13 @@ export const CardDetailPage: React.FC = () => {
         .select('id, account_id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status')
         .eq('id', id)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (fetchErr) throw fetchErr;
+      if (!data) {
+        setError('Credit card not found');
+        return;
+      }
       const cardData = (data as unknown as FullCard) ?? null;
 
       if (cardData?.account_id) {
@@ -128,7 +136,7 @@ export const CardDetailPage: React.FC = () => {
           (supabase.from('v_account_balances') as any)
             .select('balance')
             .eq('account_id', cardData.account_id)
-            .single(),
+            .maybeSingle(),
           (supabase.from('ledger_entries') as any)
             .select(`
               id, amount, entry_role, created_at,
@@ -141,11 +149,11 @@ export const CardDetailPage: React.FC = () => {
             .order('created_at', { ascending: false }),
         ]);
 
-        if (balRes.data) {
+        if (balRes?.data) {
           cardData.account = { balance: balRes.data.balance };
         }
 
-        if (payRes.data) {
+        if (payRes?.data) {
           const list = (payRes.data as any[])
             .filter((p) => p.ledger_transaction?.status === 'posted')
             .map((p) => ({
@@ -210,6 +218,8 @@ export const CardDetailPage: React.FC = () => {
           <button
             onClick={() => {
               setEditNickname(card?.nickname || '');
+              setEditIssuer(card?.issuer || '');
+              setEditLastFour(card?.last_four || '');
               setEditLimit(card?.credit_limit ? Number(card.credit_limit) : 0);
               setEditStatementDay(card?.statement_day || '');
               setEditPaymentDay(card?.payment_due_day || '');
@@ -250,48 +260,66 @@ export const CardDetailPage: React.FC = () => {
           </Badge>
         </div>
 
-        <div>
-          <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">Current Statement Balance Owed</p>
-          <p className="text-3xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
-            {formatCurrency(outstanding)}
-          </p>
-          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] mt-1">
-            Available Credit: {formatCurrency(available)} of {formatCurrency(limit)}
-          </p>
-        </div>
-
-        <ProgressBar value={pct} showValue label="Credit Limit Utilization" />
-
-        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border)]">
+        {/* Balance & Limit */}
+        <div className="grid grid-cols-2 gap-4 pt-2">
           <div>
-            <span className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">Statement Date</span>
-            <p className="text-[var(--text-body)] font-semibold text-[var(--color-text-primary)]">
-              {card.statement_day ? `Every ${card.statement_day}th of month` : 'Not set'}
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">Outstanding Balance</p>
+            <p className="text-2xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
+              {formatCurrency(outstanding)}
             </p>
           </div>
           <div>
-            <span className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">Payment Due Date</span>
-            <p className="text-[var(--text-body)] font-semibold text-[var(--color-text-primary)]">
-              {card.payment_due_day ? `Every ${card.payment_due_day}th of month` : 'Not set'}
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">Available Credit</p>
+            <p className="text-2xl font-semibold tabular-nums text-[var(--color-positive)]" data-financial>
+              {formatCurrency(available)}
             </p>
+          </div>
+        </div>
+
+        {/* Utilization Bar */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex justify-between text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+            <span>Credit Utilization ({pct}%)</span>
+            <span>Limit: {formatCurrency(limit)}</span>
+          </div>
+          <ProgressBar
+            value={pct}
+            max={100}
+            variant={pct > 80 ? 'danger' : pct > 50 ? 'warning' : 'default'}
+          />
+        </div>
+
+        {/* Dates */}
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[var(--color-border)] text-[var(--text-secondary)]">
+          <div>
+            <span className="text-[var(--color-text-muted)]">Statement Day: </span>
+            <span className="font-medium text-[var(--color-text-primary)]">
+              {card.statement_day ? `Day ${card.statement_day} of month` : 'Not set'}
+            </span>
+          </div>
+          <div>
+            <span className="text-[var(--color-text-muted)]">Payment Due: </span>
+            <span className="font-medium text-[var(--color-text-primary)]">
+              {card.payment_due_day ? `Day ${card.payment_due_day} of month` : 'Not set'}
+            </span>
           </div>
         </div>
       </Card>
 
-      {/* Payments History */}
+      {/* Payment History */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          Card Activity & Payment History ({payments.length})
+          Card Transactions & Payments ({payments.length})
         </h2>
 
         {payments.length === 0 ? (
           <EmptyState
             icon={<CreditCard size={22} />}
-            title="No card payments recorded"
-            description="Card repayments and charges will appear here."
+            title="No activity recorded"
+            description="Record payments or card purchases to track your card history."
             action={
-              <Link to="/dashboard/activity/add?type=credit_card_payment">
-                <Button size="sm">Pay Card Bill</Button>
+              <Link to={`/dashboard/activity/add?type=credit_card_payment`}>
+                <Button size="sm">Record Payment</Button>
               </Link>
             }
           />
@@ -376,6 +404,19 @@ export const CardDetailPage: React.FC = () => {
             required
             value={editNickname}
             onChange={(e) => setEditNickname(e.target.value)}
+          />
+          <Input
+            label="Bank / Issuer Name"
+            required
+            value={editIssuer}
+            onChange={(e) => setEditIssuer(e.target.value)}
+          />
+          <Input
+            label="Last 4 Digits (optional)"
+            maxLength={4}
+            optional
+            value={editLastFour}
+            onChange={(e) => setEditLastFour(e.target.value)}
           />
           <CurrencyInput
             label="Credit Limit"
