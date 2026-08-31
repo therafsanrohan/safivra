@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Landmark, Plus, Settings } from 'lucide-react';
+import { ArrowLeft, Landmark, Plus, Settings, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/Toast';
@@ -29,6 +29,15 @@ interface FullLoan {
   } | null;
 }
 
+interface LoanPaymentItem {
+  id: string;
+  txId?: string;
+  title: string;
+  amount: number;
+  payment_date: string;
+  isPayment: boolean;
+}
+
 export const LoanDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -36,6 +45,7 @@ export const LoanDetailPage: React.FC = () => {
   const { success, error: showError } = useToast();
 
   const [loan, setLoan] = useState<FullLoan | null>(null);
+  const [payments, setPayments] = useState<LoanPaymentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -112,12 +122,40 @@ export const LoanDetailPage: React.FC = () => {
       const loanData = (data as unknown as FullLoan) ?? null;
 
       if (loanData?.account_id) {
-        const { data: balData } = await (supabase.from('v_account_balances') as any)
-          .select('balance')
-          .eq('account_id', loanData.account_id)
-          .single();
-        
-        loanData.account = balData ? { balance: balData.balance } : null;
+        const [balRes, payRes] = await Promise.all([
+          (supabase.from('v_account_balances') as any)
+            .select('balance')
+            .eq('account_id', loanData.account_id)
+            .single(),
+          (supabase.from('ledger_entries') as any)
+            .select(`
+              id, amount, entry_role, created_at,
+              ledger_transaction:ledger_transactions!inner(
+                id, title, transaction_date, status, transaction_type
+              )
+            `)
+            .eq('financial_account_id', loanData.account_id)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false }),
+        ]);
+
+        if (balRes.data) {
+          loanData.account = { balance: balRes.data.balance };
+        }
+
+        if (payRes.data) {
+          const list = (payRes.data as any[])
+            .filter((p) => p.ledger_transaction?.status === 'posted')
+            .map((p) => ({
+              id: p.id,
+              txId: p.ledger_transaction?.id,
+              title: p.ledger_transaction?.title || 'Loan Transaction',
+              amount: Number(p.amount),
+              payment_date: p.ledger_transaction?.transaction_date || p.created_at,
+              isPayment: p.entry_role === 'liability_debit' || p.ledger_transaction?.transaction_type === 'loan_payment',
+            }));
+          setPayments(list);
+        }
       }
 
       setLoan(loanData);
@@ -153,8 +191,7 @@ export const LoanDetailPage: React.FC = () => {
   const original = Number(loan.original_principal);
   const outstanding = loan.account?.balance ? Math.abs(Number(loan.account.balance)) : original;
   const paidPrincipal = Math.max(0, original - outstanding);
-  const pct = Math.round((paidPrincipal / original) * 100);
-  const payments: any[] = [];
+  const pct = original > 0 ? Math.round((paidPrincipal / original) * 100) : 0;
 
   return (
     <div className="page-container pt-4 space-y-5 fade-in">
@@ -174,17 +211,17 @@ export const LoanDetailPage: React.FC = () => {
               setEditInstallment(loan?.monthly_installment ? Number(loan.monthly_installment) : 0);
               setIsEditModalOpen(true);
             }}
-            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
+            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] text-sm font-medium"
             aria-label="Edit Loan"
           >
-            <Settings size={18} /> Edit
+            <Settings size={16} /> Edit
           </button>
           <button
             onClick={() => setIsDeleteModalOpen(true)}
-            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-negative)]"
+            className="flex items-center gap-1.5 text-[var(--color-negative)] hover:text-red-700 text-sm font-medium"
             aria-label="Delete Loan"
           >
-            <Settings size={18} /> Delete
+            <Trash2 size={16} /> Delete
           </button>
           <Link to={`/dashboard/activity/add?type=loan_payment`}>
             <Button size="sm" className="gap-1">
@@ -241,7 +278,7 @@ export const LoanDetailPage: React.FC = () => {
       {/* Payment History */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          Payment History ({payments.length})
+          Loan Activity & Payment History ({payments.length})
         </h2>
 
         {payments.length === 0 ? (
@@ -259,19 +296,24 @@ export const LoanDetailPage: React.FC = () => {
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
               {payments.map((pmt) => (
-                <div key={pmt.id} className="flex items-center justify-between px-5 py-3.5" role="listitem">
+                <Link
+                  key={pmt.id}
+                  to={pmt.txId ? `/dashboard/activity/${pmt.txId}` : '#'}
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
+                  role="listitem"
+                >
                   <div>
                     <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                      {pmt.title}
+                    </p>
+                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] text-xs">
                       {formatDate(pmt.payment_date)}
                     </p>
-                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                      Principal: {formatCurrency(Number(pmt.principal_amount))} · Interest: {formatCurrency(Number(pmt.interest_amount))}
-                    </p>
                   </div>
-                  <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-positive)]" data-financial>
-                    {formatCurrency(Number(pmt.total_amount))}
+                  <span className={['font-semibold tabular-nums text-[var(--text-body)]', pmt.isPayment ? 'text-[var(--color-positive)]' : 'text-[var(--color-negative)]'].join(' ')} data-financial>
+                    {pmt.isPayment ? '+' : '-'}{formatCurrency(Number(pmt.amount))}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           </Card>
