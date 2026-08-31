@@ -1,17 +1,26 @@
 import React, { useEffect } from 'react';
-   import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-   import { BottomNav, Sidebar } from '@/components/navigation/Navigation';
-   import { usePlatform } from '@/context/PlatformContext';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { BottomNav, Sidebar } from '@/components/navigation/Navigation';
+import { usePlatform } from '@/context/PlatformContext';
+import { useAuthContext } from '@/context/AuthContext';
+import { syncNotifications } from '@/lib/notifications/sync';
 
-   /**
-    * Main application layout shell.
-    * - Mobile: content + fixed bottom nav
-    * - Desktop: fixed sidebar + scrollable content area
-    */
-   export const AppLayout: React.FC = () => {
-     const platform = usePlatform();
-     const navigate = useNavigate();
-     const location = useLocation();
+/**
+ * Main application layout shell.
+ * - Mobile: content + fixed bottom nav
+ * - Desktop: fixed sidebar + scrollable content area
+ */
+export const AppLayout: React.FC = () => {
+  const platform = usePlatform();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuthContext();
+
+  useEffect(() => {
+    if (user) {
+      syncNotifications(user.id);
+    }
+  }, [user]);
 
      useEffect(() => {
        if (!platform.lifecycle.onBackButton) return;

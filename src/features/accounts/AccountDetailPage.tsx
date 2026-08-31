@@ -191,7 +191,7 @@ export const AccountDetailPage: React.FC = () => {
                 return (
                   <Link
                     key={entry.id}
-                    to={`/activity/${tx.id}`}
+                    to={`/dashboard/activity/${tx.id}`}
                     className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                     role="listitem"
                   >

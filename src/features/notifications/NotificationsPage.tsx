@@ -62,7 +62,13 @@ export const NotificationsPage: React.FC = () => {
 
   const markAllRead = async () => {
     if (!user) return;
-    await supabase.from('notifications').update({ is_read: true } as unknown as never).eq('user_id', user.id);
+    await (supabase.from('notifications') as any).update({ is_read: true }).eq('user_id', user.id);
+    fetchNotifications();
+  };
+
+  const markAsRead = async (id: string) => {
+    if (!user) return;
+    await (supabase.from('notifications') as any).update({ is_read: true }).eq('id', id).eq('user_id', user.id);
     fetchNotifications();
   };
 
@@ -111,8 +117,23 @@ export const NotificationsPage: React.FC = () => {
         <Card padding="none">
           <div className="divide-y divide-[var(--color-border)]" role="list">
             {notifications.map((n) => (
-              <div key={n.id} className={['flex items-start gap-3 p-4', !n.is_read ? 'bg-[var(--color-bg-subtle)]/50' : ''].join(' ')} role="listitem">
-                <div className="w-2 h-2 rounded-full bg-[var(--color-accent)] mt-2 shrink-0" aria-hidden={n.is_read} />
+              <div 
+                key={n.id} 
+                className={[
+                  'flex items-start gap-3 p-4 transition-colors',
+                  !n.is_read ? 'bg-[var(--color-bg-subtle)]/50 hover:bg-[var(--color-bg-subtle)] cursor-pointer' : 'opacity-80'
+                ].join(' ')} 
+                role="button"
+                tabIndex={0}
+                onClick={() => !n.is_read && markAsRead(n.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (!n.is_read) markAsRead(n.id);
+                  }
+                }}
+              >
+                <div className="w-2 h-2 rounded-full bg-[var(--color-accent)] mt-2 shrink-0" aria-hidden={n.is_read} style={{ visibility: n.is_read ? 'hidden' : 'visible' }} />
                 <div className="flex-1">
                   <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">{n.title}</p>
                   <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-0.5">{n.body}</p>

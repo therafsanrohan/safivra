@@ -149,7 +149,7 @@ export const LoansPage: React.FC = () => {
                 return (
                   <Link
                     key={loan.id}
-                    to={`/loans/${loan.id}`}
+                    to={`/dashboard/loans/${loan.id}`}
                     className="flex flex-col gap-2 p-5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                     role="listitem"
                   >

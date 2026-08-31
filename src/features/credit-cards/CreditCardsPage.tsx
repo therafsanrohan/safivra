@@ -141,7 +141,7 @@ export const CreditCardsPage: React.FC = () => {
                 return (
                   <Link
                     key={card.id}
-                    to={`/credit-cards/${card.id}`}
+                    to={`/dashboard/credit-cards/${card.id}`}
                     className="flex flex-col gap-2.5 p-5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                     role="listitem"
                   >

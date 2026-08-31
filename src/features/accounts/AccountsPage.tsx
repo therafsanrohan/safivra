@@ -149,7 +149,7 @@ export const AccountsPage: React.FC = () => {
               {displayAssetAccounts.map((acc) => (
                 <Link
                   key={acc.account_id}
-                  to={`/accounts/${acc.account_id}`}
+                  to={`/dashboard/accounts/${acc.account_id}`}
                   className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                   role="listitem"
                 >
@@ -189,7 +189,7 @@ export const AccountsPage: React.FC = () => {
               {displayLiabilityAccounts.map((acc) => (
                 <Link
                   key={acc.account_id}
-                  to={`/accounts/${acc.account_id}`}
+                  to={`/dashboard/accounts/${acc.account_id}`}
                   className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                   role="listitem"
                 >
