@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Plus, Settings } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus, Settings, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/Toast';
@@ -15,6 +15,7 @@ import { CurrencyInput } from '@/components/ui/CurrencyInput';
 
 interface FullCard {
   id: string;
+  account_id?: string;
   nickname: string;
   issuer: string;
   last_four: string | null;
@@ -27,6 +28,16 @@ interface FullCard {
   } | null;
 }
 
+interface CardPaymentItem {
+  id: string;
+  txId?: string;
+  title: string;
+  type?: string;
+  amount: number;
+  payment_date: string;
+  isPayment: boolean;
+}
+
 export const CardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -34,6 +45,7 @@ export const CardDetailPage: React.FC = () => {
   const { success, error: showError } = useToast();
 
   const [card, setCard] = useState<FullCard | null>(null);
+  const [payments, setPayments] = useState<CardPaymentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -102,10 +114,9 @@ export const CardDetailPage: React.FC = () => {
     setError('');
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('credit_cards')
+      const { data, error: fetchErr } = await (supabase.from('credit_cards') as any)
         .select(`
-          id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status,
+          id, account_id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status,
           account:financial_accounts!credit_cards_account_id_fkey(balance)
         `)
         .eq('id', id)
@@ -113,7 +124,36 @@ export const CardDetailPage: React.FC = () => {
         .single();
 
       if (fetchErr) throw fetchErr;
-      setCard((data as unknown as FullCard) ?? null);
+      const cardData = (data as unknown as FullCard) ?? null;
+      setCard(cardData);
+
+      if (cardData?.account_id) {
+        const { data: payData } = await (supabase.from('ledger_entries') as any)
+          .select(`
+            id, amount, entry_role, created_at,
+            ledger_transaction:ledger_transactions!inner(
+              id, title, transaction_date, status, transaction_type
+            )
+          `)
+          .eq('financial_account_id', cardData.account_id)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (payData) {
+          const list = (payData as any[])
+            .filter((p) => p.ledger_transaction?.status === 'posted')
+            .map((p) => ({
+              id: p.id,
+              txId: p.ledger_transaction?.id,
+              title: p.ledger_transaction?.title || 'Card Transaction',
+              type: p.ledger_transaction?.transaction_type,
+              amount: Number(p.amount),
+              payment_date: p.ledger_transaction?.transaction_date || p.created_at,
+              isPayment: p.entry_role === 'liability_debit' || p.ledger_transaction?.transaction_type === 'credit_card_payment',
+            }));
+          setPayments(list);
+        }
+      }
     } catch (err) {
       setError(parseError(err).message);
     } finally {
@@ -147,7 +187,6 @@ export const CardDetailPage: React.FC = () => {
   const limit = Number(card.credit_limit);
   const available = Math.max(0, limit - outstanding);
   const pct = limit > 0 ? Math.round((outstanding / limit) * 100) : 0;
-  const payments: any[] = [];
 
   return (
     <div className="page-container pt-4 space-y-5 fade-in">
@@ -168,17 +207,17 @@ export const CardDetailPage: React.FC = () => {
               setEditPaymentDay(card?.payment_due_day || '');
               setIsEditModalOpen(true);
             }}
-            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
+            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] text-sm font-medium"
             aria-label="Edit Card"
           >
-            <Settings size={18} /> Edit
+            <Settings size={16} /> Edit
           </button>
           <button
             onClick={() => setIsDeleteModalOpen(true)}
-            className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-negative)]"
+            className="flex items-center gap-1.5 text-[var(--color-negative)] hover:text-red-700 text-sm font-medium"
             aria-label="Delete Card"
           >
-            <Settings size={18} /> Delete
+            <Trash2 size={16} /> Delete
           </button>
           <Link to={`/dashboard/activity/add?type=credit_card_payment`}>
             <Button size="sm" className="gap-1">
@@ -234,14 +273,14 @@ export const CardDetailPage: React.FC = () => {
       {/* Payments History */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          Card Payment History ({payments.length})
+          Card Activity & Payment History ({payments.length})
         </h2>
 
         {payments.length === 0 ? (
           <EmptyState
             icon={<CreditCard size={22} />}
             title="No card payments recorded"
-            description="Card repayments will appear here."
+            description="Card repayments and charges will appear here."
             action={
               <Link to="/dashboard/activity/add?type=credit_card_payment">
                 <Button size="sm">Pay Card Bill</Button>
@@ -252,19 +291,24 @@ export const CardDetailPage: React.FC = () => {
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
               {payments.map((pmt) => (
-                <div key={pmt.id} className="flex items-center justify-between px-5 py-3.5" role="listitem">
+                <Link 
+                  key={pmt.id} 
+                  to={pmt.txId ? `/dashboard/activity/${pmt.txId}` : '#'}
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors" 
+                  role="listitem"
+                >
                   <div>
                     <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                      {pmt.title}
+                    </p>
+                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] text-xs">
                       {formatDate(pmt.payment_date)}
                     </p>
-                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                      Bill Payment
-                    </p>
                   </div>
-                  <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-positive)]" data-financial>
-                    {formatCurrency(Number(pmt.amount))}
+                  <span className={['font-semibold tabular-nums text-[var(--text-body)]', pmt.isPayment ? 'text-[var(--color-positive)]' : 'text-[var(--color-negative)]'].join(' ')} data-financial>
+                    {pmt.isPayment ? '+' : '-'}{formatCurrency(Number(pmt.amount))}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           </Card>
