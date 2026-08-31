@@ -33,24 +33,24 @@ export const MorePage: React.FC = () => {
     {
       title: t.more.financialAccounts,
       items: [
-        { to: '/accounts', label: t.more.accountsWallets, icon: Wallet },
-        { to: '/loans', label: t.more.loansDebts, icon: Landmark },
-        { to: '/credit-cards', label: t.creditCards.title, icon: CreditCard },
+        { to: '/dashboard/accounts', label: t.more.accountsWallets, icon: Wallet },
+        { to: '/dashboard/loans', label: t.more.loansDebts, icon: Landmark },
+        { to: '/dashboard/credit-cards', label: t.creditCards.title, icon: CreditCard },
       ],
     },
     {
       title: t.more.planningAnalytics,
       items: [
-        { to: '/plans/savings', label: t.more.savingsDps, icon: Coins },
-        { to: '/plans/recurring', label: t.more.recurringCommitments, icon: RefreshCw },
-        { to: '/reports', label: t.more.reportsExports, icon: BookOpen },
-        { to: '/notifications', label: t.nav.notifications, icon: Bell },
+        { to: '/dashboard/plans/savings', label: t.more.savingsDps, icon: Coins },
+        { to: '/dashboard/plans/recurring', label: t.more.recurringCommitments, icon: RefreshCw },
+        { to: '/dashboard/reports', label: t.more.reportsExports, icon: BookOpen },
+        { to: '/dashboard/notifications', label: t.nav.notifications, icon: Bell },
       ],
     },
     {
       title: t.more.appSection,
       items: [
-        { to: '/settings', label: t.nav.settings, icon: Settings },
+        { to: '/dashboard/settings', label: t.nav.settings, icon: Settings },
       ],
     },
   ];
