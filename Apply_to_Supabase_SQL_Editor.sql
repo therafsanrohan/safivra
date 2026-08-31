@@ -261,4 +261,105 @@ CREATE POLICY "savings_schemes_owner_policy" ON public.savings_schemes
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+
+-- ----------------------------------------------------------------
+-- 7. Ensure User Profiles & Preferences tables exist with RLS & Triggers
+-- ----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id                    UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name             TEXT NOT NULL DEFAULT '',
+  preferred_currency    TEXT NOT NULL DEFAULT 'BDT',
+  timezone              TEXT NOT NULL DEFAULT 'Asia/Dhaka',
+  onboarding_completed  BOOLEAN NOT NULL DEFAULT FALSE,
+  avatar_url            TEXT,
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "profiles_owner_policy" ON public.profiles;
+CREATE POLICY "profiles_owner_policy" ON public.profiles
+  FOR ALL TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+CREATE TABLE IF NOT EXISTS public.user_preferences (
+  id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                     UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  language                    TEXT NOT NULL DEFAULT 'en',
+  preferred_currency          TEXT NOT NULL DEFAULT 'BDT',
+  timezone                    TEXT NOT NULL DEFAULT 'Asia/Dhaka',
+  theme                       TEXT NOT NULL DEFAULT 'light',
+  balance_privacy             BOOLEAN NOT NULL DEFAULT FALSE,
+  start_of_week               SMALLINT NOT NULL DEFAULT 0,
+  default_account_id          UUID,
+  notification_upcoming_days  SMALLINT NOT NULL DEFAULT 3,
+  created_at                 TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at                 TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "user_preferences_owner_policy" ON public.user_preferences;
+CREATE POLICY "user_preferences_owner_policy" ON public.user_preferences
+  FOR ALL TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+GRANT ALL ON public.profiles TO postgres, authenticated, service_role;
+GRANT ALL ON public.user_preferences TO postgres, authenticated, service_role;
+
+-- Indestructible trigger for automatic user setup on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  BEGIN
+    INSERT INTO public.profiles (id, full_name, preferred_currency, timezone, onboarding_completed)
+    VALUES (
+      NEW.id,
+      COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+      COALESCE(NEW.raw_user_meta_data->>'preferred_currency', 'BDT'),
+      COALESCE(NEW.raw_user_meta_data->>'timezone', 'Asia/Dhaka'),
+      FALSE
+    )
+    ON CONFLICT (id) DO NOTHING;
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
+
+  BEGIN
+    INSERT INTO public.user_preferences (
+      user_id, language, preferred_currency, timezone, theme, balance_privacy, start_of_week, notification_upcoming_days
+    )
+    VALUES (
+      NEW.id,
+      'en',
+      COALESCE(NEW.raw_user_meta_data->>'preferred_currency', 'BDT'),
+      COALESCE(NEW.raw_user_meta_data->>'timezone', 'Asia/Dhaka'),
+      'light',
+      FALSE,
+      0,
+      3
+    )
+    ON CONFLICT (user_id) DO NOTHING;
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres, service_role;
+
 COMMIT;

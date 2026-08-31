@@ -40,47 +40,92 @@ export function useAuth(): UseAuthReturn {
     initialized: false,
   });
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string, userMeta?: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
 
+      if (error) {
+        console.warn('[Auth] Error fetching profile:', error.message);
+      }
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+      if (!data) {
+        // Fallback lazy profile creation if trigger missed
+        const fullName = userMeta?.full_name || '';
+        const { data: createdProf, error: insErr } = await (supabase.from('profiles') as any)
+          .upsert({
+            id: userId,
+            full_name: fullName,
+            preferred_currency: 'BDT',
+            timezone: 'Asia/Dhaka',
+            onboarding_completed: false,
+          })
+          .select('*')
+          .maybeSingle();
 
-    if (error) {
-      console.error('[Auth] Failed to fetch profile:', error.message);
+        if (insErr) {
+          console.warn('[Auth] Could not create fallback profile:', insErr.message);
+        }
+        return createdProf ?? null;
+      }
+
+      return data;
+    } catch (err: any) {
+      console.warn('[Auth] Unexpected error in fetchProfile:', err?.message);
       return null;
     }
-    return data;
   }, []);
 
   const fetchPreferences = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
+      if (error) {
+        console.warn('[Auth] Error fetching preferences:', error.message);
+      }
 
-    const { data, error } = await supabase
-      .from('user_preferences')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+      if (!data) {
+        // Fallback lazy preferences creation if trigger missed
+        const { data: createdPref, error: insErr } = await (supabase.from('user_preferences') as any)
+          .upsert({
+            user_id: userId,
+            language: 'en',
+            preferred_currency: 'BDT',
+            timezone: 'Asia/Dhaka',
+            theme: 'light',
+          })
+          .select('*')
+          .maybeSingle();
 
-    if (error) {
-      console.error('[Auth] Failed to fetch preferences:', error.message);
+        if (insErr) {
+          console.warn('[Auth] Could not create fallback preferences:', insErr.message);
+        }
+        return createdPref ?? null;
+      }
+
+      return data;
+    } catch (err: any) {
+      console.warn('[Auth] Unexpected error in fetchPreferences:', err?.message);
       return null;
     }
-    return data;
   }, []);
 
   const refreshProfile = useCallback(async () => {
     const userId = state.user?.id;
     if (!userId) return;
     const [profile, preferences] = await Promise.all([
-      fetchProfile(userId),
+      fetchProfile(userId, state.user?.user_metadata),
       fetchPreferences(userId)
     ]);
     setState((prev) => ({ ...prev, profile, preferences }));
-  }, [state.user?.id, fetchProfile, fetchPreferences]);
+  }, [state.user?.id, state.user?.user_metadata, fetchProfile, fetchPreferences]);
 
   useEffect(() => {
     let mounted = true;
@@ -94,7 +139,7 @@ export function useAuth(): UseAuthReturn {
         
         if (session?.user) {
           const [profile, preferences] = await Promise.all([
-            fetchProfile(session.user.id),
+            fetchProfile(session.user.id, session.user.user_metadata),
             fetchPreferences(session.user.id)
           ]);
           if (mounted) {
@@ -128,7 +173,7 @@ export function useAuth(): UseAuthReturn {
 
       if (session?.user) {
         const [profile, preferences] = await Promise.all([
-          fetchProfile(session.user.id),
+          fetchProfile(session.user.id, session.user.user_metadata),
           fetchPreferences(session.user.id)
         ]);
         if (mounted) {
