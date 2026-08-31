@@ -406,16 +406,26 @@ const LoanPaymentForm: React.FC<{
 
   const submit = handleSubmit(async (data) => {
     const selectedLoan = loans.find((l) => l.id === data.loan_id);
+    const total = Number(data.total_amount) || 0;
+    const interest = Number(data.interest_amount) || 0;
+    const fee = Number(data.fee_amount) || 0;
+    let principal = Number(data.principal_amount) || 0;
+
+    // If user didn't specify principal, auto-balance it
+    if (principal === 0 && (interest + fee < total)) {
+      principal = total - (interest + fee);
+    }
+
     await onSubmit('loan_payment', {
       p_transaction_date: data.transaction_date,
       p_title: `Loan Payment — ${selectedLoan?.name ?? 'Loan'}`,
-      p_amount: data.total_amount,
+      p_amount: total,
       p_account_id: data.payment_account_id,
-      p_destination_account_id: data.loan_id,
-      p_category_id: interestCategory?.id,
-      p_principal_amount: data.principal_amount ?? 0,
-      p_interest_amount: data.interest_amount ?? 0,
-      p_fee_amount: data.fee_amount ?? 0,
+      p_destination_account_id: selectedLoan?.account_id || null,
+      p_category_id: interestCategory?.id || null,
+      p_principal_amount: principal,
+      p_interest_amount: interest,
+      p_fee_amount: fee,
       p_loan_id: data.loan_id,
       p_description: data.description || null,
     });
@@ -469,8 +479,8 @@ const CardPaymentForm: React.FC<{
     if (!selectedCardId) return;
     const card = cards.find((c) => c.id === selectedCardId);
     if (card) {
-      if (card.linked_account_id) {
-        setValue('payment_account_id', card.linked_account_id);
+      if (card.linked_account_id || card.account_id) {
+        setValue('payment_account_id', card.linked_account_id || card.account_id);
       }
     }
   }, [selectedCardId, cards, setValue]);
@@ -480,9 +490,9 @@ const CardPaymentForm: React.FC<{
     await onSubmit('credit_card_payment', {
       p_transaction_date: data.transaction_date,
       p_title: `Card Payment — ${selectedCard?.nickname ?? 'Card'}`,
-      p_amount: data.amount,
+      p_amount: Number(data.amount),
       p_account_id: data.payment_account_id,
-      p_destination_account_id: data.credit_card_id,
+      p_destination_account_id: selectedCard?.account_id || null,
       p_credit_card_id: data.credit_card_id,
       p_description: data.description || null,
     });
