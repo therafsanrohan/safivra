@@ -51,8 +51,12 @@ $$;
 
 
 -- ----------------------------------------------------------------
--- 2. Update v_account_balances view
+-- 2. Update v_account_balances view and zero out legacy opening_balance
 -- ----------------------------------------------------------------
+UPDATE public.financial_accounts
+SET opening_balance = 0
+WHERE opening_balance <> 0;
+
 DROP VIEW IF EXISTS public.v_account_balances CASCADE;
 
 CREATE OR REPLACE VIEW public.v_account_balances
