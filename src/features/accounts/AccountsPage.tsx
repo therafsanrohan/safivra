@@ -13,8 +13,12 @@ type AccountBalance = Database['public']['Views']['v_account_balances']['Row'];
 
 export const AccountsPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const isBn = locale === 'bn';
+
   const [accounts, setAccounts] = useState<AccountBalance[]>([]);
+  const [loans, setLoans] = useState<any[]>([]);
+  const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [balanceHidden, setBalanceHidden] = useState(false);
@@ -24,17 +28,47 @@ export const AccountsPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const { data, error } = await supabase
-        .from('v_account_balances')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_archived', false)
-        .order('name');
-      if (error) throw error;
-      setAccounts((data as AccountBalance[]) ?? []);
+      const [accRes, loansRes, cardsRes] = await Promise.all([
+        supabase
+          .from('v_account_balances')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_archived', false)
+          .order('name'),
+        (supabase.from('loans') as any)
+          .select('id, name, lender_name, loan_type, original_principal, monthly_installment, account_id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false }),
+        (supabase.from('credit_cards') as any)
+          .select('id, nickname, issuer, credit_limit, account_id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false }),
+      ]);
+
+      if (accRes.error) throw accRes.error;
+      const accData = (accRes.data as AccountBalance[]) ?? [];
+      setAccounts(accData);
+
+      const balMap = new Map(accData.map((a) => [a.account_id, a.balance]));
+
+      const mappedLoans = ((loansRes.data as any[]) ?? []).map((l) => ({
+        ...l,
+        balance: balMap.get(l.account_id) ?? l.original_principal,
+      }));
+      setLoans(mappedLoans);
+
+      const mappedCards = ((cardsRes.data as any[]) ?? []).map((c) => ({
+        ...c,
+        balance: balMap.get(c.account_id) ?? '0',
+      }));
+      setCards(mappedCards);
     } catch (err: any) {
       setError(err.message || 'Could not fetch accounts');
       setAccounts([]);
+      setLoans([]);
+      setCards([]);
     } finally {
       setLoading(false);
     }
@@ -54,6 +88,8 @@ export const AccountsPage: React.FC = () => {
 
   const totalAssetBalance = assetAccounts.reduce((sum, a) => sum + Number(a.balance), 0);
   const totalLiabilityBalance = liabilityAccounts.reduce((sum, a) => sum + Math.abs(Number(a.balance)), 0);
+
+  const hasAnyItems = displayAssetAccounts.length > 0 || loans.length > 0 || cards.length > 0 || displayLiabilityAccounts.length > 0;
 
   if (loading) {
     return (
@@ -125,7 +161,7 @@ export const AccountsPage: React.FC = () => {
         </div>
       </Card>
 
-      {displayAssetAccounts.length === 0 && displayLiabilityAccounts.length === 0 && (
+      {!hasAnyItems && (
         <EmptyState
           icon={<CreditCard size={24} />}
           title={t.accounts.noAccounts}
@@ -166,7 +202,7 @@ export const AccountsPage: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-semibold tabular-nums text-[var(--text-body)]" data-financial>
+                    <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-positive)]" data-financial>
                       {balanceHidden ? '••••' : formatCurrency(Number(acc.balance))}
                     </span>
                     <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
@@ -178,7 +214,101 @@ export const AccountsPage: React.FC = () => {
         </section>
       )}
 
-      {/* Liabilities Section */}
+      {/* Active Loans Section */}
+      {loans.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+              {isBn ? 'চলমান ঋণ ও লোন' : 'Active Loans'} ({loans.length})
+            </h2>
+            <Link to="/dashboard/loans" className="text-xs font-semibold text-[var(--color-accent)]">
+              {isBn ? 'সব দেখুন' : 'View all'} →
+            </Link>
+          </div>
+          <Card padding="none">
+            <div className="divide-y divide-[var(--color-border)]" role="list">
+              {loans.map((loan) => {
+                const outstanding = Math.abs(Number(loan.balance || loan.original_principal));
+                return (
+                  <Link
+                    key={loan.id}
+                    to={`/dashboard/loans/${loan.id}`}
+                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
+                    role="listitem"
+                  >
+                    <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
+                      <Landmark size={18} className="text-[var(--color-negative)]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                        {loan.name}
+                      </p>
+                      <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+                        {loan.lender_name} · {loan.loan_type?.replace(/_/g, ' ')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
+                        {balanceHidden ? '••••' : formatCurrency(outstanding)}
+                      </span>
+                      <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </Card>
+        </section>
+      )}
+
+      {/* Credit Cards Section */}
+      {cards.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+              {isBn ? 'ক্রেডিট কার্ডসমূহ' : 'Credit Cards'} ({cards.length})
+            </h2>
+            <Link to="/dashboard/credit-cards" className="text-xs font-semibold text-[var(--color-accent)]">
+              {isBn ? 'সব দেখুন' : 'View all'} →
+            </Link>
+          </div>
+          <Card padding="none">
+            <div className="divide-y divide-[var(--color-border)]" role="list">
+              {cards.map((card) => {
+                const outstanding = Math.abs(Number(card.balance));
+                return (
+                  <Link
+                    key={card.id}
+                    to={`/dashboard/credit-cards/${card.id}`}
+                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
+                    role="listitem"
+                  >
+                    <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
+                      <CreditCard size={18} className="text-[var(--color-negative)]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                        {card.nickname}
+                      </p>
+                      <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+                        {card.issuer} · {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(Number(card.credit_limit))}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
+                        {balanceHidden ? '••••' : formatCurrency(outstanding)}
+                      </span>
+                      <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </Card>
+        </section>
+      )}
+
+      {/* Other Liabilities Section */}
       {displayLiabilityAccounts.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
