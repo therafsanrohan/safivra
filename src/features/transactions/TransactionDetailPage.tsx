@@ -164,7 +164,10 @@ export const TransactionDetailPage: React.FC = () => {
             <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)] mt-1">
               {tx.title}
             </h1>
-            <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
+            <p className="text-3xl font-bold text-[var(--color-text-primary)] mt-2" data-financial>
+              {formatCurrency(entries[0] ? Number(entries[0].amount) : 0)}
+            </p>
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
               {formatDate(tx.transaction_date)} {tx.transaction_time ? `· ${tx.transaction_time}` : ''}
             </p>
           </div>
@@ -190,72 +193,29 @@ export const TransactionDetailPage: React.FC = () => {
           </div>
         </div>
 
+        {entries.find((e) => e.financial_account?.name) && (
+          <div className="pt-2 border-t border-[var(--color-border)]">
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] text-xs">Account</p>
+            <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+              {entries.find((e) => e.financial_account?.name)?.financial_account?.name}
+            </p>
+          </div>
+        )}
+
         {tx.merchant && (
           <div>
-            <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">Merchant / Source</p>
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] text-xs">Merchant / Source</p>
             <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">{tx.merchant}</p>
           </div>
         )}
 
         {tx.description && (
           <div>
-            <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">Notes</p>
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] text-xs">Notes</p>
             <p className="text-[var(--text-body)] text-[var(--color-text-primary)]">{tx.description}</p>
           </div>
         )}
       </Card>
-
-      {/* Double-Entry Ledger Breakdown */}
-      <section className="space-y-3">
-        <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          Double-Entry Ledger Lines
-        </h2>
-
-        <Card padding="none">
-          <div className="divide-y divide-[var(--color-border)]" role="list">
-            {entries.map((entry) => {
-              const amount = Number(entry.amount);
-              
-              let targetName = entry.financial_account?.name || entry.category?.name;
-              if (!targetName) {
-                if (entry.entry_role.includes('equity')) {
-                  targetName = 'Opening Equity / Capital';
-                } else if (entry.entry_role.includes('fee')) {
-                  targetName = 'Bank Fees & Charges';
-                } else if (entry.entry_role.includes('transfer')) {
-                  targetName = 'Linked Transfer Account';
-                } else {
-                  targetName = 'General Ledger';
-                }
-              }
-
-              const isDebit = entry.entry_role.includes('debit') || entry.entry_role === 'transfer_in';
-              const roleLabel = entry.entry_role.replace(/_/g, ' ');
-
-              return (
-                <div key={entry.id} className="flex items-center justify-between px-5 py-3.5" role="listitem">
-                  <div className="flex items-center gap-3">
-                    <span className={['px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide', isDebit ? 'bg-[var(--color-info-soft)] text-[var(--color-info)]' : 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'].join(' ')}>
-                      {isDebit ? 'Debit' : 'Credit'}
-                    </span>
-                    <div>
-                      <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
-                        {targetName}
-                      </p>
-                      <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] capitalize text-xs">
-                        {roleLabel}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
-                    {formatCurrency(amount)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      </section>
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
