@@ -3,5 +3,12 @@
   "addCard": "Add Card",
   "totalLimit": "Total Limit",
   "totalUsed": "Total Used",
-  "noCards": "No credit cards found"
+  "noCards": "No credit cards added",
+  "subtitle": "Track card statements, utilization, and due dates",
+  "totalOutstanding": "Total Credit Card Outstanding",
+  "totalLimitLabel": "Total Credit Limit",
+  "myCards": "My Cards",
+  "noCardsDesc": "Add your Visa, Mastercard, or AMEX credit cards to monitor utilization.",
+  "limitLabel": "Limit",
+  "utilizationLabel": "Limit Utilization"
 }

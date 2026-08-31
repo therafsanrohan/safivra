@@ -7,6 +7,7 @@ import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDueLabel, isOverdue } from '@/lib/dates/formatter';
 import { Card, Skeleton, EmptyState, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface LoanRow {
   id: string;
@@ -24,6 +25,7 @@ interface LoanRow {
 
 export const LoansPage: React.FC = () => {
   const { user } = useAuthContext();
+  const { t, locale } = useLanguage();
   const [loans, setLoans] = useState<LoanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -89,44 +91,47 @@ export const LoansPage: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            Loans & Debts
+            {t.loans.title}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            Track principal, interest, and payment schedules
+            {t.loans.subtitle}
           </p>
         </div>
         <Link to="/dashboard/loans/add">
           <Button size="sm" className="gap-1">
-            <Plus size={16} /> Add Loan
+            <Plus size={16} /> {t.loans.addLoan}
           </Button>
         </Link>
       </header>
 
       {/* Summary */}
       <Card>
-        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">Total Loan Outstanding</p>
+        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">{t.loans.totalOutstanding}</p>
         <p className="text-2xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
           {formatCurrency(totalOutstanding)}
         </p>
         <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] mt-2">
-          Across {activeLoans.length} active loan{activeLoans.length === 1 ? '' : 's'}
+          {locale === 'bn' 
+            ? `${activeLoans.length}${t.loans.activeCountText}`
+            : `Across ${activeLoans.length} active loan${activeLoans.length === 1 ? '' : 's'}`
+          }
         </p>
       </Card>
 
       {/* Active Loans */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          Active Loans ({activeLoans.length})
+          {t.loans.activeLoans} ({activeLoans.length})
         </h2>
 
         {activeLoans.length === 0 ? (
           <EmptyState
             icon={<Landmark size={22} />}
-            title="No active loans"
-            description="Add personal, bank, or education loans to track repayment schedules."
+            title={t.loans.noLoans}
+            description={t.loans.noLoansDesc}
             action={
               <Link to="/dashboard/loans/add">
-                <Button size="sm">Add Loan</Button>
+                <Button size="sm">{t.loans.addLoan}</Button>
               </Link>
             }
           />
@@ -162,7 +167,7 @@ export const LoansPage: React.FC = () => {
                           {formatCurrency(outstanding)}
                         </span>
                         <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                          of {formatCurrency(original)}
+                          {t.loans.ofLabel} {formatCurrency(original)}
                         </p>
                       </div>
                     </div>
@@ -176,7 +181,7 @@ export const LoansPage: React.FC = () => {
                         </Badge>
                         {loan.monthly_installment && (
                           <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-                            Installment: {formatCurrency(Number(loan.monthly_installment))}
+                            {t.loans.installmentLabel}: {formatCurrency(Number(loan.monthly_installment))}
                           </span>
                         )}
                       </div>

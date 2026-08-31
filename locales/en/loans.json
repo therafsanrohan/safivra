@@ -3,6 +3,13 @@
   "addLoan": "Add Loan",
   "outstanding": "Outstanding",
   "paid": "Paid",
-  "noLoans": "No loans found",
-  "totalOwed": "Total Owed"
+  "noLoans": "No active loans",
+  "totalOwed": "Total Owed",
+  "subtitle": "Track principal, interest, and payment schedules",
+  "totalOutstanding": "Total Loan Outstanding",
+  "activeCountText": "active loan",
+  "activeLoans": "Active Loans",
+  "noLoansDesc": "Add personal, bank, or education loans to track repayment schedules.",
+  "ofLabel": "of",
+  "installmentLabel": "Installment"
 }

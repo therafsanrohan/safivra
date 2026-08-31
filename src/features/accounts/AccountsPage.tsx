@@ -6,12 +6,14 @@ import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/context/LanguageContext';
 import type { Database } from '@/types/database';
 
 type AccountBalance = Database['public']['Views']['v_account_balances']['Row'];
 
 export const AccountsPage: React.FC = () => {
   const { user } = useAuthContext();
+  const { t } = useLanguage();
   const [accounts, setAccounts] = useState<AccountBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -79,15 +81,15 @@ export const AccountsPage: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            Accounts
+            {t.accounts.title}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            Manage your liquid assets and liabilities
+            {t.accounts.subtitle}
           </p>
         </div>
         <Link to="/dashboard/accounts/add">
           <Button size="sm" className="gap-1">
-            <Plus size={16} /> Add Account
+            <Plus size={16} /> {t.accounts.addAccount}
           </Button>
         </Link>
       </header>
@@ -95,7 +97,7 @@ export const AccountsPage: React.FC = () => {
       {/* Summary */}
       <Card>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">Total Net Assets</span>
+          <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">{t.accounts.totalNetAssets}</span>
           <button
             onClick={() => setBalanceHidden((v) => !v)}
             className="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
@@ -109,13 +111,13 @@ export const AccountsPage: React.FC = () => {
         </p>
         <div className="flex justify-between text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-3 pt-3 border-t border-[var(--color-border)]">
           <div>
-            <span className="text-[var(--color-text-muted)]">Assets: </span>
+            <span className="text-[var(--color-text-muted)]">{t.dashboard.assets}: </span>
             <span className="font-medium text-[var(--color-positive)]" data-financial>
               {balanceHidden ? '••••' : formatCurrency(totalAssetBalance)}
             </span>
           </div>
           <div>
-            <span className="text-[var(--color-text-muted)]">Liabilities: </span>
+            <span className="text-[var(--color-text-muted)]">{t.dashboard.liabilities}: </span>
             <span className="font-medium text-[var(--color-negative)]" data-financial>
               {balanceHidden ? '••••' : formatCurrency(totalLiabilityBalance)}
             </span>
@@ -126,11 +128,11 @@ export const AccountsPage: React.FC = () => {
       {displayAssetAccounts.length === 0 && displayLiabilityAccounts.length === 0 && (
         <EmptyState
           icon={<CreditCard size={24} />}
-          title="No accounts found"
-          description="You haven't added any financial accounts yet."
+          title={t.accounts.noAccounts}
+          description={t.accounts.noAccountsDesc}
           action={
             <Link to="/dashboard/accounts/add">
-              <Button size="sm" className="mt-2">Add your first account</Button>
+              <Button size="sm" className="mt-2">{t.accounts.addFirstBtn}</Button>
             </Link>
           }
         />
@@ -140,7 +142,7 @@ export const AccountsPage: React.FC = () => {
       {displayAssetAccounts.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-            Asset Accounts ({displayAssetAccounts.length})
+            {t.accounts.assetAccounts} ({displayAssetAccounts.length})
           </h2>
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">
@@ -180,7 +182,7 @@ export const AccountsPage: React.FC = () => {
       {displayLiabilityAccounts.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-            Liability Accounts ({displayLiabilityAccounts.length})
+            {t.accounts.liabilityAccounts} ({displayLiabilityAccounts.length})
           </h2>
           <Card padding="none">
             <div className="divide-y divide-[var(--color-border)]" role="list">

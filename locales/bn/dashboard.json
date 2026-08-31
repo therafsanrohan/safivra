@@ -7,5 +7,17 @@
   "seeAll": "সব দেখুন",
   "noTransactions": "এখনো কোন লেনদেন নেই",
   "addFirst": "প্রথম লেনদেন যোগ করুন",
-  "thisMonth": "এই মাসে"
+  "thisMonth": "এই মাসে",
+  "netWorth": "বর্তমান নিট সম্পদ",
+  "assets": "মোট সম্পদ",
+  "liabilities": "মোট দেনা",
+  "monthlyCashFlow": "মাসিক আয়-ব্যয়",
+  "last6Months": "গত ৬ মাস",
+  "accounts": "হিসাবসমূহ",
+  "upcomingPayments": "আসন্ন পেমেন্ট",
+  "recentActivity": "সাম্প্রতিক লেনদেন",
+  "noAccountsTitle": "কোন হিসাব নেই",
+  "noAccountsDesc": "ব্যালেন্স ট্র্যাক করতে আপনার প্রথম হিসাবটি যোগ করুন।",
+  "addAccountBtn": "হিসাব যোগ করুন",
+  "noTransactionsDesc": "ট্র্যাকিং শুরু করতে প্রথম আয় বা খরচ যোগ করুন।"
 }

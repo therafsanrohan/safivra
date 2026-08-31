@@ -1,8 +1,15 @@
 {
   "title": "ঋণ ও দেনা",
   "addLoan": "ঋণ যোগ করুন",
-  "outstanding": "বকেয়া",
+  "outstanding": "বকেয়া",
   "paid": "পরিশোধিত",
-  "noLoans": "কোন ঋণ পাওয়া যায়নি",
-  "totalOwed": "মোট বকেয়া"
+  "noLoans": "কোন সক্রিয় ঋণ নেই",
+  "totalOwed": "মোট দেনা",
+  "subtitle": "আসল, সুদ এবং কিস্তির সময়সূচী ট্র্যাক করুন",
+  "totalOutstanding": "মোট বকেয়া ঋণ",
+  "activeCountText": "টি সক্রিয় ঋণ",
+  "activeLoans": "সক্রিয় ঋণসমূহ",
+  "noLoansDesc": "পরিশোধের সময়সূচী ট্র্যাক করতে ব্যক্তিগত, ব্যাংক বা শিক্ষা ঋণ যোগ করুন।",
+  "ofLabel": "এর মধ্যে",
+  "installmentLabel": "কিস্তি"
 }

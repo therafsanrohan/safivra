@@ -7,5 +7,17 @@
   "seeAll": "See All",
   "noTransactions": "No transactions yet",
   "addFirst": "Add your first transaction",
-  "thisMonth": "This Month"
+  "thisMonth": "This Month",
+  "netWorth": "Current Net Worth",
+  "assets": "Assets",
+  "liabilities": "Liabilities",
+  "monthlyCashFlow": "Monthly Cash Flow",
+  "last6Months": "Last 6 months",
+  "accounts": "Accounts",
+  "upcomingPayments": "Upcoming Payments",
+  "recentActivity": "Recent Activity",
+  "noAccountsTitle": "No accounts yet",
+  "noAccountsDesc": "Add your first account to track balances.",
+  "addAccountBtn": "Add account",
+  "noTransactionsDesc": "Add your first income or expense to begin tracking."
 }

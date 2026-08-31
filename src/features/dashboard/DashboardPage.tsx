@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase/client';
+import { useLanguage } from '@/context/LanguageContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths, isOverdue } from '@/lib/dates/formatter';
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
@@ -56,6 +57,7 @@ interface DashboardData {
 
 export const DashboardPage: React.FC = () => {
   const { user, profile } = useAuthContext();
+  const { t } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -233,7 +235,7 @@ export const DashboardPage: React.FC = () => {
       {/* Total Balance */}
       <Card>
         <div className="flex items-start justify-between mb-1">
-          <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">Total Available Balance</p>
+          <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">{t.dashboard.totalBalance}</p>
           <button
             onClick={() => setBalanceHidden((v) => !v)}
             aria-label={balanceHidden ? 'Show balance' : 'Hide balance'}
@@ -253,28 +255,28 @@ export const DashboardPage: React.FC = () => {
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-2 gap-3">
-        <SummaryCard label="Income" value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
-        <SummaryCard label="Expense" value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
-        <SummaryCard label="Loan" value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
-        <SummaryCard label="Credit" value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
+        <SummaryCard label={t.addTransaction.income} value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
+        <SummaryCard label={t.addTransaction.expense} value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
+        <SummaryCard label={t.nav.loans} value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
+        <SummaryCard label={t.creditCards.title} value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
       </div>
 
       {/* Net Worth */}
       <Card>
-        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-2">Current Net Worth</p>
+        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-2">{t.dashboard.netWorth}</p>
         <p className={['text-2xl font-semibold tabular-nums mb-3', netWorth >= 0 ? 'text-[var(--color-positive)]' : 'text-[var(--color-text-primary)]'].join(' ')} data-financial>
           {balanceHidden ? '৳ ••••••' : formatCurrency(netWorth)}
         </p>
         <div className="flex justify-between text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-          <span><span className="text-[var(--color-text-muted)]">Assets </span><span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalAssets)}</span></span>
-          <span><span className="text-[var(--color-text-muted)]">Liabilities </span><span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalLiabilities)}</span></span>
+          <span><span className="text-[var(--color-text-muted)]">{t.dashboard.assets} </span><span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalAssets)}</span></span>
+          <span><span className="text-[var(--color-text-muted)]">{t.dashboard.liabilities} </span><span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalLiabilities)}</span></span>
         </div>
       </Card>
 
       {/* Cash Flow Chart */}
       {data && data.cashflowHistory.length > 0 && (
         <Card>
-          <CardHeader title="Monthly Cash Flow" subtitle="Last 6 months" />
+          <CardHeader title={t.dashboard.monthlyCashFlow} subtitle={t.dashboard.last6Months} />
           <ResponsiveContainer width="100%" height={150}>
             <BarChart data={data.cashflowHistory} barSize={14} barGap={2}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -284,8 +286,8 @@ export const DashboardPage: React.FC = () => {
                 contentStyle={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)', borderRadius: '10px', fontSize: '12px' }}
                 formatter={(v: number) => formatCurrency(v)}
               />
-              <Bar dataKey="income" name="Income" fill="var(--color-positive)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expense" name="Expense" fill="var(--color-negative-soft)" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="expense" name={t.addTransaction.expense} fill="var(--color-negative-soft)" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -294,15 +296,15 @@ export const DashboardPage: React.FC = () => {
       {/* Accounts */}
       <Card padding="none">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">Accounts</h2>
-          <Link to="/dashboard/accounts" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">View all</Link>
+          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t.dashboard.accounts}</h2>
+          <Link to="/dashboard/accounts" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">{t.dashboard.seeAll}</Link>
         </div>
         {liquidAccounts.length === 0 ? (
           <EmptyState
             icon={<Wallet size={22} />}
-            title="No accounts yet"
-            description="Add your first account to track balances."
-            action={<Link to="/dashboard/accounts/add"><Button size="sm">Add account</Button></Link>}
+            title={t.dashboard.noAccountsTitle}
+            description={t.dashboard.noAccountsDesc}
+            action={<Link to="/dashboard/accounts/add"><Button size="sm">{t.dashboard.addAccountBtn}</Button></Link>}
             className="py-8"
           />
         ) : (
@@ -335,7 +337,7 @@ export const DashboardPage: React.FC = () => {
       {data && data.upcomingPayments.length > 0 && (
         <Card padding="none">
           <div className="px-5 pt-5 pb-3">
-            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">Upcoming Payments</h2>
+            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t.dashboard.upcomingPayments}</h2>
           </div>
           <div className="divide-y divide-[var(--color-border)]" role="list">
             {data.upcomingPayments.map((pmt) => (
@@ -361,14 +363,14 @@ export const DashboardPage: React.FC = () => {
       {/* Recent Activity */}
       <Card padding="none">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">Recent Activity</h2>
-          <Link to="/dashboard/activity" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">View all</Link>
+          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t.dashboard.recentActivity}</h2>
+          <Link to="/dashboard/activity" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">{t.dashboard.seeAll}</Link>
         </div>
         {(!data || data.recentTransactions.length === 0) ? (
           <EmptyState
             icon={<ReceiptText size={22} />}
-            title="No transactions yet"
-            description="Add your first income or expense to begin tracking."
+            title={t.dashboard.noTransactions}
+            description={t.dashboard.noTransactionsDesc}
             className="py-8"
           />
         ) : (

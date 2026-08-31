@@ -4,5 +4,11 @@
   "addAccount": "Add Account",
   "noAccounts": "No accounts found",
   "balance": "Balance",
-  "type": "Account Type"
+  "type": "Account Type",
+  "subtitle": "Manage your liquid assets and liabilities",
+  "totalNetAssets": "Total Net Assets",
+  "noAccountsDesc": "You haven't added any financial accounts yet.",
+  "addFirstBtn": "Add your first account",
+  "assetAccounts": "Asset Accounts",
+  "liabilityAccounts": "Liability Accounts"
 }
