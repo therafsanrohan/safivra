@@ -34,23 +34,9 @@ export const NotificationsPage: React.FC = () => {
 
       if (fetchErr) throw fetchErr;
       setNotifications((data as NotificationRow[]) ?? []);
-    } catch {
-      setNotifications([
-        {
-          id: 'notif-1',
-          title: 'DBBL Home Loan EMI Due Soon',
-          body: 'Your installment of ৳22,500 is due in 3 days.',
-          is_read: false,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'notif-2',
-          title: 'City Bank AMEX Bill Due',
-          body: 'Your statement balance of ৳34,200 is due on the 5th of next month.',
-          is_read: false,
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-      ]);
+    } catch (err: any) {
+      setError(err?.message || 'Could not load notifications');
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
