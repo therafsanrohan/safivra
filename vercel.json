@@ -3,7 +3,7 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|icons/|favicon.ico|favicon.svg|manifest.webmanifest|sw.js|workbox-).*)" ,
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],

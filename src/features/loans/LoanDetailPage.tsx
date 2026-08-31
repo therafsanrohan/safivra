@@ -74,12 +74,11 @@ export const LoanDetailPage: React.FC = () => {
     setIsEditing(true);
     
     try {
-      const { data, error } = await supabase
-        .from('loans')
+      const { data, error } = await (supabase.from('loans') as any)
         .update({
           name: editName.trim(),
-          annual_rate: editRate ? Number(editRate) : null,
-          monthly_installment: editInstallment > 0 ? editInstallment : null,
+          annual_rate: editRate ? Number(editRate).toString() : null,
+          monthly_installment: editInstallment > 0 ? editInstallment.toString() : null,
         })
         .eq('id', loan.id)
         .eq('user_id', user!.id)
@@ -313,6 +312,7 @@ export const LoanDetailPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      </Dialog>
       <Dialog
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}

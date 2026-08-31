@@ -42,14 +42,18 @@ export const BudgetsPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('budgets')
+      const { data, error: fetchErr } = await (supabase.from('budgets') as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchErr) throw fetchErr;
-      setBudgets((data as BudgetRow[]) ?? []);
+      const formatted = (data ?? []).map((b: any) => ({
+        ...b,
+        amount: Number(b.total_limit),
+        period: b.period_type,
+      }));
+      setBudgets((formatted as BudgetRow[]) ?? []);
     } catch (err: any) {
       console.error(err);
       setBudgets([]);
@@ -67,20 +71,27 @@ export const BudgetsPage: React.FC = () => {
     if (!name.trim() || amount <= 0 || !user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('budgets')
+      const { data, error } = await (supabase.from('budgets') as any)
         .insert({
           user_id: user.id,
           name: name.trim(),
-          amount: amount,
-          period: 'monthly'
+          total_limit: amount.toString(),
+          period_type: 'monthly',
+          start_date: new Date().toISOString().split('T')[0],
         })
         .select()
         .single();
 
       if (error) throw error;
       
-      setBudgets((prev) => [data, ...prev]);
+      setBudgets((prev) => [
+        {
+          ...data,
+          amount: Number(data.total_limit),
+          period: data.period_type,
+        } as BudgetRow,
+        ...prev
+      ]);
       setName('');
       setAmount(10000);
       setShowAddDialog(false);
@@ -95,11 +106,10 @@ export const BudgetsPage: React.FC = () => {
     if (!selectedBudget || !name.trim() || amount <= 0 || !user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('budgets')
+      const { data, error } = await (supabase.from('budgets') as any)
         .update({
           name: name.trim(),
-          amount: amount
+          total_limit: amount.toString()
         })
         .eq('id', selectedBudget.id)
         .eq('user_id', user.id)
@@ -108,7 +118,11 @@ export const BudgetsPage: React.FC = () => {
 
       if (error) throw error;
       
-      setBudgets((prev) => prev.map((b) => b.id === data.id ? data : b));
+      setBudgets((prev) => prev.map((b) => b.id === data.id ? {
+        ...data,
+        amount: Number(data.total_limit),
+        period: data.period_type,
+      } as BudgetRow : b));
       setShowEditDialog(false);
       success('Budget Updated', `${data.name} updated successfully.`);
     } catch (err: any) {
@@ -310,7 +324,7 @@ export const BudgetsPage: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
             Cancel
           </Button>
-          <Button type="button" variant="danger" onClick={handleDeleteBudget} className="flex-1">
+          <Button type="button" variant="destructive" onClick={handleDeleteBudget} className="flex-1">
             Delete Budget
           </Button>
         </div>

@@ -44,14 +44,18 @@ export const GoalsPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('savings_goals')
+      const { data, error: fetchErr } = await (supabase.from('savings_goals') as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchErr) throw fetchErr;
-      setGoals((data as GoalRow[]) ?? []);
+      const formatted = (data ?? []).map((g: any) => ({
+        ...g,
+        target_amount: Number(g.target_amount),
+        current_amount: Number(g.current_amount),
+      }));
+      setGoals((formatted as GoalRow[]) ?? []);
     } catch (err) {
       showError('Failed to load goals', parseError(err).message);
       setGoals([]);
@@ -69,18 +73,25 @@ export const GoalsPage: React.FC = () => {
     if (!name.trim() || targetAmount <= 0 || !user) return;
 
     try {
-      const { data, error } = await supabase.from('savings_goals').insert({
+      const { data, error } = await (supabase.from('savings_goals') as any).insert({
         user_id: user.id,
         name: name.trim(),
-        target_amount: targetAmount,
-        current_amount: currentAmount,
+        target_amount: targetAmount.toString(),
+        current_amount: currentAmount.toString(),
         target_date: targetDate || null,
-        status: 'in_progress',
+        status: 'active',
       }).select().single();
 
       if (error) throw error;
 
-      setGoals((prev) => [data, ...prev]);
+      setGoals((prev) => [
+        {
+          ...data,
+          target_amount: Number(data.target_amount),
+          current_amount: Number(data.current_amount),
+        } as GoalRow,
+        ...prev
+      ]);
       setName('');
       setTargetAmount(100000);
       setCurrentAmount(10000);
@@ -97,10 +108,10 @@ export const GoalsPage: React.FC = () => {
     if (!selectedGoal || !name.trim() || targetAmount <= 0 || !user) return;
 
     try {
-      const { data, error } = await supabase.from('savings_goals').update({
+      const { data, error } = await (supabase.from('savings_goals') as any).update({
         name: name.trim(),
-        target_amount: targetAmount,
-        current_amount: currentAmount,
+        target_amount: targetAmount.toString(),
+        current_amount: currentAmount.toString(),
         target_date: targetDate || null,
       })
       .eq('id', selectedGoal.id)
@@ -109,7 +120,11 @@ export const GoalsPage: React.FC = () => {
 
       if (error) throw error;
 
-      setGoals((prev) => prev.map((g) => g.id === data.id ? data : g));
+      setGoals((prev) => prev.map((g) => g.id === data.id ? {
+        ...data,
+        target_amount: Number(data.target_amount),
+        current_amount: Number(data.current_amount),
+      } : g) as GoalRow[]);
       setShowEditDialog(false);
       success('Goal Updated', `${data.name} updated successfully.`);
     } catch (err) {
@@ -334,7 +349,7 @@ export const GoalsPage: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
             Cancel
           </Button>
-          <Button type="button" variant="danger" onClick={handleDeleteGoal} className="flex-1">
+          <Button type="button" variant="destructive" onClick={handleDeleteGoal} className="flex-1">
             Delete Goal
           </Button>
         </div>

@@ -623,6 +623,53 @@ export type Database = {
           is_read?: boolean;
         };
       };
+      savings_schemes: {
+        Row: {
+          id: string;
+          user_id: string;
+          scheme_name: string;
+          scheme_type: 'dps' | 'fdr' | 'savings_account' | 'sanchaypatra';
+          institution: string;
+          account_number: string | null;
+          deposit_amount: string;
+          maturity_amount: string;
+          interest_rate: string;
+          start_date: string;
+          maturity_date: string | null;
+          status: 'active' | 'matured' | 'closed';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          scheme_name: string;
+          scheme_type: 'dps' | 'fdr' | 'savings_account' | 'sanchaypatra';
+          institution: string;
+          account_number?: string | null;
+          deposit_amount: string;
+          maturity_amount: string;
+          interest_rate: string;
+          start_date: string;
+          maturity_date?: string | null;
+          status?: 'active' | 'matured' | 'closed';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          scheme_name?: string;
+          scheme_type?: 'dps' | 'fdr' | 'savings_account' | 'sanchaypatra';
+          institution?: string;
+          account_number?: string | null;
+          deposit_amount?: string;
+          maturity_amount?: string;
+          interest_rate?: string;
+          start_date?: string;
+          maturity_date?: string | null;
+          status?: 'active' | 'matured' | 'closed';
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       v_account_balances: {

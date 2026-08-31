@@ -172,11 +172,11 @@ export const SignUpPage: React.FC = () => {
             />
             <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
               I agree to the{' '}
-              <Link to="/terms" className="text-[var(--color-accent)]">
+              <Link to="/terms-of-use" className="text-[var(--color-accent)]">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-[var(--color-accent)]">
+              <Link to="/privacy-policy" className="text-[var(--color-accent)]">
                 Privacy Policy
               </Link>
             </span>

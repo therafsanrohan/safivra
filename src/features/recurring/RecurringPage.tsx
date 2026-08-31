@@ -580,7 +580,7 @@ export const RecurringPage: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
             Cancel
           </Button>
-          <Button type="button" variant="danger" onClick={handleDelete} className="flex-1">
+          <Button type="button" variant="destructive" onClick={handleDelete} className="flex-1">
             Delete
           </Button>
         </div>

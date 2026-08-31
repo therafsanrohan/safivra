@@ -73,11 +73,10 @@ export const CardDetailPage: React.FC = () => {
     setIsEditing(true);
     
     try {
-      const { data, error } = await supabase
-        .from('credit_cards')
+      const { data, error } = await (supabase.from('credit_cards') as any)
         .update({
           nickname: editNickname.trim(),
-          credit_limit: editLimit > 0 ? editLimit : card.credit_limit,
+          credit_limit: (editLimit > 0 ? editLimit : Number(card.credit_limit)).toString(),
           statement_day: editStatementDay ? Number(editStatementDay) : null,
           payment_due_day: editPaymentDay ? Number(editPaymentDay) : null,
         })
@@ -313,6 +312,7 @@ export const CardDetailPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      </Dialog>
       <Dialog
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}

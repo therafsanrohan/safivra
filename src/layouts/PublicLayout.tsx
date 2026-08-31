@@ -136,13 +136,13 @@ export const PublicLayout: React.FC = () => {
           <p>
             Developed by{' '}
             <a 
-              href="https://www.creatiancy.com" 
+              href="https://www.corevow.com" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded"
               style={{ textDecoration: 'none' }}
             >
-              Creatiancy
+              Corevow
             </a>
           </p>
         </div>

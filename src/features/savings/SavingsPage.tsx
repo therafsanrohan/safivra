@@ -60,14 +60,19 @@ export const SavingsPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('savings_schemes')
+      const { data, error: fetchErr } = await (supabase.from('savings_schemes') as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchErr) throw fetchErr;
-      setSchemes((data as SavingsSchemeRow[]) ?? []);
+      const formatted = (data ?? []).map((s: any) => ({
+        ...s,
+        deposit_amount: Number(s.deposit_amount),
+        maturity_amount: Number(s.maturity_amount),
+        interest_rate: Number(s.interest_rate),
+      }));
+      setSchemes(formatted as SavingsSchemeRow[]);
     } catch (err) {
       showError('Failed to load schemes', parseError(err).message);
       setSchemes([]);
@@ -85,14 +90,14 @@ export const SavingsPage: React.FC = () => {
     if (!schemeName.trim() || !institution.trim() || depositAmount <= 0 || !user) return;
 
     try {
-      const { data, error } = await supabase.from('savings_schemes').insert({
+      const { data, error } = await (supabase.from('savings_schemes') as any).insert({
         user_id: user.id,
         scheme_name: schemeName.trim(),
         scheme_type: schemeType,
         institution: institution.trim(),
-        deposit_amount: depositAmount,
-        maturity_amount: maturityAmount,
-        interest_rate: interestRate,
+        deposit_amount: depositAmount.toString(),
+        maturity_amount: maturityAmount.toString(),
+        interest_rate: interestRate.toString(),
         start_date: startDate,
         maturity_date: maturityDate || null,
         status: 'active',
@@ -100,7 +105,15 @@ export const SavingsPage: React.FC = () => {
 
       if (error) throw error;
 
-      setSchemes((prev) => [data, ...prev]);
+      setSchemes((prev) => [
+        {
+          ...data,
+          deposit_amount: Number(data.deposit_amount),
+          maturity_amount: Number(data.maturity_amount),
+          interest_rate: Number(data.interest_rate)
+        } as SavingsSchemeRow,
+        ...prev
+      ]);
       setSchemeName('');
       setInstitution('');
       setDepositAmount(5000);
@@ -120,13 +133,13 @@ export const SavingsPage: React.FC = () => {
     if (!selectedScheme || !schemeName.trim() || !institution.trim() || depositAmount <= 0 || !user) return;
 
     try {
-      const { data, error } = await supabase.from('savings_schemes').update({
+      const { data, error } = await (supabase.from('savings_schemes') as any).update({
         scheme_name: schemeName.trim(),
         scheme_type: schemeType,
         institution: institution.trim(),
-        deposit_amount: depositAmount,
-        maturity_amount: maturityAmount,
-        interest_rate: interestRate,
+        deposit_amount: depositAmount.toString(),
+        maturity_amount: maturityAmount.toString(),
+        interest_rate: interestRate.toString(),
         start_date: startDate,
         maturity_date: maturityDate || null,
       })
@@ -136,7 +149,12 @@ export const SavingsPage: React.FC = () => {
 
       if (error) throw error;
 
-      setSchemes((prev) => prev.map((s) => s.id === data.id ? data : s));
+      setSchemes((prev) => prev.map((s) => s.id === data.id ? {
+        ...data,
+        deposit_amount: Number(data.deposit_amount),
+        maturity_amount: Number(data.maturity_amount),
+        interest_rate: Number(data.interest_rate)
+      } : s) as SavingsSchemeRow[]);
       setShowEditDialog(false);
       success('Scheme Updated', `${data.scheme_name} updated successfully.`);
     } catch (err) {
@@ -148,7 +166,7 @@ export const SavingsPage: React.FC = () => {
     if (!selectedScheme || !user) return;
 
     try {
-      const { error } = await supabase.from('savings_schemes').delete()
+      const { error } = await (supabase.from('savings_schemes') as any).delete()
         .eq('id', selectedScheme.id)
         .eq('user_id', user.id);
 
@@ -479,7 +497,7 @@ export const SavingsPage: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
             Cancel
           </Button>
-          <Button type="button" variant="danger" onClick={handleDeleteScheme} className="flex-1">
+          <Button type="button" variant="destructive" onClick={handleDeleteScheme} className="flex-1">
             Delete Scheme
           </Button>
         </div>
