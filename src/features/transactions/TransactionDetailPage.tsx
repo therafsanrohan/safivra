@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Ban } from 'lucide-react';
+import { ArrowLeft, Ban, Settings, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
@@ -9,6 +9,8 @@ import { parseError } from '@/lib/errors/handler';
 import { useToast } from '@/components/ui/Toast';
 import { Card, Skeleton, ErrorState, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
+import { Input, Textarea } from '@/components/ui/Input';
 
 interface FullTransaction {
   id: string;
@@ -43,6 +45,12 @@ export const TransactionDetailPage: React.FC = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editMerchant, setEditMerchant] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
   const loadTransaction = useCallback(async () => {
     if (!user || !id) return;
     setLoading(true);
@@ -64,7 +72,13 @@ export const TransactionDetailPage: React.FC = () => {
         .single();
 
       if (fetchErr) throw fetchErr;
-      setTx((data as unknown as FullTransaction) ?? null);
+      const txData = (data as unknown as FullTransaction) ?? null;
+      setTx(txData);
+      if (txData) {
+        setEditTitle(txData.title);
+        setEditMerchant(txData.merchant || '');
+        setEditDescription(txData.description || '');
+      }
     } catch (err: any) {
       setError(err.message || 'Could not fetch transaction details');
       setTx(null);
@@ -76,6 +90,31 @@ export const TransactionDetailPage: React.FC = () => {
   useEffect(() => {
     loadTransaction();
   }, [loadTransaction]);
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !tx || !editTitle.trim()) return;
+    setIsEditing(true);
+    try {
+      const { error: updErr } = await (supabase.from('ledger_transactions') as any)
+        .update({
+          title: editTitle.trim(),
+          merchant: editMerchant.trim() || null,
+          description: editDescription.trim() || null,
+        })
+        .eq('id', id)
+        .eq('user_id', user!.id);
+
+      if (updErr) throw updErr;
+      success('Transaction updated', 'Details updated successfully.');
+      setIsEditModalOpen(false);
+      loadTransaction();
+    } catch (err) {
+      showError('Failed to update transaction', parseError(err).message);
+    } finally {
+      setIsEditing(false);
+    }
+  };
 
   const handleVoid = async () => {
     if (!id || !tx || tx.status === 'voided') return;
@@ -172,13 +211,21 @@ export const TransactionDetailPage: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditModalOpen(true)}
+              className="text-[var(--color-primary)] border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]"
+            >
+              <Settings size={16} /> Edit
+            </Button>
             {tx.status !== 'voided' && (
               <Button
                 variant="outline"
                 size="sm"
                 loading={voiding}
                 onClick={handleVoid}
-                className="text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]"
+                className="text-[var(--color-warning)] border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]"
               >
                 <Ban size={16} /> Void
               </Button>
@@ -188,7 +235,7 @@ export const TransactionDetailPage: React.FC = () => {
               size="sm"
               onClick={() => setIsDeleteModalOpen(true)}
             >
-              Delete
+              <Trash2 size={16} /> Delete
             </Button>
           </div>
         </div>
@@ -262,6 +309,54 @@ export const TransactionDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Edit Transaction Modal */}
+      <Dialog
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        title="Edit Transaction Details"
+      >
+        <form onSubmit={handleEdit} className="space-y-4">
+          <Input
+            label="Title / Description"
+            required
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            placeholder="e.g. Grocery shopping, Salary"
+          />
+          <Input
+            label="Merchant / Source (Optional)"
+            optional
+            value={editMerchant}
+            onChange={(e) => setEditMerchant(e.target.value)}
+            placeholder="e.g. Agora, Shwapno, Employer"
+          />
+          <Textarea
+            label="Notes (Optional)"
+            optional
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            placeholder="Add any additional notes"
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              loading={isEditing}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 };
