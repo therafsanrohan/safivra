@@ -22,10 +22,7 @@ export async function syncNotifications(userId: string) {
 
     // 3. Fetch active credit cards
     const { data: cards } = await (supabase.from('credit_cards') as any)
-      .select(`
-        id, nickname, credit_limit, payment_due_day,
-        account:financial_accounts!credit_cards_account_id_fkey(balance)
-      `)
+      .select('id, nickname, credit_limit, payment_due_day, account_id')
       .eq('user_id', userId)
       .eq('status', 'active');
 

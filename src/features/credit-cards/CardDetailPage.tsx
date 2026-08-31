@@ -115,32 +115,38 @@ export const CardDetailPage: React.FC = () => {
 
     try {
       const { data, error: fetchErr } = await (supabase.from('credit_cards') as any)
-        .select(`
-          id, account_id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status,
-          account:financial_accounts!credit_cards_account_id_fkey(balance)
-        `)
+        .select('id, account_id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status')
         .eq('id', id)
         .eq('user_id', user.id)
         .single();
 
       if (fetchErr) throw fetchErr;
       const cardData = (data as unknown as FullCard) ?? null;
-      setCard(cardData);
 
       if (cardData?.account_id) {
-        const { data: payData } = await (supabase.from('ledger_entries') as any)
-          .select(`
-            id, amount, entry_role, created_at,
-            ledger_transaction:ledger_transactions!inner(
-              id, title, transaction_date, status, transaction_type
-            )
-          `)
-          .eq('financial_account_id', cardData.account_id)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
+        const [balRes, payRes] = await Promise.all([
+          (supabase.from('v_account_balances') as any)
+            .select('balance')
+            .eq('account_id', cardData.account_id)
+            .single(),
+          (supabase.from('ledger_entries') as any)
+            .select(`
+              id, amount, entry_role, created_at,
+              ledger_transaction:ledger_transactions!inner(
+                id, title, transaction_date, status, transaction_type
+              )
+            `)
+            .eq('financial_account_id', cardData.account_id)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false }),
+        ]);
 
-        if (payData) {
-          const list = (payData as any[])
+        if (balRes.data) {
+          cardData.account = { balance: balRes.data.balance };
+        }
+
+        if (payRes.data) {
+          const list = (payRes.data as any[])
             .filter((p) => p.ledger_transaction?.status === 'posted')
             .map((p) => ({
               id: p.id,
@@ -154,6 +160,8 @@ export const CardDetailPage: React.FC = () => {
           setPayments(list);
         }
       }
+
+      setCard(cardData);
     } catch (err) {
       setError(parseError(err).message);
     } finally {

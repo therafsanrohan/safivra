@@ -35,18 +35,32 @@ export const CreditCardsPage: React.FC = () => {
     setError('');
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('credit_cards')
-        .select(`
-          id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status,
-          account:financial_accounts!credit_cards_account_id_fkey(balance)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const [cardsRes, balancesRes] = await Promise.all([
+        (supabase.from('credit_cards') as any)
+          .select('id, account_id, nickname, issuer, last_four, credit_limit, statement_day, payment_due_day, status')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        (supabase.from('v_account_balances') as any)
+          .select('account_id, balance')
+          .eq('user_id', user.id),
+      ]);
 
-      if (fetchErr) throw fetchErr;
-      setCards((data as unknown as CardRow[]) ?? []);
-    } catch {
+      if (cardsRes.error) throw cardsRes.error;
+
+      const balanceMap = new Map(
+        ((balancesRes.data as any[]) ?? []).map((b) => [b.account_id, b.balance])
+      );
+
+      const mappedCards: CardRow[] = ((cardsRes.data as any[]) ?? []).map((c) => ({
+        ...c,
+        credit_limit: Number(c.credit_limit),
+        account: c.account_id ? { balance: balanceMap.get(c.account_id) ?? '0' } : null,
+      }));
+
+      setCards(mappedCards);
+    } catch (err: any) {
+      console.error('Failed to load credit cards:', err);
+      setError(err?.message || 'Failed to load credit cards');
       setCards([]);
     } finally {
       setLoading(false);

@@ -36,18 +36,33 @@ export const LoansPage: React.FC = () => {
     setError('');
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('loans')
-        .select(`
-          id, name, lender_name, loan_type, original_principal, monthly_installment, next_payment_date, status,
-          account:financial_accounts!loans_account_id_fkey(balance)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const [loansRes, balancesRes] = await Promise.all([
+        (supabase.from('loans') as any)
+          .select('id, name, account_id, lender_name, loan_type, original_principal, monthly_installment, next_payment_date, status')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        (supabase.from('v_account_balances') as any)
+          .select('account_id, balance')
+          .eq('user_id', user.id),
+      ]);
 
-      if (fetchErr) throw fetchErr;
-      setLoans((data as unknown as LoanRow[]) ?? []);
-    } catch {
+      if (loansRes.error) throw loansRes.error;
+
+      const balanceMap = new Map(
+        ((balancesRes.data as any[]) ?? []).map((b) => [b.account_id, b.balance])
+      );
+
+      const mappedLoans: LoanRow[] = ((loansRes.data as any[]) ?? []).map((l) => ({
+        ...l,
+        original_principal: Number(l.original_principal),
+        monthly_installment: l.monthly_installment ? Number(l.monthly_installment) : null,
+        account: l.account_id ? { balance: balanceMap.get(l.account_id) ?? String(l.original_principal) } : null,
+      }));
+
+      setLoans(mappedLoans);
+    } catch (err: any) {
+      console.error('Failed to load loans:', err);
+      setError(err?.message || 'Failed to load loans');
       setLoans([]);
     } finally {
       setLoading(false);

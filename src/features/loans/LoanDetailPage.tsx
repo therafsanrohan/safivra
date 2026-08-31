@@ -102,18 +102,25 @@ export const LoanDetailPage: React.FC = () => {
     setError('');
 
     try {
-      const { data, error: fetchErr } = await supabase
-        .from('loans')
-        .select(`
-          id, name, lender_name, loan_type, original_principal, annual_rate, monthly_installment, next_payment_date, status, account_id,
-          account:financial_accounts!loans_account_id_fkey(balance)
-        `)
+      const { data, error: fetchErr } = await (supabase.from('loans') as any)
+        .select('id, name, lender_name, loan_type, original_principal, annual_rate, monthly_installment, next_payment_date, status, account_id')
         .eq('id', id)
         .eq('user_id', user.id)
         .single();
 
       if (fetchErr) throw fetchErr;
-      setLoan((data as unknown as FullLoan) ?? null);
+      const loanData = (data as unknown as FullLoan) ?? null;
+
+      if (loanData?.account_id) {
+        const { data: balData } = await (supabase.from('v_account_balances') as any)
+          .select('balance')
+          .eq('account_id', loanData.account_id)
+          .single();
+        
+        loanData.account = balData ? { balance: balData.balance } : null;
+      }
+
+      setLoan(loanData);
     } catch (err) {
       setError(parseError(err).message);
     } finally {
