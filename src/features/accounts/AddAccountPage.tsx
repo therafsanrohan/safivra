@@ -58,7 +58,7 @@ export const AddAccountPage: React.FC = () => {
     try {
       const accountClass: AccountClass = typeObj?.class ?? 'asset';
 
-      // Insert account record
+      // Insert account record with opening_balance 0 (the actual opening balance is posted cleanly via ledger entry below)
       const { data: newAccount, error: accError } = await (supabase.from('financial_accounts') as any)
         .insert({
           user_id: user.id,
@@ -67,7 +67,7 @@ export const AddAccountPage: React.FC = () => {
           account_class: accountClass,
           institution: data.institution || null,
           currency_code: 'BDT',
-          opening_balance: data.opening_balance,
+          opening_balance: 0,
           opening_balance_date: data.opening_balance_date,
           last_four: data.last_four || null,
           credit_limit: data.credit_limit ? String(data.credit_limit) : null,

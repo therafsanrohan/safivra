@@ -136,10 +136,10 @@ export const AccountDetailPage: React.FC = () => {
         </button>
         <button
           onClick={() => setIsEditModalOpen(true)}
-          className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-          aria-label="Account Settings"
+          className="flex items-center gap-1.5 text-[var(--color-primary)] hover:opacity-80 font-medium text-sm"
+          aria-label="Edit Account"
         >
-          <Settings size={18} /> Settings
+          <Settings size={16} /> Edit Account
         </button>
       </div>
 

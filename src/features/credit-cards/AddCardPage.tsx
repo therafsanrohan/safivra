@@ -30,7 +30,7 @@ export const AddCardPage: React.FC = () => {
     setSubmitting(true);
 
     try {
-      // Step 1: Create linked liability account for credit card
+      // Step 1: Create linked liability account for credit card with opening_balance 0
       const { data: newAcc, error: accErr } = await (supabase.from('financial_accounts') as any)
         .insert({
           user_id: user.id,
@@ -39,7 +39,7 @@ export const AddCardPage: React.FC = () => {
           account_class: 'liability',
           institution: data.issuer,
           currency_code: 'BDT',
-          opening_balance: data.opening_outstanding,
+          opening_balance: 0,
           opening_balance_date: new Date().toISOString().split('T')[0],
           credit_limit: data.credit_limit,
           last_four: data.last_four || null,

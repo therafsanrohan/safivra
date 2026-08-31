@@ -37,7 +37,7 @@ export const AddLoanPage: React.FC = () => {
     setSubmitting(true);
 
     try {
-      // Step 1: Create linked liability account for the loan
+      // Step 1: Create linked liability account for the loan with opening_balance 0
       const { data: newAcc, error: accErr } = await (supabase.from('financial_accounts') as any)
         .insert({
           user_id: user.id,
@@ -46,7 +46,7 @@ export const AddLoanPage: React.FC = () => {
           account_class: 'liability',
           institution: data.lender_name,
           currency_code: 'BDT',
-          opening_balance: data.opening_outstanding ?? data.original_principal,
+          opening_balance: 0,
           opening_balance_date: data.start_date,
           include_in_total: false,
           include_in_net_worth: data.include_in_net_worth,
