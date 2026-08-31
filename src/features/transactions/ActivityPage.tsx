@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Search, TrendingUp, TrendingDown, ArrowRightLeft, ReceiptText } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate } from '@/lib/dates/formatter';
 import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
@@ -26,6 +27,7 @@ interface TxRow {
 
 export const ActivityPage: React.FC = () => {
   const { user } = useAuthContext();
+  const { t, locale } = useLanguage();
   const [transactions, setTransactions] = useState<TxRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -52,12 +54,12 @@ export const ActivityPage: React.FC = () => {
         query = query.eq('transaction_type', typeFilter);
       }
 
-      const { data, error: fetchErr } = await query.limit(50);
+      const { data, error: fetchErr } = await query;
       if (fetchErr) throw fetchErr;
 
       setTransactions((data as unknown as TxRow[]) ?? []);
     } catch (err: any) {
-      setError(err.message || 'Could not fetch transactions');
+      setError(err?.message || 'Could not fetch transactions');
       setTransactions([]);
     } finally {
       setLoading(false);
@@ -81,11 +83,11 @@ export const ActivityPage: React.FC = () => {
     return (
       <div className="page-container pt-5 space-y-4">
         <div className="flex justify-between">
-          <Skeleton height={28} width={140} />
-          <Skeleton height={36} width={90} />
+          <Skeleton height={28} width={120} />
+          <Skeleton height={36} width={80} />
         </div>
-        <Skeleton height={44} />
-        <Skeleton height={260} />
+        <Skeleton height={40} />
+        <Skeleton height={240} />
       </div>
     );
   }
@@ -98,20 +100,22 @@ export const ActivityPage: React.FC = () => {
     );
   }
 
+  const isBn = locale === 'bn';
+
   return (
     <div className="page-container pt-5 space-y-5 fade-in">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            Activity
+            {t.activity.title}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            All posted ledger transactions
+            {isBn ? 'সকল অনুমোদিত ও সংরক্ষিত লেনদেন' : 'All posted ledger transactions'}
           </p>
         </div>
         <Link to="/dashboard/activity/add">
           <Button size="sm" className="gap-1">
-            <Plus size={16} /> Record
+            <Plus size={16} /> {isBn ? 'যুক্ত করুন' : 'Record'}
           </Button>
         </Link>
       </header>
@@ -120,7 +124,7 @@ export const ActivityPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1">
           <Input
-            placeholder="Search by title or merchant..."
+            placeholder={isBn ? 'শিরোনাম বা মার্চেন্ট খুঁজুন...' : 'Search by title or merchant...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             leftElement={<Search size={16} />}
@@ -131,12 +135,12 @@ export const ActivityPage: React.FC = () => {
             value={typeFilter}
             onValueChange={setTypeFilter}
             options={[
-              { value: 'all', label: 'All Types' },
-              { value: 'expense', label: 'Expense' },
-              { value: 'income', label: 'Income' },
-              { value: 'transfer', label: 'Transfer' },
-              { value: 'loan_payment', label: 'Loan Payment' },
-              { value: 'credit_card_payment', label: 'Card Payment' },
+              { value: 'all', label: isBn ? 'সকল ধরন' : 'All Types' },
+              { value: 'expense', label: isBn ? 'খরচ (Expense)' : 'Expense' },
+              { value: 'income', label: isBn ? 'আয় (Income)' : 'Income' },
+              { value: 'transfer', label: isBn ? 'স্থানান্তর (Transfer)' : 'Transfer' },
+              { value: 'loan_payment', label: isBn ? 'ঋণ পরিশোধ' : 'Loan Payment' },
+              { value: 'credit_card_payment', label: isBn ? 'কার্ড পরিশোধ' : 'Card Payment' },
             ]}
           />
         </div>
@@ -146,12 +150,12 @@ export const ActivityPage: React.FC = () => {
       {filteredTransactions.length === 0 ? (
         <EmptyState
           icon={<ReceiptText size={22} />}
-          title="No transactions found"
-          description={searchQuery ? 'Try adjusting your search query or filter.' : 'Record your first transaction to get started.'}
+          title={isBn ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}
+          description={searchQuery ? (isBn ? 'অনুসন্ধান বা ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।' : 'Try adjusting your search query or filter.') : (isBn ? 'শুরু করতে আপনার প্রথম লেনদেন যোগ করুন।' : 'Record your first transaction to get started.')}
           action={
             !searchQuery ? (
               <Link to="/dashboard/activity/add">
-                <Button size="sm">Add Transaction</Button>
+                <Button size="sm">{isBn ? 'লেনদেন যোগ করুন' : 'Add Transaction'}</Button>
               </Link>
             ) : undefined
           }
