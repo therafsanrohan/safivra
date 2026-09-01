@@ -17,6 +17,9 @@ BEGIN;
 -- 1. Financial Integrity Check Function
 -- ────────────────────────────────────────────────────────────────
 
+DROP FUNCTION IF EXISTS public.check_financial_integrity();
+DROP FUNCTION IF EXISTS public.check_financial_integrity(UUID);
+
 CREATE OR REPLACE FUNCTION public.check_financial_integrity(p_target_user_id UUID DEFAULT NULL)
 RETURNS JSON
 LANGUAGE plpgsql
@@ -130,8 +133,8 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.check_financial_integrity() FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION public.check_financial_integrity() TO authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION public.check_financial_integrity(UUID) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION public.check_financial_integrity(UUID) TO authenticated, service_role;
 
 -- ────────────────────────────────────────────────────────────────
 -- 2. Composite Indexes (Performance — Phase 0 bottleneck fixes)
