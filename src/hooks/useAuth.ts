@@ -199,7 +199,7 @@ export function useAuth(): UseAuthReturn {
       mounted = false;
       subscription?.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, fetchPreferences]);
 
   const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
 
@@ -278,26 +278,15 @@ export function useAuth(): UseAuthReturn {
 
 
     const userId = state.user.id;
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${token}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({ ...updates, updated_at: new Date().toISOString() }),
-      }
-    );
+    const { error } = await supabase
+      .from('profiles')
+      // @ts-ignore — Supabase generated types may lag behind schema
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', userId);
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      return { error: (errData as any)?.message || 'Failed to update profile' };
+    if (error) {
+      return { error: error.message || 'Failed to update profile' };
     }
 
     await refreshProfile();

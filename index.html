@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https: ws: wss:;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://o*.ingest.sentry.io; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none';" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#234C3A" />
     <meta name="description" content="Safivra — Personal financial management for Bangladesh" />
@@ -22,12 +22,6 @@
           console.warn('Preload error detected, reloading page to load latest bundle:', event);
           window.location.reload();
         }
-      });
-      window.onerror = function(msg, url, line, col, error) {
-        document.body.innerHTML += '<div style="color:red; z-index:9999; position:absolute; top:0; left:0; background:white; padding:20px;">' + msg + '<br>' + (error && error.stack) + '</div>';
-      };
-      window.addEventListener('unhandledrejection', function(event) {
-        document.body.innerHTML += '<div style="color:red; z-index:9999; position:absolute; top:50px; left:0; background:white; padding:20px;">' + event.reason + '</div>';
       });
     </script>
     <title>Safivra — Personal Financial Management</title>
