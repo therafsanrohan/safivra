@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { cacheGet, cacheSet } from '../lib/redis';
+import { checkRateLimit } from '../lib/rateLimit';
 
 function getSupabaseClient(authHeader?: string) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -26,6 +28,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Rate Limiting Check
+  const allowed = await checkRateLimit(req, res);
+  if (!allowed) return;
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ error: 'Missing authorization header' });
@@ -40,21 +46,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const monthsBack = Math.min(Number(req.query.months) || 6, 24);
+    const cacheKey = `dashboard:${user.id}:${monthsBack}`;
 
-    // Single aggregated RPC call replacing 7 separate monthly queries
+    // 1. Try Redis cache first (Phase 4 optimization)
+    const cachedSummary = await cacheGet<any>(cacheKey);
+    if (cachedSummary) {
+      res.setHeader('X-Cache', 'HIT');
+      res.setHeader('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+      return res.status(200).json({ success: true, data: cachedSummary, source: 'cache' });
+    }
+
+    // 2. Cache miss — fetch from database via single aggregated RPC
     const { data, error } = await supabase.rpc('get_dashboard_summary', {
       p_months_back: monthsBack,
     });
 
     if (error) throw error;
 
-    // Cache summary response for 60 seconds (s-maxage=60, stale-while-revalidate=120)
-    res.setHeader(
-      'Cache-Control',
-      'private, max-age=10, s-maxage=60, stale-while-revalidate=120'
-    );
+    // 3. Store in Redis cache for 5 minutes (300 seconds)
+    if (data) {
+      await cacheSet(cacheKey, data, 300);
+    }
 
-    return res.status(200).json({ success: true, data });
+    res.setHeader('X-Cache', 'MISS');
+    res.setHeader('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+
+    return res.status(200).json({ success: true, data, source: 'database' });
   } catch (err: any) {
     return res.status(500).json({
       error: 'Server error fetching dashboard summary',
