@@ -17,73 +17,102 @@ BEGIN;
 -- 1. Financial Integrity Check Function
 -- ────────────────────────────────────────────────────────────────
 
-CREATE OR REPLACE FUNCTION public.check_financial_integrity()
+CREATE OR REPLACE FUNCTION public.check_financial_integrity(p_target_user_id UUID DEFAULT NULL)
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_user_id UUID := auth.uid();
+  v_user_id UUID := COALESCE(p_target_user_id, auth.uid());
   v_orphaned_txns          INT := 0;
   v_unbalanced_txns        INT := 0;
   v_cross_user_entries     INT := 0;
   v_nonzero_opening_bal    INT := 0;
   v_invalid_void_state     INT := 0;
 BEGIN
-  IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'Authentication required';
+  IF v_user_id IS NOT NULL THEN
+    -- Check specific user
+    SELECT COUNT(*) INTO v_orphaned_txns
+    FROM public.ledger_transactions lt
+    WHERE lt.user_id = v_user_id
+      AND lt.status = 'posted'
+      AND (SELECT COUNT(*) FROM public.ledger_entries le WHERE le.ledger_transaction_id = lt.id) < 2;
+
+    SELECT COUNT(*) INTO v_unbalanced_txns
+    FROM public.ledger_transactions lt
+    WHERE lt.user_id = v_user_id
+      AND lt.status = 'posted'
+      AND lt.transaction_type NOT IN ('opening_balance', 'balance_adjustment')
+      AND (
+        SELECT SUM(CASE
+          WHEN le.entry_role IN ('asset_debit', 'transfer_in', 'liability_credit')       THEN  le.amount
+          WHEN le.entry_role IN ('asset_credit', 'transfer_out', 'fee_expense',
+                                 'liability_debit', 'income_credit', 'expense_debit')    THEN -le.amount
+          ELSE 0
+        END)
+        FROM public.ledger_entries le
+        WHERE le.ledger_transaction_id = lt.id
+      ) != 0;
+
+    SELECT COUNT(*) INTO v_cross_user_entries
+    FROM public.ledger_entries le
+    JOIN public.financial_accounts fa ON fa.id = le.financial_account_id
+    WHERE le.user_id = v_user_id
+      AND fa.user_id != v_user_id;
+
+    SELECT COUNT(*) INTO v_nonzero_opening_bal
+    FROM public.financial_accounts
+    WHERE user_id = v_user_id
+      AND is_archived = FALSE
+      AND opening_balance != 0;
+
+    SELECT COUNT(*) INTO v_invalid_void_state
+    FROM public.ledger_transactions
+    WHERE user_id = v_user_id
+      AND voided_at IS NOT NULL
+      AND status = 'posted';
+  ELSE
+    -- System-wide check (for Supabase SQL Editor / Admin execution)
+    SELECT COUNT(*) INTO v_orphaned_txns
+    FROM public.ledger_transactions lt
+    WHERE lt.status = 'posted'
+      AND (SELECT COUNT(*) FROM public.ledger_entries le WHERE le.ledger_transaction_id = lt.id) < 2;
+
+    SELECT COUNT(*) INTO v_unbalanced_txns
+    FROM public.ledger_transactions lt
+    WHERE lt.status = 'posted'
+      AND lt.transaction_type NOT IN ('opening_balance', 'balance_adjustment')
+      AND (
+        SELECT SUM(CASE
+          WHEN le.entry_role IN ('asset_debit', 'transfer_in', 'liability_credit')       THEN  le.amount
+          WHEN le.entry_role IN ('asset_credit', 'transfer_out', 'fee_expense',
+                                 'liability_debit', 'income_credit', 'expense_debit')    THEN -le.amount
+          ELSE 0
+        END)
+        FROM public.ledger_entries le
+        WHERE le.ledger_transaction_id = lt.id
+      ) != 0;
+
+    SELECT COUNT(*) INTO v_cross_user_entries
+    FROM public.ledger_entries le
+    JOIN public.financial_accounts fa ON fa.id = le.financial_account_id
+    WHERE le.user_id != fa.user_id;
+
+    SELECT COUNT(*) INTO v_nonzero_opening_bal
+    FROM public.financial_accounts
+    WHERE is_archived = FALSE
+      AND opening_balance != 0;
+
+    SELECT COUNT(*) INTO v_invalid_void_state
+    FROM public.ledger_transactions
+    WHERE voided_at IS NOT NULL
+      AND status = 'posted';
   END IF;
 
-  -- Check 1: Orphaned transactions (< 2 ledger entries = broken double-entry)
-  SELECT COUNT(*) INTO v_orphaned_txns
-  FROM public.ledger_transactions lt
-  WHERE lt.user_id = v_user_id
-    AND lt.status = 'posted'
-    AND (SELECT COUNT(*) FROM public.ledger_entries le WHERE le.ledger_transaction_id = lt.id) < 2;
-
-  -- Check 2: Unbalanced transactions (debit != credit)
-  SELECT COUNT(*) INTO v_unbalanced_txns
-  FROM public.ledger_transactions lt
-  WHERE lt.user_id = v_user_id
-    AND lt.status = 'posted'
-    AND lt.transaction_type NOT IN ('opening_balance', 'balance_adjustment')
-    AND (
-      SELECT SUM(CASE
-        WHEN le.entry_role IN ('asset_debit', 'transfer_in', 'liability_credit')       THEN  le.amount
-        WHEN le.entry_role IN ('asset_credit', 'transfer_out', 'fee_expense',
-                               'liability_debit', 'income_credit', 'expense_debit')    THEN -le.amount
-        ELSE 0
-      END)
-      FROM public.ledger_entries le
-      WHERE le.ledger_transaction_id = lt.id
-    ) != 0;
-
-  -- Check 3: Entries referencing an account owned by a different user
-  SELECT COUNT(*) INTO v_cross_user_entries
-  FROM public.ledger_entries le
-  JOIN public.financial_accounts fa ON fa.id = le.financial_account_id
-  WHERE le.user_id = v_user_id
-    AND fa.user_id != v_user_id;
-
-  -- Check 4: Accounts with non-zero opening_balance column
-  -- (after fix_double_calc migration, this should always be 0)
-  SELECT COUNT(*) INTO v_nonzero_opening_bal
-  FROM public.financial_accounts
-  WHERE user_id = v_user_id
-    AND is_archived = FALSE
-    AND opening_balance != 0;
-
-  -- Check 5: Voided transactions still showing as posted
-  SELECT COUNT(*) INTO v_invalid_void_state
-  FROM public.ledger_transactions
-  WHERE user_id = v_user_id
-    AND voided_at IS NOT NULL
-    AND status = 'posted';
-
   RETURN json_build_object(
-    'user_id',   v_user_id,
-    'checked_at', NOW(),
+    'target_user_id', COALESCE(v_user_id::TEXT, 'ALL_USERS_SYSTEM_WIDE'),
+    'checked_at',     NOW(),
     'status', CASE
       WHEN (v_orphaned_txns + v_unbalanced_txns + v_cross_user_entries +
             v_nonzero_opening_bal + v_invalid_void_state) = 0
