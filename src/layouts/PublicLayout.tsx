@@ -2,10 +2,13 @@ import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/Logo';
 import { useAuthContext } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/Button';
 
 export const PublicLayout: React.FC = () => {
   const { user } = useAuthContext();
+  const { locale } = useLanguage();
+  const isBn = locale === 'bn';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   return (
@@ -90,61 +93,39 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      <footer className="w-full bg-[var(--color-bg-surface)] border-t border-[var(--color-border)] py-12 px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Logo textClassName="text-lg" />
+      <footer className="w-full bg-[var(--color-bg-surface)] border-t border-[var(--color-border)] py-12 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 text-sm text-[var(--color-text-secondary)]">
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-[var(--color-text-primary)]">Safivra</h3>
+              <p className="max-w-xs leading-relaxed">
+                {isBn ? 'আপনার ব্যক্তিগত অর্থের হিসাব রাখার বিশ্বস্ত সঙ্গী।' : 'Your trusted companion for personal financial management.'}
+              </p>
+              <p>
+                <span className="font-semibold">{isBn ? 'নির্মাতা' : 'Developed by'}</span> <a href="https://www.creatiancy.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Creatiancy</a>
+              </p>
             </div>
-            <p className="text-sm text-[var(--color-text-secondary)]">Your money, finally makes sense.</p>
+            <div className="grid grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h4 className="font-semibold text-[var(--color-text-primary)]">{isBn ? 'প্রোডাক্ট' : 'Product'}</h4>
+                <ul className="space-y-2">
+                  <li><a href="/#features" className="hover:text-[var(--color-text-primary)]">{isBn ? 'ফিচারসমূহ' : 'Features'}</a></li>
+                  <li><Link to="/security" className="hover:text-[var(--color-text-primary)]">{isBn ? 'নিরাপত্তা' : 'Security'}</Link></li>
+                  <li><a href="/#faq" className="hover:text-[var(--color-text-primary)]">{isBn ? 'সাধারণ জিজ্ঞাসা' : 'FAQ'}</a></li>
+                </ul>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-semibold text-[var(--color-text-primary)]">{isBn ? 'লিগ্যাল' : 'Legal'}</h4>
+                <ul className="space-y-2">
+                  <li><Link to="/privacy-policy" className="hover:text-[var(--color-text-primary)]">{isBn ? 'গোপনীয়তা নীতি' : 'Privacy Policy'}</Link></li>
+                  <li><Link to="/terms-of-use" className="hover:text-[var(--color-text-primary)]">{isBn ? 'ব্যবহারের শর্তাবলী' : 'Terms of Use'}</Link></li>
+                </ul>
+              </div>
+            </div>
           </div>
-          
-          <div>
-            <h4 className="font-semibold text-[var(--color-text-primary)] mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
-              <li><a href="/#features" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Features</a></li>
-              <li><Link to="/security" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Security</Link></li>
-              <li><a href="/#faq" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">FAQ</a></li>
-            </ul>
+          <div className="mt-12 pt-8 border-t border-[var(--color-border)] flex flex-col md:flex-row items-center justify-between gap-4">
+            <p>&copy; {new Date().getFullYear()} Safivra. {isBn ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}</p>
           </div>
-          
-          <div>
-            <h4 className="font-semibold text-[var(--color-text-primary)] mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
-              <li><Link to="/privacy-policy" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Privacy Policy</Link></li>
-              <li><Link to="/terms-of-use" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Terms of Use</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-[var(--color-text-primary)] mb-4">Account</h4>
-            <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
-              {user ? (
-                <li><Link to="/dashboard" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Dashboard</Link></li>
-              ) : (
-                <>
-                  <li><Link to="/auth/sign-in" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Sign In</Link></li>
-                  <li><Link to="/auth/sign-up" className="hover:text-[var(--color-accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded">Create Account</Link></li>
-                </>
-              )}
-            </ul>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto pt-8 border-t border-[var(--color-border)] flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--color-text-muted)]">
-          <p>© {new Date().getFullYear()} Safivra. All rights reserved.</p>
-          <p>
-            Developed by{' '}
-            <a 
-              href="https://www.corevow.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded"
-              style={{ textDecoration: 'none' }}
-            >
-              Corevow
-            </a>
-          </p>
         </div>
       </footer>
     </div>
