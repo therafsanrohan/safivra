@@ -96,7 +96,7 @@ export const DashboardPage: React.FC = () => {
             .limit(5),
           supabase
             .from('ledger_transactions')
-            .select('id, title, transaction_type, transaction_date')
+            .select('id, title, transaction_type, transaction_date, ledger_entries(amount, entry_role)')
             .eq('user_id', user.id)
             .eq('status', 'posted')
             .order('transaction_date', { ascending: false })
@@ -113,28 +113,34 @@ export const DashboardPage: React.FC = () => {
 
       const accounts: AccountBalance[] = (accountsResult.data ?? []) as AccountBalance[];
 
-      // Get monthly summary from DB function
+      // Get monthly summary + 6-month cashflow in a single batch
       const now = new Date();
-      const summaryResult = await supabase.rpc('get_monthly_summary', {
-        p_year: now.getFullYear(),
-        p_month: now.getMonth() + 1,
-      } as unknown as never);
-      if (summaryResult.error) throw summaryResult.error;
-      const summary: MonthlySummary = (summaryResult.data as MonthlySummary | null) ?? { income: 0, expense: 0, net: 0 };
-
-      // Get 6-month cashflow for chart
       const months = lastNMonths(6);
-      const cashflowHistory = await Promise.all(
-        months.map(async (m) => {
-          const s = await supabase.rpc('get_monthly_summary', {
+      const allSummaryPromises = [
+        supabase.rpc('get_monthly_summary', {
+          p_year: now.getFullYear(),
+          p_month: now.getMonth() + 1,
+        } as unknown as never),
+        ...months.map((m) =>
+          supabase.rpc('get_monthly_summary', {
             p_year: m.year,
             p_month: m.month,
-          } as unknown as never);
-          if (s.error) throw s.error;
-          const ms: MonthlySummary = (s.data as MonthlySummary | null) ?? { income: 0, expense: 0, net: 0 };
-          return { label: m.label, income: ms.income, expense: ms.expense };
-        })
-      );
+          } as unknown as never)
+        ),
+      ];
+      const summaryResults = await Promise.all(allSummaryPromises);
+
+      // First result is current month
+      if (summaryResults[0].error) throw summaryResults[0].error;
+      const summary: MonthlySummary = (summaryResults[0].data as MonthlySummary | null) ?? { income: 0, expense: 0, net: 0 };
+
+      // Remaining results are 6-month history
+      const cashflowHistory = months.map((m, i) => {
+        const s = summaryResults[i + 1];
+        if (s.error) console.warn(`[Dashboard] Cashflow fetch error for ${m.label}:`, s.error);
+        const ms: MonthlySummary = (s.data as MonthlySummary | null) ?? { income: 0, expense: 0, net: 0 };
+        return { label: m.label, income: ms.income, expense: ms.expense };
+      });
 
       // Calculate loan outstanding from liability accounts
       const loanAccountIds = new Set<string>(
@@ -158,15 +164,26 @@ export const DashboardPage: React.FC = () => {
         overdue: isOverdue(l.next_payment_date!),
       }));
 
-      const recentTransactions: RecentTransaction[] = ((recentTxResult.data as Array<{id: string; title: string; transaction_type: string; transaction_date: string}>) ?? []).map((tx) => ({
-        id: tx.id,
-        title: tx.title,
-        amount: 0,
-        type: tx.transaction_type,
-        date: tx.transaction_date,
-        isIncome: tx.transaction_type === 'income',
-        isTransfer: tx.transaction_type === 'transfer',
-      }));
+      const recentTransactions: RecentTransaction[] = ((recentTxResult.data as Array<{id: string; title: string; transaction_type: string; transaction_date: string; ledger_entries: Array<{amount: number; entry_role: string}>}>) ?? []).map((tx) => {
+        const entries = tx.ledger_entries ?? [];
+        const isIncome = tx.transaction_type === 'income';
+        const isTransfer = tx.transaction_type === 'transfer';
+        // Get the primary display amount from ledger entries
+        const primaryEntry = entries.find((e) =>
+          isIncome ? e.entry_role === 'asset_debit' : e.entry_role === 'asset_credit' || e.entry_role === 'expense_debit'
+        ) || entries[0];
+        const amount = primaryEntry ? Math.abs(Number(primaryEntry.amount)) : 0;
+
+        return {
+          id: tx.id,
+          title: tx.title,
+          amount,
+          type: tx.transaction_type,
+          date: tx.transaction_date,
+          isIncome,
+          isTransfer,
+        };
+      });
 
       setUnreadCount(notifResult.count ?? 0);
       setData({ accounts, monthlySummary: summary, cashflowHistory, loanOutstanding, creditOutstanding, upcomingPayments, recentTransactions });
@@ -398,7 +415,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
                 <span className={['font-semibold tabular-nums text-[var(--text-body)] shrink-0', tx.isIncome ? 'text-[var(--color-positive)]' : ''].join(' ')} data-financial>
                   {tx.isIncome ? '+' : tx.isTransfer ? '' : '-'}
-                  {balanceHidden ? '••••' : '—'}
+                  {balanceHidden ? '••••' : formatCurrency(tx.amount)}
                 </span>
               </Link>
             ))}

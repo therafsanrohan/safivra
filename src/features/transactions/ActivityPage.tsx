@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 
+const PAGE_SIZE = 50;
+
 interface TxRow {
   id: string;
   title: string;
@@ -30,13 +32,20 @@ export const ActivityPage: React.FC = () => {
   const { t, locale } = useLanguage();
   const [transactions, setTransactions] = useState<TxRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
-  const fetchTransactions = useCallback(async () => {
+  const fetchTransactions = useCallback(async (offset = 0, append = false) => {
     if (!user) return;
-    setLoading(true);
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setError('');
 
     try {
@@ -45,30 +54,39 @@ export const ActivityPage: React.FC = () => {
         .select(`
           id, title, transaction_type, transaction_date, merchant, status,
           ledger_entries(id, amount, entry_role)
-        `)
+        `, { count: 'exact' })
         .eq('user_id', user.id)
         .order('transaction_date', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
 
       if (typeFilter !== 'all') {
         query = query.eq('transaction_type', typeFilter);
       }
 
-      const { data, error: fetchErr } = await query;
+      const { data, error: fetchErr, count } = await query;
       if (fetchErr) throw fetchErr;
 
-      setTransactions((data as unknown as TxRow[]) ?? []);
+      const newData = (data as unknown as TxRow[]) ?? [];
+      setTransactions((prev) => append ? [...prev, ...newData] : newData);
+      setTotalCount(count ?? 0);
+      setHasMore(newData.length === PAGE_SIZE);
     } catch (err: any) {
       setError(err?.message || 'Could not fetch transactions');
-      setTransactions([]);
+      if (!append) setTransactions([]);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, [user, typeFilter]);
 
   useEffect(() => {
-    fetchTransactions();
+    fetchTransactions(0, false);
   }, [fetchTransactions]);
+
+  const handleLoadMore = () => {
+    fetchTransactions(transactions.length, true);
+  };
 
   const filteredTransactions = transactions.filter((tx) => {
     if (!searchQuery.trim()) return true;
@@ -95,7 +113,7 @@ export const ActivityPage: React.FC = () => {
   if (error) {
     return (
       <div className="page-container pt-6">
-        <ErrorState message={error} onRetry={fetchTransactions} />
+        <ErrorState message={error} onRetry={() => fetchTransactions(0, false)} />
       </div>
     );
   }
@@ -110,7 +128,9 @@ export const ActivityPage: React.FC = () => {
             {t.activity.title}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            {isBn ? 'সকল অনুমোদিত ও সংরক্ষিত লেনদেন' : 'All posted ledger transactions'}
+            {totalCount > 0
+              ? (isBn ? `মোট ${totalCount}টি লেনদেন` : `${totalCount} transactions total`)
+              : (isBn ? 'সকল অনুমোদিত ও সংরক্ষিত লেনদেন' : 'All posted ledger transactions')}
           </p>
         </div>
         <Link to="/dashboard/activity/add">
@@ -137,7 +157,7 @@ export const ActivityPage: React.FC = () => {
             options={[
               { value: 'all', label: isBn ? 'সকল ধরন' : 'All Types' },
               { value: 'expense', label: isBn ? 'খরচ (Expense)' : 'Expense' },
-              { value: 'income', label: isBn ? 'আয় (Income)' : 'Income' },
+              { value: 'income', label: isBn ? 'আয় (Income)' : 'Income' },
               { value: 'transfer', label: isBn ? 'স্থানান্তর (Transfer)' : 'Transfer' },
               { value: 'loan_payment', label: isBn ? 'ঋণ পরিশোধ' : 'Loan Payment' },
               { value: 'credit_card_payment', label: isBn ? 'কার্ড পরিশোধ' : 'Card Payment' },
@@ -150,7 +170,7 @@ export const ActivityPage: React.FC = () => {
       {filteredTransactions.length === 0 ? (
         <EmptyState
           icon={<ReceiptText size={22} />}
-          title={isBn ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}
+          title={isBn ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}
           description={searchQuery ? (isBn ? 'অনুসন্ধান বা ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।' : 'Try adjusting your search query or filter.') : (isBn ? 'শুরু করতে আপনার প্রথম লেনদেন যোগ করুন।' : 'Record your first transaction to get started.')}
           action={
             !searchQuery ? (
@@ -217,6 +237,19 @@ export const ActivityPage: React.FC = () => {
               );
             })}
           </div>
+          {/* Load More */}
+          {hasMore && !searchQuery && (
+            <div className="px-5 py-4 flex justify-center border-t border-[var(--color-border)]">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleLoadMore}
+                loading={loadingMore}
+              >
+                {isBn ? 'আরও দেখুন' : 'Load More'}
+              </Button>
+            </div>
+          )}
         </Card>
       )}
     </div>

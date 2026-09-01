@@ -28,7 +28,7 @@ export const AppLayout: React.FC = () => {
        const removeListener = platform.lifecycle.onBackButton(() => {
          // Handle back button clicks:
          // 1. If we are on the dashboard root path "/", let the app default exit or do nothing
-         if (location.pathname === '/') {
+         if (location.pathname === '/dashboard') {
            return;
          }
          // 2. Otherwise navigate back in the React Router history stack

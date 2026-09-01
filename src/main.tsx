@@ -59,6 +59,14 @@ window.addEventListener('error', (event) => {
   }
 });
 
+// ─── Theme Initialization (prevent FOUC) ─────────────────────────────────────
+const storedTheme = localStorage.getItem('safivra_theme');
+if (storedTheme === 'dark') {
+  document.documentElement.setAttribute('data-theme', 'dark');
+} else if (storedTheme === 'light') {
+  document.documentElement.setAttribute('data-theme', 'light');
+}
+
 // ─── App Bootstrap ────────────────────────────────────────────────────────────
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found');
@@ -70,3 +78,6 @@ ReactDOM.createRoot(root).render(
     </PlatformProvider>
   </React.StrictMode>
 );
+
+// ─── Web Vitals (deferred) ────────────────────────────────────────────────────
+import('./lib/monitoring/webVitals').then(({ initWebVitals }) => initWebVitals());

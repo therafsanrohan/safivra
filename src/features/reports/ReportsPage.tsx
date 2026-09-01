@@ -46,7 +46,7 @@ export const ReportsPage: React.FC = () => {
     setError('');
 
     try {
-      const { data, error: fetchErr } = await (supabase.from('ledger_transactions') as any)
+      let query = (supabase.from('ledger_transactions') as any)
         .select(`
           id, title, transaction_type, transaction_date, merchant, description, status,
           ledger_entries(
@@ -59,6 +59,19 @@ export const ReportsPage: React.FC = () => {
         .eq('status', 'posted')
         .order('transaction_date', { ascending: false });
 
+      if (dateRangeMode === 'month') {
+        const startStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`;
+        const lastDay = new Date(selectedYear, selectedMonth, 0).getDate();
+        const endStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
+        query = query.gte('transaction_date', startStr).lte('transaction_date', endStr);
+      } else if (dateRangeMode === 'year') {
+        const startStr = `${selectedYear}-01-01`;
+        const endStr = `${selectedYear}-12-31T23:59:59.999Z`;
+        query = query.gte('transaction_date', startStr).lte('transaction_date', endStr);
+      }
+
+      const { data, error: fetchErr } = await query;
+
       if (fetchErr) throw fetchErr;
       setTransactions((data as unknown as TransactionWithEntries[]) ?? []);
     } catch (err: any) {
@@ -68,26 +81,11 @@ export const ReportsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, dateRangeMode, selectedMonth, selectedYear]);
 
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
-
-  // Filter transactions according to selected range
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
-      if (dateRangeMode === 'all') return true;
-      const txDate = new Date(tx.transaction_date);
-      const txYear = txDate.getFullYear();
-      const txMonth = txDate.getMonth() + 1;
-
-      if (dateRangeMode === 'year') {
-        return txYear === selectedYear;
-      }
-      return txYear === selectedYear && txMonth === selectedMonth;
-    });
-  }, [transactions, selectedYear, selectedMonth, dateRangeMode]);
 
   // Calculate Aggregates
   const analytics = useMemo(() => {
@@ -97,7 +95,7 @@ export const ReportsPage: React.FC = () => {
     const categoryIncomeMap: Record<string, number> = {};
     const accountActivityMap: Record<string, number> = {};
 
-    for (const tx of filteredTransactions) {
+    for (const tx of transactions) {
       const entries = tx.ledger_entries ?? [];
       
       // Find category entry or default to first entry
@@ -168,13 +166,13 @@ export const ReportsPage: React.FC = () => {
       expenseCategories,
       incomeCategories,
       accountActivity,
-      txCount: filteredTransactions.length,
+      txCount: transactions.length,
     };
-  }, [filteredTransactions, isBn]);
+  }, [transactions, isBn]);
 
   // Export Full CSV
   const exportCSV = () => {
-    if (filteredTransactions.length === 0) return;
+    if (transactions.length === 0) return;
 
     const headers = [
       'Date',
@@ -188,7 +186,7 @@ export const ReportsPage: React.FC = () => {
       'Status'
     ];
 
-    const rows = filteredTransactions.map((tx) => {
+    const rows = transactions.map((tx) => {
       const entries = tx.ledger_entries ?? [];
       const catEntry = entries.find((e) => e.category?.name);
       const accEntry = entries.find((e) => e.financial_account?.name);
@@ -286,7 +284,7 @@ export const ReportsPage: React.FC = () => {
             {isBn ? 'আয় ও ব্যয়ের বিশ্লেষণ এবং সিএসভি ডাটা এক্সপোর্ট' : 'Income vs expense breakdown and CSV data exports'}
           </p>
         </div>
-        <Button size="sm" variant="secondary" onClick={exportCSV} className="gap-1.5 self-start sm:self-auto" disabled={filteredTransactions.length === 0}>
+        <Button size="sm" variant="secondary" onClick={exportCSV} className="gap-1.5 self-start sm:self-auto" disabled={transactions.length === 0}>
           <Download size={16} /> {isBn ? 'সিএসভি ডাউনলোড' : 'Export CSV'}
         </Button>
       </header>
