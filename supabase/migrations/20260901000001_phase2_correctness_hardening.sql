@@ -44,8 +44,7 @@ CREATE INDEX IF NOT EXISTS idx_idempotency_keys_user_key
   ON public.idempotency_keys (user_id, idempotency_key);
 
 CREATE INDEX IF NOT EXISTS idx_idempotency_keys_expires
-  ON public.idempotency_keys (expires_at)
-  WHERE expires_at < NOW(); -- Partial index for efficient cleanup
+  ON public.idempotency_keys (expires_at);
 
 ALTER TABLE public.idempotency_keys ENABLE ROW LEVEL SECURITY;
 
