@@ -99,20 +99,41 @@ export const ReportsPage: React.FC = () => {
 
     for (const tx of filteredTransactions) {
       const entries = tx.ledger_entries ?? [];
-      const primaryEntry = entries[0];
-      const amount = primaryEntry ? Number(primaryEntry.amount) : 0;
-      const catName = primaryEntry?.category?.name || (isBn ? 'অন্যান্য' : 'Uncategorized');
-      const accName = primaryEntry?.financial_account?.name || (isBn ? 'সাধারণ' : 'General');
+      
+      // Find category entry or default to first entry
+      const categoryEntry = entries.find((e) => e.category?.name) || entries[0];
+      const accountEntry = entries.find((e) => e.financial_account?.name) || entries[0];
 
-      if (tx.transaction_type === 'income') {
-        income += amount;
-        categoryIncomeMap[catName] = (categoryIncomeMap[catName] || 0) + amount;
-      } else if (tx.transaction_type === 'expense' || tx.transaction_type === 'loan_payment' || tx.transaction_type === 'credit_card_payment') {
-        expense += amount;
-        categoryExpenseMap[catName] = (categoryExpenseMap[catName] || 0) + amount;
+      const catName = categoryEntry?.category?.name || (isBn ? 'অন্যান্য' : 'Uncategorized');
+      const accName = accountEntry?.financial_account?.name || (isBn ? 'সাধারণ' : 'General');
+
+      // Income entries
+      const incomeEntries = entries.filter((e) => e.entry_role === 'income_credit');
+      const txIncome = incomeEntries.reduce((sum, e) => sum + Number(e.amount), 0);
+
+      // Expense entries
+      const expenseEntries = entries.filter((e) =>
+        ['expense_debit', 'fee_expense'].includes(e.entry_role)
+      );
+      const txExpense = expenseEntries.reduce((sum, e) => sum + Number(e.amount), 0);
+
+      if (tx.transaction_type === 'income' || txIncome > 0) {
+        const amt = txIncome > 0 ? txIncome : Number(categoryEntry?.amount || 0);
+        income += amt;
+        categoryIncomeMap[catName] = (categoryIncomeMap[catName] || 0) + amt;
       }
 
-      accountActivityMap[accName] = (accountActivityMap[accName] || 0) + amount;
+      if (
+        ['expense', 'loan_payment', 'credit_card_payment', 'credit_card_purchase', 'fee'].includes(tx.transaction_type) ||
+        txExpense > 0
+      ) {
+        const amt = txExpense > 0 ? txExpense : Number(categoryEntry?.amount || 0);
+        expense += amt;
+        categoryExpenseMap[catName] = (categoryExpenseMap[catName] || 0) + amt;
+      }
+
+      const totalTxAmount = Number(entries[0]?.amount || 0);
+      accountActivityMap[accName] = (accountActivityMap[accName] || 0) + totalTxAmount;
     }
 
     const netSavings = income - expense;
@@ -135,6 +156,10 @@ export const ReportsPage: React.FC = () => {
       }))
       .sort((a, b) => b.total - a.total);
 
+    const accountActivity = Object.entries(accountActivityMap)
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+
     return {
       income,
       expense,
@@ -142,6 +167,7 @@ export const ReportsPage: React.FC = () => {
       savingsRate,
       expenseCategories,
       incomeCategories,
+      accountActivity,
       txCount: filteredTransactions.length,
     };
   }, [filteredTransactions, isBn]);
@@ -163,10 +189,13 @@ export const ReportsPage: React.FC = () => {
     ];
 
     const rows = filteredTransactions.map((tx) => {
-      const primaryEntry = tx.ledger_entries?.[0];
-      const amount = primaryEntry ? Number(primaryEntry.amount) : 0;
-      const cat = primaryEntry?.category?.name || '';
-      const acc = primaryEntry?.financial_account?.name || '';
+      const entries = tx.ledger_entries ?? [];
+      const catEntry = entries.find((e) => e.category?.name);
+      const accEntry = entries.find((e) => e.financial_account?.name);
+
+      const amount = Number(entries[0]?.amount || 0);
+      const cat = catEntry?.category?.name || '';
+      const acc = accEntry?.financial_account?.name || '';
       const merchant = tx.merchant || '';
       const notes = (tx.description || '').replace(/"/g, '""');
       const title = (tx.title || '').replace(/"/g, '""');
@@ -184,19 +213,21 @@ export const ReportsPage: React.FC = () => {
       ];
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [
+    const csvContent = '\uFEFF' + [
       headers.join(','),
       ...rows.map((r) => r.join(','))
     ].join('\n');
 
-    const encodedUri = encodeURI(csvContent);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.href = url;
     const fileName = `safivra_report_${selectedYear}_${dateRangeMode === 'month' ? selectedMonth : dateRangeMode}.csv`;
     link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
