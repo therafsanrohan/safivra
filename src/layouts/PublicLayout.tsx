@@ -101,9 +101,6 @@ export const PublicLayout: React.FC = () => {
               <p className="max-w-xs leading-relaxed">
                 {isBn ? 'আপনার ব্যক্তিগত অর্থের হিসাব রাখার বিশ্বস্ত সঙ্গী।' : 'Your trusted companion for personal financial management.'}
               </p>
-              <p>
-                <span className="font-semibold">{isBn ? 'নির্মাতা' : 'Developed by'}</span> <a href="https://www.creatiancy.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Creatiancy</a>
-              </p>
             </div>
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
@@ -125,6 +122,9 @@ export const PublicLayout: React.FC = () => {
           </div>
           <div className="mt-12 pt-8 border-t border-[var(--color-border)] flex flex-col md:flex-row items-center justify-between gap-4">
             <p>&copy; {new Date().getFullYear()} Safivra. {isBn ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}</p>
+            <p>
+              <span className="font-semibold">{isBn ? 'নির্মাতা' : 'Developed by'}</span> <a href="https://www.creatiancy.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Creatiancy</a>
+            </p>
           </div>
         </div>
       </footer>
