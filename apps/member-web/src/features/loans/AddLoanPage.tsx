@@ -84,19 +84,25 @@ export const AddLoanPage: React.FC = () => {
       // Step 3: Post opening balance for loan liability
       const initialOutstanding = data.opening_outstanding ?? data.original_principal;
       if (initialOutstanding > 0 && newAcc) {
-        await supabase.rpc('post_transaction', {
+        const { error: rpcErr } = await supabase.rpc('post_transaction', {
           p_transaction_type: 'opening_balance',
           p_transaction_date: data.start_date,
           p_title: `Opening Loan Principal — ${data.name}`,
           p_amount: initialOutstanding,
           p_account_id: newAcc.id,
-        } as unknown as never);
+        } as any);
+
+        if (rpcErr) {
+          console.error("RPC Error:", rpcErr);
+          throw rpcErr;
+        }
       }
 
       success('Loan added', `${data.name} recorded successfully.`);
       navigate('/dashboard/loans');
-    } catch (err) {
-      showError('Failed to record loan', parseError(err).message);
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      showError('Failed to record loan', err?.message || parseError(err).message);
     } finally {
       setSubmitting(false);
     }
