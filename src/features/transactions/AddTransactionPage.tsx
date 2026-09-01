@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toast';
 import { parseError } from '@/lib/errors/handler';
 import { todayString } from '@/lib/dates/formatter';
 import { useIdempotencyKey } from '@/lib/idempotency';
+import { postTransactionApi } from '@/lib/api/stranglerClient';
 import {
   expenseSchema, incomeSchema, transferSchema,
   loanPaymentSchema, creditCardPaymentSchema,
@@ -88,11 +89,14 @@ export const AddTransactionPage: React.FC = () => {
   ) => {
     setSubmitting(true);
     try {
-      const { error } = await supabase.rpc('post_transaction', {
-        p_transaction_type: type,
-        p_idempotency_key: idempotencyKey,
-        ...params,
-      } as unknown as never);
+      const { error } = await postTransactionApi(
+        {
+          p_transaction_type: type,
+          p_idempotency_key: idempotencyKey,
+          ...(params as any),
+        },
+        user?.id
+      );
       if (error) throw error;
       success(`${txInfo.label} recorded`, 'Transaction saved successfully.');
       navigate('/dashboard/activity');
