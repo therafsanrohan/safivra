@@ -123,11 +123,9 @@ CREATE INDEX IF NOT EXISTS idx_credit_cards_user_status
 CREATE INDEX IF NOT EXISTS idx_ledger_entries_txn_account
   ON public.ledger_entries (ledger_transaction_id, financial_account_id);
 
--- ────────────────────────────────────────────────────────────────
--- 3. Ensure post_transaction execute privileges are explicit
--- ────────────────────────────────────────────────────────────────
-REVOKE EXECUTE ON FUNCTION public.post_transaction(JSON) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION public.post_transaction(JSON) TO authenticated, service_role;
+-- NOTE: post_transaction() is SECURITY DEFINER and uses auth.uid() internally.
+-- Its execute privileges are managed when the function is created/replaced in Phase 2.
+-- No separate REVOKE/GRANT needed here.
 
 COMMIT;
 
