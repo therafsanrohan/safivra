@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { cacheInvalidateUser } from '../lib/redis';
+import { checkRateLimit } from '../lib/rateLimit';
 
-// Server-side Supabase Client initialized per request from Auth Token header
 function getSupabaseClient(authHeader?: string) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
@@ -23,6 +24,10 @@ function getSupabaseClient(authHeader?: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Content-Type', 'application/json');
 
+  // Rate Limiting Check
+  const allowed = await checkRateLimit(req, res);
+  if (!allowed) return;
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ error: 'Missing authorization header' });
@@ -31,7 +36,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const supabase = getSupabaseClient(authHeader);
 
-    // Verify token & user session
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) {
       return res.status(401).json({ error: 'Unauthorized token or expired session' });
@@ -57,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ data, count, limit, offset });
     }
 
-    // ── POST: Record new financial transaction (with Idempotency) ──────────────
+    // ── POST: Record new financial transaction (with Idempotency + Cache Invalidation)
     if (req.method === 'POST') {
       const body = req.body || {};
       const {
@@ -103,10 +107,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (error) throw error;
+
+      // Invalidate user's cached read models in Redis after successful mutation
+      await cacheInvalidateUser(user.id);
+
       return res.status(201).json({ success: true, data });
     }
 
-    // ── DELETE: Archive financial transaction (Soft-delete) ───────────────────
+    // ── DELETE: Archive financial transaction (Soft-delete + Cache Invalidation) 
     if (req.method === 'DELETE') {
       const id = req.query.id as string || req.body?.id;
       const reason = req.body?.reason || 'API Archive request';
@@ -122,6 +130,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (error) throw error;
+
+      // Invalidate user's cached read models in Redis
+      await cacheInvalidateUser(user.id);
+
       return res.status(200).json({ success: true, data });
     }
 
