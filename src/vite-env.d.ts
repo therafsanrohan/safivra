@@ -4,6 +4,10 @@
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
+  // Sentry error tracking — optional, only set in production Vercel
+  readonly VITE_SENTRY_DSN?: string;
+  // App version injected at build time
+  readonly VITE_APP_VERSION?: string;
 }
 
 interface ImportMeta {
