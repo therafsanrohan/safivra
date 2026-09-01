@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ZakatController } from './zakat.controller.js';
+import { ZakatController } from './zakat.controller';
 
 @Module({
   controllers: [ZakatController]

@@ -22,5 +22,6 @@
   },
   "dependencies": {
     "@tailwindcss/node": "^4.3.3"
-  }
+  },
+  "packageManager": "npm@10.8.2"
 }
