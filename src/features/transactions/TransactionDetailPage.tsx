@@ -142,15 +142,19 @@ export const TransactionDetailPage: React.FC = () => {
     if (!id || !tx || deleteConfirmation !== 'DELETE') return;
     setIsDeleting(true);
     try {
-      const { error: delErr } = await supabase.rpc('delete_financial_record', {
+      // Phase 2: Use archive_financial_record() instead of delete_financial_record()
+      // This voids + archives the transaction instead of permanently destroying it,
+      // preserving the full audit trail and double-entry ledger history.
+      const { error: delErr } = await supabase.rpc('archive_financial_record', {
         p_record_type: 'transaction',
         p_record_id: id,
+        p_reason: 'User deleted transaction',
       } as any);
       if (delErr) throw delErr;
-      success('Transaction Deleted', 'The transaction has been permanently deleted.');
+      success('Transaction Archived', 'The transaction has been voided and archived.');
       navigate('/dashboard/activity');
     } catch (err) {
-      showError('Could not delete transaction', parseError(err).message);
+      showError('Could not archive transaction', parseError(err).message);
     } finally {
       setIsDeleting(false);
     }
