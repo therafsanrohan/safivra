@@ -1,97 +1,55 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { SEO } from '@/components/ui/SEO';
-
-const COMPANY_NAME = '[Legal Operator Name]';
-const JURISDICTION = '[Governing Jurisdiction]';
-const CONTACT_EMAIL = '[Privacy Contact Email]';
+import { Layers } from 'lucide-react';
 
 export const TermsOfUsePage: React.FC = () => {
+  const { locale } = useLanguage();
+  const isBn = locale === 'bn';
+
   return (
     <>
-      <SEO title="Terms of Use" description="Terms of Use for Safivra." />
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4">Terms of Use</h1>
-        <p className="text-[var(--color-text-secondary)] mb-8">
-          Effective Date: [Date]<br />
-          Last Updated: [Date]
-        </p>
+      <SEO title={isBn ? 'ব্যবহারের শর্তাবলী - Safivra' : 'Terms of Use - Safivra'} />
+      <div className="w-full flex flex-col items-center overflow-x-hidden page-container pt-16 pb-20">
+        <div className="max-w-4xl w-full mx-auto space-y-8 animate-in fade-in duration-300">
+          <div className="text-center space-y-4 mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-teal-50 dark:bg-teal-950/50 flex items-center justify-center text-teal-600 mx-auto">
+              <Layers size={32} />
+            </div>
+            <h1 className="text-4xl font-extrabold text-[var(--color-text-primary)]">
+              {isBn ? 'ব্যবহারের শর্তাবলী' : 'Terms of Use'}
+            </h1>
+            <p className="text-[var(--color-text-secondary)]">
+              {isBn ? 'সর্বশেষ আপডেট: সেপ্টেম্বর ২০২৬' : 'Last Updated: September 2026'}
+            </p>
+          </div>
 
-        <div className="prose prose-slate dark:prose-invert max-w-none text-[var(--color-text-secondary)]">
-          <p>
-            Welcome to Safivra. By accessing or using our application, you agree to these Terms of Use.
-          </p>
-          
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">1. Acceptance of Terms</h2>
-          <p>
-            By creating an account and using Safivra, you agree to be bound by these Terms. If you do not agree, you must not use the service.
-          </p>
+          <div className="prose prose-teal max-w-none text-[var(--color-text-primary)]">
+            <p>
+              By accessing and using Safivra, you agree to comply with and be bound by the following terms and conditions. If you disagree with any part of these terms, please do not use our service.
+            </p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">2. Eligibility</h2>
-          <p>
-            You must be at least [Age] years old to use Safivra. By using the service, you represent and warrant that you meet this requirement.
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">1. Acceptance of Terms</h3>
+            <p>Safivra provides its service to you subject to these Terms of Use, which may be updated occasionally without notice. Your continued use of the service constitutes acceptance of any updates.</p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">3. User Account Responsibility</h2>
-          <p>
-            You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate, current, and complete information during registration.
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">2. Description of Service</h3>
+            <p>Safivra is a personal financial management tool designed to help users track expenses, budgets, loans, and assets. The application is a tool for personal use and does not provide certified financial, investment, or legal advice.</p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">4. Permitted and Prohibited Use</h2>
-          <p>
-            Safivra is provided for personal financial management. You agree not to:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 mt-4">
-            <li>Use the service for any illegal purpose.</li>
-            <li>Attempt to bypass security controls or access data belonging to other users.</li>
-            <li>Reverse engineer or misuse the software infrastructure.</li>
-            <li>Use the service to transmit malicious software.</li>
-          </ul>
+            <h3 className="text-xl font-bold mt-8 mb-4">3. User Responsibilities</h3>
+            <ul className="list-disc pl-6 space-y-2 text-[var(--color-text-secondary)]">
+              <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+              <li>You agree to provide accurate and complete information during registration.</li>
+              <li>You must not use the service for any illegal or unauthorized purpose.</li>
+            </ul>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">5. Financial Disclaimer</h2>
-          <p>
-            <strong>No Banking Relationship:</strong> Safivra is a personal financial management tool. It is not a bank, lender, or financial institution.<br />
-            <strong>No Professional Advice:</strong> Safivra does not provide investment advice, accounting advice, tax advice, or legal advice. The information you generate using Safivra is for your personal use, and you should consult a certified professional before making significant financial decisions.
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">4. Limitation of Liability</h3>
+            <p>
+              Safivra and its developers (Creatiancy) shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service. Safivra is provided "as is" without warranties of any kind.
+            </p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">6. Service Availability and Cloud Limitations</h2>
-          <p>
-            Safivra is a cloud-based service and requires an internet connection. We strive for high uptime, but we do not guarantee uninterrupted access. Service may be temporarily unavailable due to maintenance or infrastructure issues. We are not liable for data access delays during outages.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">7. User Content and Financial Records</h2>
-          <p>
-            You retain ownership of the financial data you input. By entering data into Safivra, you grant us a license to process and store it solely for the purpose of providing the service to you.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">8. Intellectual Property</h2>
-          <p>
-            The Safivra application, including its design, code, graphics, and features, is owned by {COMPANY_NAME}. You may not copy, modify, or distribute any part of the service without explicit permission.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">9. Account Suspension and Termination</h2>
-          <p>
-            We reserve the right to suspend or terminate your account if you violate these terms. You may also terminate your account at any time. Upon termination, your active data will be scheduled for deletion in accordance with our Privacy Policy.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">10. Limitation of Liability</h2>
-          <p>
-            To the maximum extent permitted by law, {COMPANY_NAME} shall not be liable for any indirect, incidental, or consequential damages resulting from your use of Safivra, including but not loss of data or financial losses.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">11. Changes to Terms</h2>
-          <p>
-            We may modify these Terms of Use at any time. Continued use of the application after changes constitute your acceptance of the updated terms.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">12. Governing Law</h2>
-          <p>
-            These terms shall be governed by and construed in accordance with the laws of {JURISDICTION}.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">13. Contact Information</h2>
-          <p>
-            If you have questions about these Terms, please contact us at {CONTACT_EMAIL}.
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">5. Intellectual Property</h3>
+            <p>All content, features, and functionality of Safivra are owned by its developers and are protected by international copyright, trademark, and other intellectual property laws.</p>
+          </div>
         </div>
       </div>
     </>

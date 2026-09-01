@@ -21,7 +21,7 @@ interface AuthActions {
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
-  updateProfile: (updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone'>>) => Promise<{ error?: string }>;
+  updateProfile: (updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone' | 'phone' | 'date_of_birth' | 'gender' | 'address' | 'country'>>) => Promise<{ error?: string }>;
   updatePreferences: (updates: Database['public']['Tables']['user_preferences']['Update']) => Promise<{ error?: string }>;
   refreshProfile: () => Promise<void>;
 }
@@ -271,7 +271,7 @@ export function useAuth(): UseAuthReturn {
   };
 
   const updateProfile = async (
-    updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone'>>
+    updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone' | 'phone' | 'date_of_birth' | 'gender' | 'address' | 'country'>>
   ): Promise<{ error?: string }> => {
     if (!state.user) return { error: 'Not authenticated' };
 

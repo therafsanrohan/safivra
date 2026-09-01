@@ -8,7 +8,7 @@
    ============================================================================= */
 
 @layer base {
-  :root {
+  :root, :root[data-theme="light"] {
     /* ── Colour Tokens (Light Theme) ──────────────────────────────────────── */
     --color-bg-page:         #F7F7F5;
     --color-bg-surface:      #FFFFFF;

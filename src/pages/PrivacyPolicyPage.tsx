@@ -1,119 +1,64 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { SEO } from '@/components/ui/SEO';
-
-const COMPANY_NAME = '[Legal Operator Name]';
-const CONTACT_EMAIL = '[Privacy Contact Email]';
-const POSTAL_ADDRESS = '[Postal Address]';
-const SUPPORT_URL = '[Support URL]';
+import { Shield } from 'lucide-react';
 
 export const PrivacyPolicyPage: React.FC = () => {
+  const { locale } = useLanguage();
+  const isBn = locale === 'bn';
+
   return (
     <>
-      <SEO title="Privacy Policy" description="Privacy policy for Safivra." />
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4">Privacy Policy</h1>
-        <p className="text-[var(--color-text-secondary)] mb-8">
-          Effective Date: [Date]<br />
-          Last Updated: [Date]
-        </p>
+      <SEO title={isBn ? 'গোপনীয়তা নীতি - Safivra' : 'Privacy Policy - Safivra'} />
+      <div className="w-full flex flex-col items-center overflow-x-hidden page-container pt-16 pb-20">
+        <div className="max-w-4xl w-full mx-auto space-y-8 animate-in fade-in duration-300">
+          <div className="text-center space-y-4 mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 mx-auto">
+              <Shield size={32} />
+            </div>
+            <h1 className="text-4xl font-extrabold text-[var(--color-text-primary)]">
+              {isBn ? 'গোপনীয়তা নীতি' : 'Privacy Policy'}
+            </h1>
+            <p className="text-[var(--color-text-secondary)]">
+              {isBn ? 'সর্বশেষ আপডেট: সেপ্টেম্বর ২০২৬' : 'Last Updated: September 2026'}
+            </p>
+          </div>
 
-        <div className="prose prose-slate dark:prose-invert max-w-none text-[var(--color-text-secondary)]">
-          <p>
-            This Privacy Policy explains how {COMPANY_NAME} ("we," "us," or "our") collects, uses, and discloses your information when you use Safivra.
-          </p>
-          
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">1. Introduction</h2>
-          <p>
-            Safivra is a personal financial management application. {COMPANY_NAME} acts as the data controller and service provider for this application.
-          </p>
+          <div className="prose prose-emerald max-w-none text-[var(--color-text-primary)]">
+            <p>
+              {isBn 
+                ? 'Safivra-তে আমরা আপনার গোপনীয়তা এবং ডেটা সুরক্ষাকে সর্বোচ্চ অগ্রাধিকার দিই। এই নীতিমালায় ব্যাখ্যা করা হয়েছে আমরা কীভাবে আপনার ব্যক্তিগত তথ্য সংগ্রহ, ব্যবহার এবং সুরক্ষিত করি।' 
+                : 'At Safivra, we prioritize your privacy and data security above all else. This policy explains how we collect, use, and protect your personal information.'}
+            </p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">2. Information Collected</h2>
-          <p>We only collect data that the system actually handles to provide you with the Safivra service:</p>
-          <ul className="list-disc pl-5 space-y-2 mt-4">
-            <li><strong>Account Information:</strong> Information required to create and secure your account (e.g., email address, password).</li>
-            <li><strong>Financial Records:</strong> Accounts, budgets, transactions, and other financial records you actively enter into the system.</li>
-            <li><strong>Device and Browser Information:</strong> Basic analytics and diagnostic data.</li>
-            <li><strong>Security and Diagnostic Logs:</strong> For system reliability and abuse prevention.</li>
-            <li><strong>Support Communications:</strong> If you contact us for help.</li>
-          </ul>
+            <h3 className="text-xl font-bold mt-8 mb-4">1. Information We Collect</h3>
+            <p>We only collect the information necessary to provide you with our financial management services:</p>
+            <ul className="list-disc pl-6 space-y-2 text-[var(--color-text-secondary)]">
+              <li><strong>Account Information:</strong> Name, email address, phone number, date of birth, and secure passwords (encrypted via Supabase Auth).</li>
+              <li><strong>Financial Data:</strong> Transaction records, account balances, budgets, loans, and categories you input into the system.</li>
+              <li><strong>Device Information:</strong> Basic analytics such as device type and browser to optimize performance.</li>
+            </ul>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">3. Financial Information</h2>
-          <p>
-            Safivra stores user-entered personal financial records. Safivra is not directly connected to a bank. Users are strictly responsible for the accuracy of information they manually enter into the system.
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">2. How We Use Your Data</h3>
+            <p>Your data is used strictly for:</p>
+            <ul className="list-disc pl-6 space-y-2 text-[var(--color-text-secondary)]">
+              <li>Providing you with accurate financial analytics and dashboards.</li>
+              <li>Ensuring account security and preventing unauthorized access.</li>
+              <li>Improving app performance and user experience.</li>
+            </ul>
+            <p className="font-semibold text-emerald-600 mt-4">We do NOT sell, rent, or trade your personal or financial data to any third-party advertisers or data brokers.</p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">4. How Information is Used</h2>
-          <p>We use the collected information for purposes such as:</p>
-          <ul className="list-disc pl-5 space-y-2 mt-4">
-            <li>Providing the Safivra financial management service.</li>
-            <li>Authenticating users securely.</li>
-            <li>Saving and synchronizing your financial records.</li>
-            <li>Calculating summaries and insights based on your entries.</li>
-            <li>Improving system reliability and security.</li>
-          </ul>
+            <h3 className="text-xl font-bold mt-8 mb-4">3. Data Security</h3>
+            <p>
+              We implement industry-standard security measures including PostgreSQL Row Level Security (RLS) to ensure that only YOU can access your financial records. All data is encrypted in transit (TLS) and at rest.
+            </p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">5. Legal Bases (If Applicable)</h2>
-          <p>
-            Where legally required, we rely on contractual necessity, legitimate business interests (such as preventing abuse and maintaining service security), and your consent.
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">4. Your Rights</h3>
+            <p>You have the right to access, modify, or permanently delete your account and all associated data at any time through the app settings.</p>
 
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">6. Cloud Storage and Processing</h2>
-          <p>
-            Account and financial information is processed through secure cloud infrastructure. Your data is managed using industry-standard cloud database services (e.g., Supabase, Vercel).
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">7. Browser and Device Storage</h2>
-          <p>
-            Financial records are not intentionally stored in normal browser local storage. However, temporary interface state may exist while using the application, secure authentication tokens are required to maintain a signed-in session, and static application files may be cached for performance.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">8. Data Sharing</h2>
-          <p>
-            We may share your data with essential infrastructure and hosting providers required to run the service. We do not sell personal data. Data may be shared if required by law or during business transfers.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">9. Data Retention</h2>
-          <p>
-            We retain your active account data as long as you use the service. If you request account deletion, your data is permanently removed, though some security logs or backups may undergo a lifecycle deletion over time.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">10. User Rights</h2>
-          <p>
-            Depending on your jurisdiction, you may have rights to access, correct, export, or delete your data. You can manage and delete your financial records directly within the application.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">11. Account Deletion</h2>
-          <p>
-            You can delete your account and financial data at any time from within the application or by contacting support. Upon deletion, financial records are removed permanently.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">12. International Data Transfers</h2>
-          <p>
-            Our service providers may process data in countries outside your residence. We ensure suitable safeguards are maintained for these transfers.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">13. Children’s Privacy</h2>
-          <p>
-            Safivra is not intended for users under the age of [Age]. We do not knowingly collect personal information from children.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">14. Security</h2>
-          <p>
-            We employ account-level access controls and secure cloud storage to protect your data. Each user can only access their own financial records.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">15. Changes to the Policy</h2>
-          <p>
-            We may update this policy over time. We will communicate material changes within the application or via email.
-          </p>
-
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">16. Contact</h2>
-          <p>
-            For any privacy-related questions, please contact us at: <br />
-            <strong>Email:</strong> {CONTACT_EMAIL}<br />
-            <strong>Address:</strong> {POSTAL_ADDRESS}<br />
-            <strong>Support:</strong> {SUPPORT_URL}
-          </p>
+            <h3 className="text-xl font-bold mt-8 mb-4">5. Contact Us</h3>
+            <p>If you have any questions about this Privacy Policy, please contact our support team or the developer: <a href="https://www.creatiancy.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Creatiancy</a>.</p>
+          </div>
         </div>
       </div>
     </>

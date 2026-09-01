@@ -13,24 +13,26 @@ export function formatCurrency(
     showSymbol?: boolean;
     alwaysShowDecimals?: boolean;
     compact?: boolean;
+    forceEnglish?: boolean;
   }
 ): string {
-  const { showSymbol = true, alwaysShowDecimals = false, compact = false } = options ?? {};
+  const { showSymbol = true, alwaysShowDecimals = false, compact = false, forceEnglish = false } = options ?? {};
 
   const hasDecimals = amount % 1 !== 0;
   const minimumFractionDigits = alwaysShowDecimals || hasDecimals ? 2 : 0;
   const maximumFractionDigits = 2;
+  const locale = forceEnglish ? 'en-US' : APP_CONFIG.currency.locale;
 
   if (compact && Math.abs(amount) >= 100_000) {
     const lakh = amount / 100_000;
-    const formatted = new Intl.NumberFormat(APP_CONFIG.currency.locale, {
+    const formatted = new Intl.NumberFormat(locale, {
       minimumFractionDigits: lakh % 1 !== 0 ? 1 : 0,
       maximumFractionDigits: 1,
     }).format(lakh);
     return showSymbol ? `${APP_CONFIG.currency.symbol}${formatted}L` : `${formatted}L`;
   }
 
-  const formatter = new Intl.NumberFormat(APP_CONFIG.currency.locale, {
+  const formatter = new Intl.NumberFormat(locale, {
     minimumFractionDigits,
     maximumFractionDigits,
   });

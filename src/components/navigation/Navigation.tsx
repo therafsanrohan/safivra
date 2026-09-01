@@ -152,6 +152,8 @@ const AddTransactionSheet: React.FC<{
 export const Sidebar: React.FC = () => {
   const { profile } = useAuthContext();
   const { t, toggleLocale, locale } = useLanguage();
+  const [addOpen, setAddOpen] = useState(false);
+  const navigate = useNavigate();
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
 
   const navGroups = [
@@ -202,8 +204,18 @@ export const Sidebar: React.FC = () => {
         </button>
       </div>
 
+      <div className="px-3 pt-4 pb-2">
+        <button
+          onClick={() => setAddOpen(true)}
+          className="w-full flex items-center justify-center gap-2 bg-[var(--color-accent)] hover:opacity-90 text-white py-2.5 px-4 rounded-[var(--radius-button)] font-medium transition-opacity shadow-sm"
+        >
+          <Plus size={18} />
+          {t.nav.add}
+        </button>
+      </div>
+
       {/* Nav groups */}
-      <nav className="flex-1 px-3 py-4 space-y-5">
+      <nav className="flex-1 px-3 py-2 space-y-5">
         {navGroups.map((group, gi) => (
           <div key={gi}>
             {group.label && (
@@ -293,6 +305,7 @@ export const Sidebar: React.FC = () => {
           </div>
         </div>
       </div>
+      <AddTransactionSheet open={addOpen} onOpenChange={setAddOpen} navigate={navigate} />
     </aside>
   );
 };
