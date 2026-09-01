@@ -59,5 +59,6 @@
         }
       ]
     }
-  ]
+  ],
+  "outputDirectory": "apps/member-web/dist"
 }
