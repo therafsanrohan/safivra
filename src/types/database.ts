@@ -20,6 +20,11 @@ export type Database = {
           timezone: string;
           onboarding_completed: boolean;
           avatar_url: string | null;
+          phone: string | null;
+          date_of_birth: string | null;
+          gender: string | null;
+          address: string | null;
+          country: string;
           created_at: string;
           updated_at: string;
         };
@@ -30,6 +35,11 @@ export type Database = {
           timezone?: string;
           onboarding_completed?: boolean;
           avatar_url?: string | null;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          gender?: string | null;
+          address?: string | null;
+          country?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -40,6 +50,11 @@ export type Database = {
           timezone?: string;
           onboarding_completed?: boolean;
           avatar_url?: string | null;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          gender?: string | null;
+          address?: string | null;
+          country?: string;
           updated_at?: string;
         };
       };

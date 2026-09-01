@@ -1,59 +1,54 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { SEO } from '@/components/ui/SEO';
-import { Shield, Lock, Server, Cloud } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 export const SecurityPage: React.FC = () => {
+  const { locale } = useLanguage();
+  const isBn = locale === 'bn';
+
   return (
     <>
-      <SEO title="Security" description="How Safivra protects your financial data." />
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-16">
-          <Shield className="w-16 h-16 text-[var(--color-accent)] mx-auto mb-6" />
-          <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4">Security at Safivra</h1>
-          <p className="text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-            Your financial data is private and sensitive. Here is how we ensure it remains secure and protected.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-          <div className="bg-[var(--color-bg-surface)] p-8 border border-[var(--color-border)] rounded-2xl">
-            <Lock className="w-8 h-8 text-[var(--color-accent)] mb-4" />
-            <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-3">Authentication</h3>
+      <SEO title={isBn ? 'নিরাপত্তা - Safivra' : 'Security - Safivra'} />
+      <div className="w-full flex flex-col items-center overflow-x-hidden page-container pt-16 pb-20">
+        <div className="max-w-4xl w-full mx-auto space-y-8 animate-in fade-in duration-300">
+          <div className="text-center space-y-4 mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 mx-auto">
+              <Lock size={32} />
+            </div>
+            <h1 className="text-4xl font-extrabold text-[var(--color-text-primary)]">
+              {isBn ? 'নিরাপত্তা ও সুরক্ষা' : 'Security & Protection'}
+            </h1>
             <p className="text-[var(--color-text-secondary)]">
-              Access to your Safivra account requires secure authentication. We use modern, industry-standard authentication protocols to ensure that only you can access your account. Your passwords are encrypted and never stored in plain text.
-            </p>
-          </div>
-          
-          <div className="bg-[var(--color-bg-surface)] p-8 border border-[var(--color-border)] rounded-2xl">
-            <Server className="w-8 h-8 text-[var(--color-accent)] mb-4" />
-            <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-3">Data Isolation</h3>
-            <p className="text-[var(--color-text-secondary)]">
-              Our cloud database employs strict Row Level Security (RLS) policies. This means at the core database level, your financial records are cryptographically tied to your user identity, preventing unauthorized cross-account access.
+              {isBn ? 'কিভাবে আমরা আপনার ডেটা সুরক্ষিত রাখি' : 'How we keep your financial data safe'}
             </p>
           </div>
 
-          <div className="bg-[var(--color-bg-surface)] p-8 border border-[var(--color-border)] rounded-2xl">
-            <Cloud className="w-8 h-8 text-[var(--color-accent)] mb-4" />
-            <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-3">Cloud Infrastructure</h3>
-            <p className="text-[var(--color-text-secondary)]">
-              Safivra is hosted on reliable, enterprise-grade cloud infrastructure. We utilize secure HTTPS for all communications between your device and our servers to protect your data while in transit.
+          <div className="prose prose-emerald max-w-none text-[var(--color-text-primary)]">
+            <p>
+              Security is our foundational principle. Safivra is built from the ground up to protect your sensitive financial data using enterprise-grade security architecture.
+            </p>
+
+            <h3 className="text-xl font-bold mt-8 mb-4">1. Database Security (RLS)</h3>
+            <p>
+              We utilize PostgreSQL Row Level Security (RLS). This means the database physically prevents any user from accessing another user's data. Even if a flaw occurred in our application logic, the database engine itself enforces strict isolation based on your cryptographic Auth Token.
+            </p>
+
+            <h3 className="text-xl font-bold mt-8 mb-4">2. Encryption in Transit and at Rest</h3>
+            <p>
+              All data transmitted between your device and our servers is protected using Transport Layer Security (TLS/SSL). Additionally, your data is encrypted at rest on our secure servers, protecting it against unauthorized physical or digital access.
+            </p>
+
+            <h3 className="text-xl font-bold mt-8 mb-4">3. Authentication</h3>
+            <p>
+              We use Supabase Auth (powered by GoTrue) for secure, token-based authentication. Passwords are cryptographically hashed and salted using bcrypt, meaning we never store or see your plaintext password.
+            </p>
+
+            <h3 className="text-xl font-bold mt-8 mb-4">4. Content Security Policy (CSP)</h3>
+            <p>
+              The Safivra application implements strict Content Security Policies in the browser to prevent Cross-Site Scripting (XSS) attacks, ensuring only authorized scripts and API calls can be executed on your device.
             </p>
           </div>
-
-          <div className="bg-[var(--color-bg-surface)] p-8 border border-[var(--color-border)] rounded-2xl">
-            <Shield className="w-8 h-8 text-[var(--color-accent)] mb-4" />
-            <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-3">Browser Safety</h3>
-            <p className="text-[var(--color-text-secondary)]">
-              Your financial records are not intentionally saved in standard browser storage. We manage sessions securely to reduce the risk of unauthorized access on shared devices. Always remember to sign out on public computers.
-            </p>
-          </div>
-        </div>
-
-        <div className="prose prose-slate dark:prose-invert max-w-none text-[var(--color-text-secondary)]">
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mt-8 mb-4">Responsible Disclosure</h2>
-          <p>
-            If you are a security researcher and have discovered a security vulnerability in our application, we appreciate your help in disclosing it to us in a responsible manner. Please contact our support team immediately so we can investigate and patch the issue promptly.
-          </p>
         </div>
       </div>
     </>

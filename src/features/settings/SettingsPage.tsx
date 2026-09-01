@@ -35,6 +35,16 @@ export const SettingsPage: React.FC = () => {
   const isBn = locale === 'bn';
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
+  // @ts-ignore
+  const [phone, setPhone] = useState(profile?.phone ?? '');
+  // @ts-ignore
+  const [dob, setDob] = useState(profile?.date_of_birth ?? '');
+  // @ts-ignore
+  const [gender, setGender] = useState(profile?.gender ?? '');
+  // @ts-ignore
+  const [address, setAddress] = useState(profile?.address ?? '');
+  // @ts-ignore
+  const [country, setCountry] = useState(profile?.country ?? 'Bangladesh');
   const [saving, setSaving] = useState(false);
 
   // Password change
@@ -52,7 +62,14 @@ export const SettingsPage: React.FC = () => {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const res = await updateProfile({ full_name: fullName });
+    const res = await updateProfile({ 
+      full_name: fullName,
+      phone,
+      date_of_birth: dob,
+      gender,
+      address,
+      country
+    });
     setSaving(false);
     if (res.error) {
       showError(isBn ? 'প্রোফাইল আপডেট ব্যর্থ' : 'Failed to update profile', res.error);
@@ -113,6 +130,49 @@ export const SettingsPage: React.FC = () => {
             label={isBn ? 'পুরো নাম' : 'Full Name'}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+          />
+          <Input
+            label={isBn ? 'ফোন নম্বর' : 'Phone Number'}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            type="tel"
+            placeholder="+8801700000000"
+          />
+          <Input
+            label={isBn ? 'জন্ম তারিখ' : 'Date of Birth'}
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+            type="date"
+          />
+          <Select
+            label={isBn ? 'লিঙ্গ' : 'Gender'}
+            value={gender}
+            onValueChange={(val) => setGender(val)}
+            options={[
+              { value: '', label: isBn ? 'নির্বাচন করুন' : 'Select...' },
+              { value: 'Male', label: isBn ? 'পুরুষ' : 'Male' },
+              { value: 'Female', label: isBn ? 'নারী' : 'Female' },
+              { value: 'Other', label: isBn ? 'অন্যান্য' : 'Other' },
+            ]}
+          />
+          <Input
+            label={isBn ? 'ঠিকানা (ঐচ্ছিক)' : 'Address (Optional)'}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <Select
+            label={isBn ? 'দেশ' : 'Country'}
+            value={country}
+            onValueChange={(val) => setCountry(val)}
+            options={[
+              { value: 'Bangladesh', label: 'Bangladesh' },
+              { value: 'USA', label: 'USA' },
+              { value: 'UK', label: 'UK' },
+              { value: 'India', label: 'India' },
+              { value: 'Canada', label: 'Canada' },
+              { value: 'Australia', label: 'Australia' },
+              { value: 'Other', label: 'Other' },
+            ]}
           />
           <Input
             label={isBn ? 'পছন্দের মুদ্রা' : 'Preferred Currency'}
