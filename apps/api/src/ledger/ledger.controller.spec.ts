@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LedgerController } from './ledger.controller.js';
+import { LedgerController } from './ledger.controller';
 
 describe('LedgerController', () => {
   let controller: LedgerController;
