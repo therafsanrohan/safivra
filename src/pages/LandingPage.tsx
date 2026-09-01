@@ -162,17 +162,17 @@ export const LandingPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট নেট সম্পদ' : 'Total Net Assets'}</span>
-                      <p className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] mt-1 tabular-nums" data-financial>{formatCurrency(485250, { forceEnglish: true })}</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] mt-1 tabular-nums" data-financial>{formatCurrency(485250)}</p>
                       <span className="text-xs text-emerald-600 font-medium mt-1 inline-block">↑ +12.4% {isBn ? 'এই মাসে বৃদ্ধি' : 'this month'}</span>
                     </div>
                     <div className="p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট আয়' : 'Monthly Income'}</span>
-                      <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1 tabular-nums" data-financial>{formatCurrency(120000, { forceEnglish: true })}</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1 tabular-nums" data-financial>{formatCurrency(120000)}</p>
                       <span className="text-xs text-[var(--color-text-muted)] mt-1 inline-block">{isBn ? 'বেতন ও ফ্রিল্যান্স' : 'Salary & Freelancing'}</span>
                     </div>
                     <div className="p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট খরচ' : 'Monthly Expenses'}</span>
-                      <p className="text-2xl sm:text-3xl font-bold text-rose-600 mt-1 tabular-nums" data-financial>{formatCurrency(52400, { forceEnglish: true })}</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-rose-600 mt-1 tabular-nums" data-financial>{formatCurrency(52400)}</p>
                       <span className="text-xs text-[var(--color-text-muted)] mt-1 inline-block">{isBn ? 'বাজেটের 68%' : '68% of Budget'}</span>
                     </div>
                   </div>
@@ -185,15 +185,15 @@ export const LandingPage: React.FC = () => {
                       <div className="space-y-2.5">
                         <div className="flex justify-between items-center text-sm py-1.5 border-b border-[var(--color-border)]">
                           <span className="font-medium text-[var(--color-text-primary)]">City Bank Salary Account</span>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(245000, { forceEnglish: true })}</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(245000)}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1.5 border-b border-[var(--color-border)]">
                           <span className="font-medium text-[var(--color-text-primary)]">bKash Personal Wallet</span>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(18500, { forceEnglish: true })}</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(18500)}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1.5">
                           <span className="font-medium text-[var(--color-text-primary)]">BRAC Bank Savings</span>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(221750, { forceEnglish: true })}</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(221750)}</span>
                         </div>
                       </div>
                     </div>
@@ -208,14 +208,14 @@ export const LandingPage: React.FC = () => {
                             <p className="font-medium text-[var(--color-text-primary)]">Shwapno Supermarket</p>
                             <p className="text-xs text-[var(--color-text-muted)]">Groceries · City Bank</p>
                           </div>
-                          <span className="font-semibold text-rose-600 tabular-nums" data-financial>-{formatCurrency(4200, { forceEnglish: true })}</span>
+                          <span className="font-semibold text-rose-600 tabular-nums" data-financial>-{formatCurrency(4200)}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1.5">
                           <div>
                             <p className="font-medium text-[var(--color-text-primary)]">Monthly Salary</p>
                             <p className="text-xs text-[var(--color-text-muted)]">Income · Direct Deposit</p>
                           </div>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>+{formatCurrency(120000, { forceEnglish: true })}</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>+{formatCurrency(120000)}</span>
                         </div>
                       </div>
                     </div>
@@ -233,10 +233,10 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-xs text-slate-400">{isBn ? 'ব্যবহৃত ব্যালেন্স' : 'Current Outstanding'}</span>
-                        <p className="text-3xl font-bold text-rose-400 mt-0.5 tabular-nums" data-financial>{formatCurrency(28500, { forceEnglish: true })}</p>
+                        <p className="text-3xl font-bold text-rose-400 mt-0.5 tabular-nums" data-financial>{formatCurrency(28500)}</p>
                       </div>
                       <div className="flex justify-between items-center text-xs text-slate-300 pt-2 border-t border-slate-700/60">
-                        <span>{isBn ? 'লিমিট: ' : 'Limit: '}{formatCurrency(150000, { forceEnglish: true })}</span>
+                        <span>{isBn ? 'লিমিট: ' : 'Limit: '}{formatCurrency(150000)}</span>
                         <span>{isBn ? 'ডিউ ডেট: 15ই প্রতি মাস' : 'Due: 15th monthly'}</span>
                       </div>
                     </div>
@@ -266,8 +266,8 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'বাকি আসল ঋণ' : 'Remaining Principal'}</span>
-                        <p className="text-3xl font-bold text-rose-600 mt-0.5 tabular-nums" data-financial>{formatCurrency(45000, { forceEnglish: true })}</p>
-                        <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মূল ঋণ: ' : 'Original: '}{formatCurrency(100000, { forceEnglish: true })}</span>
+                        <p className="text-3xl font-bold text-rose-600 mt-0.5 tabular-nums" data-financial>{formatCurrency(45000)}</p>
+                        <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মূল ঋণ: ' : 'Original: '}{formatCurrency(100000)}</span>
                       </div>
                       <div className="w-full bg-[var(--color-border)] h-2 rounded-full overflow-hidden">
                         <div className="bg-emerald-500 h-full w-[55%]" />
@@ -277,7 +277,7 @@ export const LandingPage: React.FC = () => {
 
                     <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] flex flex-col justify-center space-y-3">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মাসিক কিস্তি (EMI)' : 'Monthly Installment'}</span>
-                      <p className="text-3xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>{formatCurrency(5250, { forceEnglish: true })}</p>
+                      <p className="text-3xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>{formatCurrency(5250)}</p>
                       <p className="text-xs text-[var(--color-text-secondary)]">
                         {isBn ? 'প্রতি কিস্তির আসল এবং সুদের অংশ স্বয়ংক্রিয়ভাবে আলাদা হিসাব করা হয়।' : 'Accurately separates principal repayment from interest expense.'}
                       </p>
@@ -296,15 +296,15 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মোট জমাকৃত টাকা' : 'Total Accumulated'}</span>
-                        <p className="text-3xl font-bold text-emerald-600 mt-0.5 tabular-nums" data-financial>{formatCurrency(180000, { forceEnglish: true })}</p>
+                        <p className="text-3xl font-bold text-emerald-600 mt-0.5 tabular-nums" data-financial>{formatCurrency(180000)}</p>
                       </div>
-                      <p className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মাসিক কিস্তি: ' : 'Monthly: '}{formatCurrency(5000, { forceEnglish: true })} · Rate: 8.5%</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মাসিক কিস্তি: ' : 'Monthly: '}{formatCurrency(5000)} · Rate: 8.5%</p>
                     </div>
 
                     <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] flex flex-col justify-center space-y-3">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মেয়াদান্তে সম্ভাব্য লাভ' : 'Maturity Target Value'}</span>
-                      <p className="text-3xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>{formatCurrency(364000, { forceEnglish: true })}</p>
-                      <p className="text-xs text-emerald-600 font-medium">{formatCurrency(64000, { forceEnglish: true })} {isBn ? 'মুনাফা বা লাভ' : 'Estimated Return'}</p>
+                      <p className="text-3xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>{formatCurrency(364000)}</p>
+                      <p className="text-xs text-emerald-600 font-medium">{formatCurrency(64000)} {isBn ? 'মুনাফা বা লাভ' : 'Estimated Return'}</p>
                     </div>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ export const LandingPage: React.FC = () => {
                   <div>
                     <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
                       <span>{isBn ? 'মাসিক জমা' : 'Monthly Deposit'}</span>
-                      <span className="font-bold text-emerald-600">{formatCurrency(dpsMonthly, { forceEnglish: true })}</span>
+                      <span className="font-bold text-emerald-600">{formatCurrency(dpsMonthly)}</span>
                     </div>
                     <input
                       type="range"
@@ -403,15 +403,15 @@ export const LandingPage: React.FC = () => {
                 <div className="p-6 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border)] space-y-4">
                   <div>
                     <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মোট জমাকৃত আসল' : 'Total Deposited'}</span>
-                    <p className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalDpsDeposit, { forceEnglish: true })}</p>
+                    <p className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalDpsDeposit)}</p>
                   </div>
                   <div>
                     <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'সম্ভাব্য মুনাফা' : 'Estimated Return'}</span>
-                    <p className="text-xl font-bold text-emerald-600">+{formatCurrency(dpsInterestEarned, { forceEnglish: true })}</p>
+                    <p className="text-xl font-bold text-emerald-600">+{formatCurrency(dpsInterestEarned)}</p>
                   </div>
                   <div className="pt-3 border-t border-[var(--color-border)]">
                     <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মেয়াদান্তে মোট প্রাপ্তি' : 'Maturity Amount'}</span>
-                    <p className="text-3xl font-extrabold text-[var(--color-primary)]">{formatCurrency(dpsMaturity, { forceEnglish: true })}</p>
+                    <p className="text-3xl font-extrabold text-[var(--color-primary)]">{formatCurrency(dpsMaturity)}</p>
                   </div>
                 </div>
               </div>
@@ -421,7 +421,7 @@ export const LandingPage: React.FC = () => {
                   <div>
                     <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
                       <span>{isBn ? 'লোনের পরিমাণ' : 'Loan Amount'}</span>
-                      <span className="font-bold text-rose-600">{formatCurrency(loanAmount, { forceEnglish: true })}</span>
+                      <span className="font-bold text-rose-600">{formatCurrency(loanAmount)}</span>
                     </div>
                     <input
                       type="range"
@@ -470,15 +470,15 @@ export const LandingPage: React.FC = () => {
                 <div className="p-6 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border)] space-y-4">
                   <div>
                     <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মাসিক কিস্তি (EMI)' : 'Monthly EMI'}</span>
-                    <p className="text-3xl font-extrabold text-[var(--color-text-primary)]">{formatCurrency(loanEmi, { forceEnglish: true })}</p>
+                    <p className="text-3xl font-extrabold text-[var(--color-text-primary)]">{formatCurrency(loanEmi)}</p>
                   </div>
                   <div>
                     <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মোট পরিশোধযোগ্য টাকা' : 'Total Repayment'}</span>
-                    <p className="text-xl font-bold text-rose-600">{formatCurrency(totalLoanRepayment, { forceEnglish: true })}</p>
+                    <p className="text-xl font-bold text-rose-600">{formatCurrency(totalLoanRepayment)}</p>
                   </div>
                   <div className="pt-3 border-t border-[var(--color-border)]">
                     <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মোট অতিরিক্ত সুদ' : 'Total Interest'}</span>
-                    <p className="text-xl font-bold text-[var(--color-text-muted)]">{formatCurrency(totalLoanRepayment - loanAmount, { forceEnglish: true })}</p>
+                    <p className="text-xl font-bold text-[var(--color-text-muted)]">{formatCurrency(totalLoanRepayment - loanAmount)}</p>
                   </div>
                 </div>
               </div>
@@ -598,42 +598,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="w-full bg-[var(--color-bg-surface)] border-t border-[var(--color-border)] py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 text-sm text-[var(--color-text-secondary)]">
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-[var(--color-text-primary)]">Safivra</h3>
-                <p className="max-w-xs leading-relaxed">
-                  {isBn ? 'আপনার ব্যক্তিগত অর্থের হিসাব রাখার বিশ্বস্ত সঙ্গী।' : 'Your trusted companion for personal financial management.'}
-                </p>
-                <p>
-                  <span className="font-semibold">{isBn ? 'নির্মাতা' : 'Developed by'}</span> <a href="https://www.creatiancy.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">Creatiancy</a>
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-[var(--color-text-primary)]">{isBn ? 'প্রোডাক্ট' : 'Product'}</h4>
-                  <ul className="space-y-2">
-                    <li><a href="#features" className="hover:text-[var(--color-text-primary)]">{isBn ? 'ফিচারসমূহ' : 'Features'}</a></li>
-                    <li><Link to="/security" className="hover:text-[var(--color-text-primary)]">{isBn ? 'নিরাপত্তা' : 'Security'}</Link></li>
-                    <li><a href="#faq" className="hover:text-[var(--color-text-primary)]">{isBn ? 'সাধারণ জিজ্ঞাসা' : 'FAQ'}</a></li>
-                  </ul>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-[var(--color-text-primary)]">{isBn ? 'লিগ্যাল' : 'Legal'}</h4>
-                  <ul className="space-y-2">
-                    <li><Link to="/privacy-policy" className="hover:text-[var(--color-text-primary)]">{isBn ? 'গোপনীয়তা নীতি' : 'Privacy Policy'}</Link></li>
-                    <li><Link to="/terms-of-use" className="hover:text-[var(--color-text-primary)]">{isBn ? 'ব্যবহারের শর্তাবলী' : 'Terms of Use'}</Link></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div className="mt-12 pt-8 border-t border-[var(--color-border)] flex flex-col md:flex-row items-center justify-between gap-4">
-              <p>&copy; {new Date().getFullYear()} Safivra. {isBn ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}</p>
-            </div>
-          </div>
-        </footer>
       </div>
     </>
   );

@@ -12,6 +12,7 @@ import { formatCurrency } from '@/lib/currency/formatter';
 import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths, isOverdue } from '@/lib/dates/formatter';
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { InfoPopover } from '@/components/ui/InfoPopover';
 import {
   BarChart, Bar, XAxis, YAxis,
   ResponsiveContainer, Tooltip, CartesianGrid,
@@ -252,7 +253,10 @@ export const DashboardPage: React.FC = () => {
       {/* Total Balance */}
       <Card>
         <div className="flex items-start justify-between mb-1">
-          <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">{t.dashboard.totalBalance}</p>
+          <p className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
+            {t.dashboard.totalBalance}
+            <InfoPopover content={t.dashboard.totalBalanceDesc} />
+          </p>
           <button
             onClick={() => setBalanceHidden((v) => !v)}
             aria-label={balanceHidden ? 'Show balance' : 'Hide balance'}
@@ -272,21 +276,32 @@ export const DashboardPage: React.FC = () => {
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-2 gap-3">
-        <SummaryCard label={t.addTransaction.income} value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
-        <SummaryCard label={t.addTransaction.expense} value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
-        <SummaryCard label={t.nav.loans} value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
-        <SummaryCard label={t.creditCards.title} value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
+        <SummaryCard label={t.addTransaction.income} tooltip={t.dashboard.incomeDesc} value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
+        <SummaryCard label={t.addTransaction.expense} tooltip={t.dashboard.expenseDesc} value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
+        <SummaryCard label={t.nav.loans} tooltip={t.dashboard.loansDesc} value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
+        <SummaryCard label={t.creditCards.title} tooltip={t.dashboard.creditCardsDesc} value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
       </div>
 
       {/* Net Worth */}
       <Card>
-        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-2">{t.dashboard.netWorth}</p>
+        <p className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-2">
+          {t.dashboard.netWorth}
+          <InfoPopover content={t.dashboard.netWorthDesc} />
+        </p>
         <p className={['text-2xl font-semibold tabular-nums mb-3', netWorth >= 0 ? 'text-[var(--color-positive)]' : 'text-[var(--color-text-primary)]'].join(' ')} data-financial>
           {balanceHidden ? '৳ ••••••' : formatCurrency(netWorth)}
         </p>
         <div className="flex justify-between text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-          <span><span className="text-[var(--color-text-muted)]">{t.dashboard.assets} </span><span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalAssets)}</span></span>
-          <span><span className="text-[var(--color-text-muted)]">{t.dashboard.liabilities} </span><span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalLiabilities)}</span></span>
+          <span className="flex items-center gap-1">
+            <span className="text-[var(--color-text-muted)]">{t.dashboard.assets} </span>
+            <InfoPopover content={t.dashboard.assetsDesc} />
+            <span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalAssets)}</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="text-[var(--color-text-muted)]">{t.dashboard.liabilities} </span>
+            <InfoPopover content={t.dashboard.liabilitiesDesc} />
+            <span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalLiabilities)}</span>
+          </span>
         </div>
       </Card>
 
@@ -431,13 +446,14 @@ export const DashboardPage: React.FC = () => {
 // Summary card
 const SummaryCard: React.FC<{
   label: string; value: number; masked: boolean;
-  icon: React.ReactNode; href?: string;
-}> = ({ label, value, masked, icon, href }) => {
+  icon: React.ReactNode; href?: string; tooltip?: string;
+}> = ({ label, value, masked, icon, href, tooltip }) => {
   const content = (
     <Card className="flex flex-col gap-2">
       <div className="flex items-center gap-1.5 text-[var(--color-text-muted)]">
         {icon}
         <span className="text-[var(--text-secondary)] font-medium">{label}</span>
+        {tooltip && <InfoPopover content={tooltip} />}
       </div>
       <p className="text-[1.125rem] font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
         {masked ? '••••' : formatCurrency(value)}

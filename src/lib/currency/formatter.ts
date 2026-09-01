@@ -21,7 +21,18 @@ export function formatCurrency(
   const hasDecimals = amount % 1 !== 0;
   const minimumFractionDigits = alwaysShowDecimals || hasDecimals ? 2 : 0;
   const maximumFractionDigits = 2;
-  const locale = forceEnglish ? 'en-US' : APP_CONFIG.currency.locale;
+  
+  // Pick up user locale if possible, fallback to config
+  let userLocale = null;
+  try {
+    if (typeof window !== 'undefined' && window.localStorage && typeof window.localStorage.getItem === 'function') {
+      userLocale = window.localStorage.getItem('safivra_locale');
+    }
+  } catch (e) {
+    // Ignore errors in test environments
+  }
+  const computedLocale = userLocale === 'bn' ? 'bn-BD' : APP_CONFIG.currency.locale;
+  const locale = forceEnglish ? 'en-US' : computedLocale;
 
   if (compact && Math.abs(amount) >= 100_000) {
     const lakh = amount / 100_000;

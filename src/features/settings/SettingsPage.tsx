@@ -35,8 +35,12 @@ export const SettingsPage: React.FC = () => {
   const isBn = locale === 'bn';
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
-  // @ts-ignore
-  const [phone, setPhone] = useState(profile?.phone ?? '');
+  const initialPhone = (profile?.phone as string) ?? '';
+  const initialCodeMatch = initialPhone.match(/^(\+\d{1,4})/);
+  const initialCode = initialCodeMatch ? initialCodeMatch[1] : '+880';
+  const initialNumber = initialCodeMatch ? initialPhone.slice(initialCode.length) : initialPhone;
+  const [phoneCode, setPhoneCode] = useState(initialCode);
+  const [phoneNumber, setPhoneNumber] = useState(initialNumber);
   // @ts-ignore
   const [dob, setDob] = useState(profile?.date_of_birth ?? '');
   // @ts-ignore
@@ -64,7 +68,7 @@ export const SettingsPage: React.FC = () => {
     setSaving(true);
     const res = await updateProfile({ 
       full_name: fullName,
-      phone,
+      phone: `${phoneCode}${phoneNumber}`,
       date_of_birth: dob,
       gender,
       address,
@@ -131,13 +135,36 @@ export const SettingsPage: React.FC = () => {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
           />
-          <Input
-            label={isBn ? 'ফোন নম্বর' : 'Phone Number'}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            type="tel"
-            placeholder="+8801700000000"
-          />
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+              {isBn ? 'ফোন নম্বর' : 'Phone Number'}
+            </label>
+            <div className="flex gap-2">
+              <div className="w-[120px] shrink-0">
+                <Select
+                  value={phoneCode}
+                  onValueChange={(val) => setPhoneCode(val)}
+                  options={[
+                    { value: '+880', label: '🇧🇩 +880' },
+                    { value: '+1', label: '🇺🇸 +1' },
+                    { value: '+44', label: '🇬🇧 +44' },
+                    { value: '+91', label: '🇮🇳 +91' },
+                    { value: '+971', label: '🇦🇪 +971' },
+                    { value: '+65', label: '🇸🇬 +65' },
+                    { value: '+61', label: '🇦🇺 +61' },
+                  ]}
+                />
+              </div>
+              <div className="flex-1">
+                <Input
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  type="tel"
+                  placeholder="1700000000"
+                />
+              </div>
+            </div>
+          </div>
           <Input
             label={isBn ? 'জন্ম তারিখ' : 'Date of Birth'}
             value={dob}
