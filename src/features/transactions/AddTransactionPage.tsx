@@ -8,6 +8,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { parseError } from '@/lib/errors/handler';
 import { todayString } from '@/lib/dates/formatter';
+import { useIdempotencyKey } from '@/lib/idempotency';
 import {
   expenseSchema, incomeSchema, transferSchema,
   loanPaymentSchema, creditCardPaymentSchema,
@@ -54,6 +55,11 @@ export const AddTransactionPage: React.FC = () => {
   const [cards, setCards] = useState<Array<{ id: string; nickname: string }>>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  // Generate one idempotency key per form session.
+  // This key is sent to post_transaction() so that network retries
+  // do NOT create duplicate financial records.
+  const idempotencyKey = useIdempotencyKey(user?.id);
+
   // Load reference data
   useEffect(() => {
     if (!user) return;
@@ -84,6 +90,7 @@ export const AddTransactionPage: React.FC = () => {
     try {
       const { error } = await supabase.rpc('post_transaction', {
         p_transaction_type: type,
+        p_idempotency_key: idempotencyKey,
         ...params,
       } as unknown as never);
       if (error) throw error;
