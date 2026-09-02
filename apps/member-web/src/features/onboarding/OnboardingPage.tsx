@@ -98,35 +98,35 @@ export const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-svh flex items-center justify-center bg-slate-50 relative overflow-hidden px-4">
+    <div className="min-h-svh flex items-center justify-center bg-[var(--color-bg-page)] relative overflow-hidden px-4">
       {/* Background aesthetics */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-emerald-600 to-slate-50 -z-10" />
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-emerald-400/20 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-emerald-600/20 to-transparent -z-10" />
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-emerald-400/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
-      <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+      <div className="w-full max-w-xl bg-[var(--color-bg-surface)] rounded-3xl shadow-xl overflow-hidden border border-[var(--color-border)]">
         <div className="p-8 sm:p-10">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Wallet size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Welcome to Safivra</h1>
-              <p className="text-slate-500 text-sm">Let&apos;s set up your primary account</p>
+              <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Welcome to Safivra</h1>
+              <p className="text-[var(--color-text-secondary)] text-sm">Let&apos;s set up your primary account</p>
             </div>
           </div>
 
           {/* Stepper indicator */}
           <div className="flex items-center mb-8 gap-2">
-            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
-            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-emerald-500' : 'bg-[var(--color-bg-subtle)]'}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-emerald-500' : 'bg-[var(--color-bg-subtle)]'}`} />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             {step === 1 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900 mb-1">What kind of account is this?</h2>
-                  <p className="text-sm text-slate-500 mb-4">Choose where you keep your most frequently used money.</p>
+                  <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">What kind of account is this?</h2>
+                  <p className="text-sm text-[var(--color-text-secondary)] mb-4">Choose where you keep your most frequently used money.</p>
                   
                   <div className="space-y-3">
                     {ACCOUNT_TYPES.map((type) => {
@@ -137,15 +137,15 @@ export const OnboardingPage: React.FC = () => {
                           key={type.id}
                           onClick={() => setValue('account_type', type.id as any)}
                           className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                            isSelected ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-emerald-200'
+                            isSelected ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'border-[var(--color-border)] hover:border-emerald-200 dark:hover:border-emerald-500/30'
                           }`}
                         >
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isSelected ? 'bg-emerald-500 text-white' : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)]'}`}>
                             <Icon size={24} />
                           </div>
                           <div className="flex-1">
-                            <h3 className={`font-semibold ${isSelected ? 'text-emerald-900' : 'text-slate-900'}`}>{type.label}</h3>
-                            <p className="text-sm text-slate-500">{type.desc}</p>
+                            <h3 className={`font-semibold ${isSelected ? 'text-emerald-700 dark:text-emerald-400' : 'text-[var(--color-text-primary)]'}`}>{type.label}</h3>
+                            <p className="text-sm text-[var(--color-text-secondary)]">{type.desc}</p>
                           </div>
                           {isSelected && <CheckCircle2 className="text-emerald-500" size={24} />}
                         </div>
@@ -165,7 +165,7 @@ export const OnboardingPage: React.FC = () => {
             {step === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900 mb-4">Account Details</h2>
+                  <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Account Details</h2>
                   
                   <div className="space-y-5">
                     <Input
@@ -197,9 +197,9 @@ export const OnboardingPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-start gap-3 mt-4">
-                  <ShieldCheck className="text-emerald-600 shrink-0 mt-0.5" size={20} />
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20 flex items-start gap-3 mt-4">
+                  <ShieldCheck className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" size={20} />
+                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
                     Your data is secured with AES-256 encryption. We never connect directly to your bank account or store your bank credentials.
                   </p>
                 </div>

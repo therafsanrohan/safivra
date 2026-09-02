@@ -315,24 +315,8 @@ export const LandingPage: React.FC = () => {
                   ? 'সম্পদ এবং দায়ের সঠিক পার্থক্যের মাধ্যমে আপনার রিয়েল-টাইম ফাইন্যান্সিয়াল হেলথ জানুন।'
                   : 'Get a real-time, accurate picture of your financial health by properly contrasting assets and liabilities.'}
               </p>
-            </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="w-full border-t border-[var(--color-border)] py-12 bg-[var(--color-bg-surface)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center">
-                <Wallet className="text-white h-5 w-5" />
-              </div>
-              <span className="font-bold text-xl tracking-tight text-[var(--color-text-primary)]">Safivra</span>
-            </div>
-            <div className="text-[var(--color-text-muted)] text-sm">
-              © {new Date().getFullYear()} Safivra. {isBn ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}
-            </div>
-          </div>
-        </footer>
       </div>
     </>
   );
