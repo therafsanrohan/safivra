@@ -245,6 +245,7 @@ export function useAuth(): UseAuthReturn {
 
   const signOut = async (): Promise<void> => {
     await supabase.auth.signOut();
+    localStorage.removeItem("safivra-lang");
     setState({
       user: null,
       session: null,

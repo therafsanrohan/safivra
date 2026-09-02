@@ -1,5 +1,6 @@
 import { format, parseISO, isValid, differenceInDays, isBefore, isAfter, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { bn, enUS } from 'date-fns/locale';
 import { APP_CONFIG } from '@/config/app';
 
 const TZ = APP_CONFIG.timezone;
@@ -14,35 +15,38 @@ export function nowInDhaka(): Date {
 /**
  * Format a date string for display: "29 Jul 2026"
  */
-export function formatDate(dateStr: string | Date): string {
+export function formatDate(dateStr: string | Date, localeStr: 'en' | 'bn' = 'en'): string {
   const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
   if (!isValid(date)) return '—';
-  return formatInTimeZone(date, TZ, 'dd MMM yyyy');
+  const locale = localeStr === 'bn' ? bn : enUS;
+  return formatInTimeZone(date, TZ, 'dd MMM yyyy', { locale });
 }
 
 /**
  * Format a date string fully: "29 July 2026"
  */
-export function formatFullDate(dateStr: string | Date): string {
+export function formatFullDate(dateStr: string | Date, localeStr: 'en' | 'bn' = 'en'): string {
   const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
   if (!isValid(date)) return '—';
-  return formatInTimeZone(date, TZ, 'dd MMMM yyyy');
+  const locale = localeStr === 'bn' ? bn : enUS;
+  return formatInTimeZone(date, TZ, 'dd MMMM yyyy', { locale });
 }
 
 /**
  * Format a time string: "10:23 AM"
  */
-export function formatTime(dateStr: string | Date): string {
+export function formatTime(dateStr: string | Date, localeStr: 'en' | 'bn' = 'en'): string {
   const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
   if (!isValid(date)) return '—';
-  return formatInTimeZone(date, TZ, 'hh:mm a');
+  const locale = localeStr === 'bn' ? bn : enUS;
+  return formatInTimeZone(date, TZ, 'hh:mm a', { locale });
 }
 
 /**
  * Format a date and time combined: "29 Jul 2026 · 10:23 AM"
  */
-export function formatDateTime(dateStr: string | Date): string {
-  return `${formatDate(dateStr)} · ${formatTime(dateStr)}`;
+export function formatDateTime(dateStr: string | Date, localeStr: 'en' | 'bn' = 'en'): string {
+  return `${formatDate(dateStr, localeStr)} · ${formatTime(dateStr, localeStr)}`;
 }
 
 /**
@@ -57,34 +61,38 @@ export function formatDateInput(dateStr: string | Date): string {
 /**
  * Format a month label for charts: "Jul"
  */
-export function formatMonthShort(dateStr: string | Date): string {
+export function formatMonthShort(dateStr: string | Date, localeStr: 'en' | 'bn' = 'en'): string {
   const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
   if (!isValid(date)) return '';
-  return formatInTimeZone(date, TZ, 'MMM');
+  const locale = localeStr === 'bn' ? bn : enUS;
+  return formatInTimeZone(date, TZ, 'MMM', { locale });
 }
 
 /**
  * Format a month + year: "July 2026"
  */
-export function formatMonthYear(dateStr: string | Date): string {
+export function formatMonthYear(dateStr: string | Date, localeStr: 'en' | 'bn' = 'en'): string {
   const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
   if (!isValid(date)) return '';
-  return formatInTimeZone(date, TZ, 'MMMM yyyy');
+  const locale = localeStr === 'bn' ? bn : enUS;
+  return formatInTimeZone(date, TZ, 'MMMM yyyy', { locale });
 }
 
 /**
  * Get a relative due label: "Due today", "Due in 3 days", "Overdue by 2 days"
  */
-export function formatDueLabel(dateStr: string): string {
+export function formatDueLabel(dateStr: string, localeStr: 'en' | 'bn' = 'en'): string {
   const now = nowInDhaka();
   const date = toZonedTime(parseISO(dateStr), TZ);
   const diff = differenceInDays(date, now);
 
-  if (diff === 0) return 'Due today';
-  if (diff === 1) return 'Due tomorrow';
-  if (diff > 1) return `Due in ${diff} days`;
-  if (diff === -1) return 'Overdue by 1 day';
-  return `Overdue by ${Math.abs(diff)} days`;
+  const isBn = localeStr === 'bn';
+
+  if (diff === 0) return isBn ? 'আজকে ডিউ' : 'Due today';
+  if (diff === 1) return isBn ? 'আগামীকাল ডিউ' : 'Due tomorrow';
+  if (diff > 1) return isBn ? `${diff} দিন পর ডিউ` : `Due in ${diff} days`;
+  if (diff === -1) return isBn ? '১ দিন ওভারডিউ' : 'Overdue by 1 day';
+  return isBn ? `${Math.abs(diff)} দিন ওভারডিউ` : `Overdue by ${Math.abs(diff)} days`;
 }
 
 /**
@@ -107,12 +115,21 @@ export function isUpcoming(dateStr: string, withinDays = 7): boolean {
 /**
  * Get greeting based on current hour in Asia/Dhaka.
  */
-export function getGreeting(): string {
+export function getGreeting(localeStr: 'en' | 'bn' = 'en'): string {
   const hour = nowInDhaka().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  if (hour < 21) return 'Good evening';
-  return 'Good night';
+  const isBn = localeStr === 'bn';
+  if (hour < 12) return isBn ? 'শুভ সকাল' : 'Good morning';
+  if (hour < 17) return isBn ? 'শুভ অপরাহ্ন' : 'Good afternoon';
+  if (hour < 21) return isBn ? 'শুভ সন্ধ্যা' : 'Good evening';
+  return isBn ? 'শুভ রাত্রি' : 'Good night';
+}
+
+/**
+ * Format a header date string: "Tuesday, July 29"
+ */
+export function formatHeaderDate(localeStr: 'en' | 'bn' = 'en'): string {
+  const locale = localeStr === 'bn' ? bn : enUS;
+  return formatInTimeZone(nowInDhaka(), TZ, 'EEEE, MMMM do', { locale });
 }
 
 /**
@@ -136,25 +153,17 @@ export function currentMonthRange(): { start: string; end: string } {
 /**
  * Get an array of the last N months as { start, end, label } for chart data.
  */
-export function lastNMonths(n: number): Array<{ start: string; end: string; label: string; year: number; month: number }> {
+export function lastNMonths(n: number, localeStr: 'en' | 'bn' = 'en'): Array<{ start: string; end: string; label: string; year: number; month: number }> {
   const now = nowInDhaka();
+  const locale = localeStr === 'bn' ? bn : enUS;
   return Array.from({ length: n }, (_, i) => {
     const date = subMonths(now, n - 1 - i);
     return {
       start: formatInTimeZone(startOfMonth(date), TZ, 'yyyy-MM-dd'),
       end: formatInTimeZone(endOfMonth(date), TZ, 'yyyy-MM-dd'),
-      label: formatInTimeZone(date, TZ, 'MMM'),
+      label: formatInTimeZone(date, TZ, 'MMM', { locale }),
       year: date.getFullYear(),
       month: date.getMonth() + 1,
     };
   });
 }
-
-/**
- * Format a header date: "Wednesday, 29 July"
- */
-export function formatHeaderDate(): string {
-  return formatInTimeZone(new Date(), TZ, 'EEEE, dd MMMM');
-}
-
-export { parseISO, isValid, isBefore, isAfter, addMonths, subMonths, startOfMonth, endOfMonth, format };

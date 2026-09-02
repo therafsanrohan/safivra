@@ -25,7 +25,6 @@ import {
   Lock,
   Zap,
 } from 'lucide-react';
-import { formatCurrency } from '@/lib/currency/formatter';
 
 export const LandingPage: React.FC = () => {
   const { user } = useAuthContext();
@@ -35,40 +34,19 @@ export const LandingPage: React.FC = () => {
   // Interactive Live Preview Tab State
   const [activeTab, setActiveTab] = useState<'overview' | 'cards' | 'loans' | 'savings'>('overview');
 
-  // Interactive Live DPS/EMI Calculator State
-  const [calcType, setCalcType] = useState<'dps' | 'loan'>('dps');
-  const [dpsMonthly, setDpsMonthly] = useState<number>(5000);
-  const [dpsYears, setDpsYears] = useState<number>(5);
-  const [dpsRate, setDpsRate] = useState<number>(8.5);
-
-  const [loanAmount, setLoanAmount] = useState<number>(200000);
-  const [loanMonths, setLoanMonths] = useState<number>(24);
-  const [loanRate, setLoanRate] = useState<number>(9.5);
-
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Calculate DPS Estimated Total
-  const totalDpsDeposit = dpsMonthly * (dpsYears * 12);
-  const dpsInterestEarned = Math.round(totalDpsDeposit * ((dpsRate / 100) * (dpsYears / 2)));
-  const dpsMaturity = totalDpsDeposit + dpsInterestEarned;
-
-  // Calculate Loan EMI
-  const monthlyRate = loanRate / 12 / 100;
-  const loanEmi = Math.round(
-    (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanMonths)) /
-    (Math.pow(1 + monthlyRate, loanMonths) - 1)
-  ) || 0;
-  const totalLoanRepayment = loanEmi * loanMonths;
-
   return (
     <>
-      <SEO />
+      <SEO 
+        title={isBn ? 'Safivra - সুরক্ষিত পার্সোনাল ফাইন্যান্স' : 'Safivra - Secure Personal Finance'} 
+        description={isBn ? 'আপনার আয়-ব্যয়, লোন, এবং সঞ্চয়ের সম্পূর্ণ হিসাব রাখুন এক জায়গায়, সম্পূর্ণ নিরাপদে।' : 'Track your income, expenses, loans, and savings in one place with bank-grade security.'}
+      />
       <div className="w-full flex flex-col items-center overflow-x-hidden">
         {/* Hero Section */}
         <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 sm:pt-24 sm:pb-20 text-center relative">
-          {/* Subtle Background Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm mb-6 text-xs sm:text-sm font-medium text-[var(--color-text-secondary)]">
@@ -92,14 +70,14 @@ export const LandingPage: React.FC = () => {
                 {isBn ? 'ফ্রি অ্যাকাউন্ট খুলুন' : 'Get Started Free'} <ArrowRight size={18} />
               </Button>
             </Link>
-            <a href="#interactive-preview" className="w-full sm:w-auto">
+            <a href="#security" className="w-full sm:w-auto">
               <Button variant="secondary" size="lg" className="w-full sm:w-auto px-7">
-                {isBn ? 'লাইভ ডেমো দেখুন' : 'Explore Interactive Demo'}
+                {isBn ? 'নিরাপত্তা সম্পর্কে জানুন' : 'Learn about Security'}
               </Button>
             </a>
           </div>
 
-          {/* Interactive Dynamic App Showcase */}
+          {/* Interactive Dynamic App Showcase (Anonymized) */}
           <div id="interactive-preview" className="max-w-5xl mx-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] shadow-2xl overflow-hidden text-left transition-all">
             {/* Window Header */}
             <div className="px-5 py-3.5 bg-[var(--color-bg-subtle)] border-b border-[var(--color-border)] flex flex-wrap items-center justify-between gap-3">
@@ -132,26 +110,6 @@ export const LandingPage: React.FC = () => {
                 >
                   {isBn ? 'ক্রেডিট কার্ড' : 'Credit Cards'}
                 </button>
-                <button
-                  onClick={() => setActiveTab('loans')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    activeTab === 'loans'
-                      ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                  }`}
-                >
-                  {isBn ? 'লোন ও ইএমআই' : 'Loans & EMI'}
-                </button>
-                <button
-                  onClick={() => setActiveTab('savings')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    activeTab === 'savings'
-                      ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                  }`}
-                >
-                  {isBn ? 'সঞ্চয় ও ডিপিএস' : 'DPS & Savings'}
-                </button>
               </div>
             </div>
 
@@ -162,18 +120,18 @@ export const LandingPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট নেট সম্পদ' : 'Total Net Assets'}</span>
-                      <p className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] mt-1 tabular-nums" data-financial>{formatCurrency(485250)}</p>
-                      <span className="text-xs text-emerald-600 font-medium mt-1 inline-block">↑ +12.4% {isBn ? 'এই মাসে বৃদ্ধি' : 'this month'}</span>
+                      <p className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] mt-1 tabular-nums" data-financial>৳ **,***</p>
+                      <span className="text-xs text-emerald-600 font-medium mt-1 inline-block">↑ +**.*% {isBn ? 'এই মাসে বৃদ্ধি' : 'this month'}</span>
                     </div>
                     <div className="p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট আয়' : 'Monthly Income'}</span>
-                      <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1 tabular-nums" data-financial>{formatCurrency(120000)}</p>
-                      <span className="text-xs text-[var(--color-text-muted)] mt-1 inline-block">{isBn ? 'বেতন ও ফ্রিল্যান্স' : 'Salary & Freelancing'}</span>
+                      <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1 tabular-nums" data-financial>৳ **,***</p>
+                      <span className="text-xs text-[var(--color-text-muted)] mt-1 inline-block">{isBn ? 'বেতন ও অন্যান্য' : 'Salary & Other'}</span>
                     </div>
                     <div className="p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-sm">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট খরচ' : 'Monthly Expenses'}</span>
-                      <p className="text-2xl sm:text-3xl font-bold text-rose-600 mt-1 tabular-nums" data-financial>{formatCurrency(52400)}</p>
-                      <span className="text-xs text-[var(--color-text-muted)] mt-1 inline-block">{isBn ? 'বাজেটের 68%' : '68% of Budget'}</span>
+                      <p className="text-2xl sm:text-3xl font-bold text-rose-600 mt-1 tabular-nums" data-financial>৳ **,***</p>
+                      <span className="text-xs text-[var(--color-text-muted)] mt-1 inline-block">{isBn ? 'বাজেটের **%' : '**% of Budget'}</span>
                     </div>
                   </div>
 
@@ -184,16 +142,16 @@ export const LandingPage: React.FC = () => {
                       </h4>
                       <div className="space-y-2.5">
                         <div className="flex justify-between items-center text-sm py-1.5 border-b border-[var(--color-border)]">
-                          <span className="font-medium text-[var(--color-text-primary)]">City Bank Salary Account</span>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(245000)}</span>
+                          <span className="font-medium text-[var(--color-text-primary)]">Primary Salary Account</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>৳ **,***</span>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1.5 border-b border-[var(--color-border)]">
-                          <span className="font-medium text-[var(--color-text-primary)]">bKash Personal Wallet</span>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(18500)}</span>
+                          <span className="font-medium text-[var(--color-text-primary)]">Personal Mobile Wallet</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>৳ **,***</span>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1.5">
-                          <span className="font-medium text-[var(--color-text-primary)]">BRAC Bank Savings</span>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>{formatCurrency(221750)}</span>
+                          <span className="font-medium text-[var(--color-text-primary)]">Savings Deposit</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>৳ **,***</span>
                         </div>
                       </div>
                     </div>
@@ -205,17 +163,17 @@ export const LandingPage: React.FC = () => {
                       <div className="space-y-2.5">
                         <div className="flex justify-between items-center text-sm py-1.5 border-b border-[var(--color-border)]">
                           <div>
-                            <p className="font-medium text-[var(--color-text-primary)]">Shwapno Supermarket</p>
-                            <p className="text-xs text-[var(--color-text-muted)]">Groceries · City Bank</p>
+                            <p className="font-medium text-[var(--color-text-primary)]">Supermarket Checkout</p>
+                            <p className="text-xs text-[var(--color-text-muted)]">Groceries · Primary Bank</p>
                           </div>
-                          <span className="font-semibold text-rose-600 tabular-nums" data-financial>-{formatCurrency(4200)}</span>
+                          <span className="font-semibold text-rose-600 tabular-nums" data-financial>-৳ *,***</span>
                         </div>
                         <div className="flex justify-between items-center text-sm py-1.5">
                           <div>
                             <p className="font-medium text-[var(--color-text-primary)]">Monthly Salary</p>
                             <p className="text-xs text-[var(--color-text-muted)]">Income · Direct Deposit</p>
                           </div>
-                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>+{formatCurrency(120000)}</span>
+                          <span className="font-semibold text-emerald-600 tabular-nums" data-financial>+৳ **,***</span>
                         </div>
                       </div>
                     </div>
@@ -228,15 +186,15 @@ export const LandingPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="p-5 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold tracking-wider text-slate-300">CITY GEMINI TITANIUM</span>
+                        <span className="text-xs font-semibold tracking-wider text-slate-300">PREMIUM CREDIT CARD</span>
                         <CreditCard size={20} className="text-amber-400" />
                       </div>
                       <div>
                         <span className="text-xs text-slate-400">{isBn ? 'ব্যবহৃত ব্যালেন্স' : 'Current Outstanding'}</span>
-                        <p className="text-3xl font-bold text-rose-400 mt-0.5 tabular-nums" data-financial>{formatCurrency(28500)}</p>
+                        <p className="text-3xl font-bold text-rose-400 mt-0.5 tabular-nums" data-financial>৳ **,***</p>
                       </div>
                       <div className="flex justify-between items-center text-xs text-slate-300 pt-2 border-t border-slate-700/60">
-                        <span>{isBn ? 'লিমিট: ' : 'Limit: '}{formatCurrency(150000)}</span>
+                        <span>{isBn ? 'লিমিট: ' : 'Limit: '}৳ ***,***</span>
                         <span>{isBn ? 'ডিউ ডেট: 15ই প্রতি মাস' : 'Due: 15th monthly'}</span>
                       </div>
                     </div>
@@ -244,67 +202,12 @@ export const LandingPage: React.FC = () => {
                     <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] flex flex-col justify-center space-y-3">
                       <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'ক্রেডিট ব্যবহার হার' : 'Credit Utilization'}</span>
                       <div className="flex justify-between items-end">
-                        <span className="text-2xl font-bold text-[var(--color-text-primary)]">19.0%</span>
+                        <span className="text-2xl font-bold text-[var(--color-text-primary)]">**.0%</span>
                         <span className="text-xs text-emerald-600 font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40">Healthy (&lt;30%)</span>
                       </div>
                       <div className="w-full bg-[var(--color-border)] h-2.5 rounded-full overflow-hidden">
-                        <div className="bg-emerald-500 h-full w-[19%]" />
+                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '19%' }}></div>
                       </div>
-                      <p className="text-xs text-[var(--color-text-secondary)]">{isBn ? 'বিল পরিশোধ করলে মূল ব্যালেন্স থেকে ডাবল হিসাব ছাড়া নির্ভুল অ্যাডজাস্ট হয়।' : 'Single-source ledger adjustments prevent double-counted statements.'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'loans' && (
-                <div className="space-y-6 animate-in fade-in duration-300">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">Home Appliance Loan</span>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/40">ACTIVE</span>
-                      </div>
-                      <div>
-                        <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'বাকি আসল ঋণ' : 'Remaining Principal'}</span>
-                        <p className="text-3xl font-bold text-rose-600 mt-0.5 tabular-nums" data-financial>{formatCurrency(45000)}</p>
-                        <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মূল ঋণ: ' : 'Original: '}{formatCurrency(100000)}</span>
-                      </div>
-                      <div className="w-full bg-[var(--color-border)] h-2 rounded-full overflow-hidden">
-                        <div className="bg-emerald-500 h-full w-[55%]" />
-                      </div>
-                      <p className="text-xs text-emerald-600 font-medium">55% {isBn ? 'পরিশোধ সম্পন্ন' : 'Principal Repaid'}</p>
-                    </div>
-
-                    <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] flex flex-col justify-center space-y-3">
-                      <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মাসিক কিস্তি (EMI)' : 'Monthly Installment'}</span>
-                      <p className="text-3xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>{formatCurrency(5250)}</p>
-                      <p className="text-xs text-[var(--color-text-secondary)]">
-                        {isBn ? 'প্রতি কিস্তির আসল এবং সুদের অংশ স্বয়ংক্রিয়ভাবে আলাদা হিসাব করা হয়।' : 'Accurately separates principal repayment from interest expense.'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'savings' && (
-                <div className="space-y-6 animate-in fade-in duration-300">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">BRAC Bank 5-Year DPS</span>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40">MATURING 2028</span>
-                      </div>
-                      <div>
-                        <span className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মোট জমাকৃত টাকা' : 'Total Accumulated'}</span>
-                        <p className="text-3xl font-bold text-emerald-600 mt-0.5 tabular-nums" data-financial>{formatCurrency(180000)}</p>
-                      </div>
-                      <p className="text-xs text-[var(--color-text-muted)]">{isBn ? 'মাসিক কিস্তি: ' : 'Monthly: '}{formatCurrency(5000)} · Rate: 8.5%</p>
-                    </div>
-
-                    <div className="p-5 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] flex flex-col justify-center space-y-3">
-                      <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মেয়াদান্তে সম্ভাব্য লাভ' : 'Maturity Target Value'}</span>
-                      <p className="text-3xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>{formatCurrency(364000)}</p>
-                      <p className="text-xs text-emerald-600 font-medium">{formatCurrency(64000)} {isBn ? 'মুনাফা বা লাভ' : 'Estimated Return'}</p>
                     </div>
                   </div>
                 </div>
@@ -313,313 +216,126 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Live Interactive DPS & Loan Estimator */}
-        <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-6 sm:p-10 shadow-lg">
-            <div className="text-center max-w-2xl mx-auto mb-8">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 text-xs font-semibold mb-3">
-                <Calculator size={14} /> {isBn ? 'ইন্টারেক্টিভ ক্যালকুলেটর' : 'Interactive Financial Tool'}
+        {/* Security Section (NEW) */}
+        <section id="security" className="w-full bg-slate-900 py-20 text-white border-y border-slate-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <Shield className="mx-auto h-16 w-16 text-emerald-400 mb-6" />
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              {isBn ? 'ব্যাংক-গ্রেড নিরাপত্তা' : 'Bank-Grade Security'}
+            </h2>
+            <p className="text-lg text-slate-300 max-w-3xl mx-auto mb-12">
+              {isBn 
+                ? 'আপনার আর্থিক ডেটা শুধুমাত্র আপনারই। আমরা আধুনিক প্রযুক্তির মাধ্যমে সর্বোচ্চ নিরাপত্তা নিশ্চিত করি।' 
+                : 'Your financial data is strictly yours. We employ state-of-the-art security measures to ensure absolute privacy and protection.'}
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 transition-colors">
+                <Lock className="h-10 w-10 text-emerald-400 mb-4 mx-auto" />
+                <h3 className="text-xl font-semibold mb-2">{isBn ? 'AES-256 এনক্রিপশন' : 'AES-256 Encryption'}</h3>
+                <p className="text-slate-400 text-sm">
+                  {isBn 
+                    ? 'ডেটাবেসে সংরক্ষণ করার সময় আপনার সকল সংবেদনশীল তথ্য শক্তিশালি এনক্রিপশন অ্যালগরিদম দিয়ে সুরক্ষিত থাকে।' 
+                    : 'All sensitive financial data is encrypted at rest using industry-standard AES-256 encryption algorithms.'}
+                </p>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)]">
-                {isBn ? 'আপনার সঞ্চয় ও ঋণের কিস্তি হিসাব করুন' : 'Calculate Your Savings & Loan Estimates'}
-              </h2>
+              <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 transition-colors">
+                <Shield className="h-10 w-10 text-emerald-400 mb-4 mx-auto" />
+                <h3 className="text-xl font-semibold mb-2">{isBn ? 'কোনো ডেটা শেয়ারিং নেই' : 'No Data Selling'}</h3>
+                <p className="text-slate-400 text-sm">
+                  {isBn 
+                    ? 'আপনার ডেটা আমরা তৃতীয় কোনো পক্ষের কাছে বিক্রি করি না। আপনার প্রাইভেসির সাথে কোনো আপস নয়।' 
+                    : 'We never sell, rent, or share your personal financial data with third-party advertisers or data brokers.'}
+                </p>
+              </div>
+              <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 transition-colors">
+                <Layers className="h-10 w-10 text-emerald-400 mb-4 mx-auto" />
+                <h3 className="text-xl font-semibold mb-2">{isBn ? 'কঠোর অডিট ট্রেইল' : 'Immutable Audit Trails'}</h3>
+                <p className="text-slate-400 text-sm">
+                  {isBn 
+                    ? 'প্রতিটি ট্রানজেকশন এবং লগইনের হিসাব ব্যাকএন্ডে কঠোরভাবে নিরীক্ষণ করা হয় যেন কোনো অননুমোদিত কাজ না ঘটে।' 
+                    : 'Every critical action is logged immutably, ensuring accountability and preventing unauthorized modifications.'}
+                </p>
+              </div>
             </div>
-
-            <div className="flex justify-center gap-2 mb-8">
-              <button
-                onClick={() => setCalcType('dps')}
-                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  calcType === 'dps'
-                    ? 'bg-[var(--color-primary)] text-white shadow-md'
-                    : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                }`}
-              >
-                {isBn ? 'ডিপিএস সঞ্চয় হিসাব (DPS)' : 'DPS Savings Estimator'}
-              </button>
-              <button
-                onClick={() => setCalcType('loan')}
-                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  calcType === 'loan'
-                    ? 'bg-[var(--color-primary)] text-white shadow-md'
-                    : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                }`}
-              >
-                {isBn ? 'লোন ও ইএমআই হিসাব (Loan EMI)' : 'Loan EMI Estimator'}
-              </button>
-            </div>
-
-            {calcType === 'dps' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-5">
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      <span>{isBn ? 'মাসিক জমা' : 'Monthly Deposit'}</span>
-                      <span className="font-bold text-emerald-600">{formatCurrency(dpsMonthly)}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1000"
-                      max="50000"
-                      step="1000"
-                      value={dpsMonthly}
-                      onChange={(e) => setDpsMonthly(Number(e.target.value))}
-                      className="w-full accent-emerald-600"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      <span>{isBn ? 'সময়কাল (বছর)' : 'Tenure (Years)'}</span>
-                      <span className="font-bold">{dpsYears} {isBn ? 'বছর' : 'Years'}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      step="1"
-                      value={dpsYears}
-                      onChange={(e) => setDpsYears(Number(e.target.value))}
-                      className="w-full accent-emerald-600"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      <span>{isBn ? 'বার্ষিক সুদের হার (%)' : 'Interest Rate (%)'}</span>
-                      <span className="font-bold">{dpsRate}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="14"
-                      step="0.5"
-                      value={dpsRate}
-                      onChange={(e) => setDpsRate(Number(e.target.value))}
-                      className="w-full accent-emerald-600"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border)] space-y-4">
-                  <div>
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মোট জমাকৃত আসল' : 'Total Deposited'}</span>
-                    <p className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalDpsDeposit)}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'সম্ভাব্য মুনাফা' : 'Estimated Return'}</span>
-                    <p className="text-xl font-bold text-emerald-600">+{formatCurrency(dpsInterestEarned)}</p>
-                  </div>
-                  <div className="pt-3 border-t border-[var(--color-border)]">
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মেয়াদান্তে মোট প্রাপ্তি' : 'Maturity Amount'}</span>
-                    <p className="text-3xl font-extrabold text-[var(--color-primary)]">{formatCurrency(dpsMaturity)}</p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-5">
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      <span>{isBn ? 'লোনের পরিমাণ' : 'Loan Amount'}</span>
-                      <span className="font-bold text-rose-600">{formatCurrency(loanAmount)}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="50000"
-                      max="2000000"
-                      step="25000"
-                      value={loanAmount}
-                      onChange={(e) => setLoanAmount(Number(e.target.value))}
-                      className="w-full accent-emerald-600"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      <span>{isBn ? 'পরিশোধের মেয়াদ (মাস)' : 'Tenure (Months)'}</span>
-                      <span className="font-bold">{loanMonths} {isBn ? 'মাস' : 'Months'}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="6"
-                      max="60"
-                      step="6"
-                      value={loanMonths}
-                      onChange={(e) => setLoanMonths(Number(e.target.value))}
-                      className="w-full accent-emerald-600"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      <span>{isBn ? 'সুদের হার (%)' : 'Interest Rate (%)'}</span>
-                      <span className="font-bold">{loanRate}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="6"
-                      max="18"
-                      step="0.5"
-                      value={loanRate}
-                      onChange={(e) => setLoanRate(Number(e.target.value))}
-                      className="w-full accent-emerald-600"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border)] space-y-4">
-                  <div>
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মাসিক কিস্তি (EMI)' : 'Monthly EMI'}</span>
-                    <p className="text-3xl font-extrabold text-[var(--color-text-primary)]">{formatCurrency(loanEmi)}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মোট পরিশোধযোগ্য টাকা' : 'Total Repayment'}</span>
-                    <p className="text-xl font-bold text-rose-600">{formatCurrency(totalLoanRepayment)}</p>
-                  </div>
-                  <div className="pt-3 border-t border-[var(--color-border)]">
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase">{isBn ? 'মোট অতিরিক্ত সুদ' : 'Total Interest'}</span>
-                    <p className="text-xl font-bold text-[var(--color-text-muted)]">{formatCurrency(totalLoanRepayment - loanAmount)}</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </section>
 
         {/* Feature Grid */}
-        <section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-text-primary)] mb-4">
-              {isBn ? 'আপনার আর্থিক জীবনের পূর্ণ নিয়ন্ত্রণ' : 'Built for Everyday Financial Clarity'}
+        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-4">
+              {isBn ? 'কেন Safivra ব্যবহার করবেন?' : 'Why choose Safivra?'}
             </h2>
-            <p className="text-lg text-[var(--color-text-secondary)]">
+            <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
               {isBn
-                ? 'জটিল এক্সেল বা ডাবল ক্যালকুলেশন ছাড়াই আপনার সমস্ত সম্পদ ও দায়ের নিখুঁত রেকর্ড।'
-                : 'Say goodbye to messy spreadsheets and flawed accounting logic.'}
+                ? 'মানি ম্যানেজমেন্ট অ্যাপের প্রচলিত সমস্যাগুলো দূর করে, আমরা এনেছি সঠিক ডাবল-এন্ট্রি হিসাব ব্যবস্থা।'
+                : 'Built to solve the flaws of traditional expense trackers with true double-entry accuracy.'}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-7 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-emerald-500/50 transition-all shadow-sm space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-emerald-500/30 transition-all hover:shadow-md group">
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
                 <Landmark size={24} />
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text-primary)]">{isBn ? 'অ্যাকাউন্ট ও ওয়ালেটস' : 'Accounts & Wallets'}</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                {isBn ? 'ক্যাশ, ব্যাংক এবং বিকাশ/নগদের ব্যালেন্স একসাথে পর্যবেক্ষণ করুন।' : 'Track liquid cash, multi-bank accounts, and mobile wallets in real time.'}
+              <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2">
+                {isBn ? 'সঠিক হিসাব' : 'True Accounting'}
+              </h3>
+              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">
+                {isBn
+                  ? 'ডাবল-এন্ট্রি সিস্টেমের মাধ্যমে একটি টাকাও হারিয়ে যাবে না। ট্রান্সফার করলে খরচ হিসেবে দেখাবে না।'
+                  : 'Double-entry ledger ensures zero missing funds. Transfers between accounts are never counted as expenses.'}
               </p>
             </div>
-
-            <div className="p-7 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-emerald-500/50 transition-all shadow-sm space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/50 flex items-center justify-center text-teal-600">
+            
+            <div className="p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-blue-500/30 transition-all hover:shadow-md group">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4 group-hover:scale-110 transition-transform">
                 <CreditCard size={24} />
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text-primary)]">{isBn ? 'ক্রেডিট কার্ড ও লোন' : 'Credit Cards & Loans'}</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                {isBn ? 'আসল টাকা ও সুদের আলাদা হিসাব এবং ডিউ ডেট রিমাইন্ডার।' : 'Never miss a due date. Clear principal vs interest separation.'}
+              <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2">
+                {isBn ? 'ক্রেডিট কার্ড ম্যানেজমেন্ট' : 'Credit Card Logic'}
+              </h3>
+              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">
+                {isBn
+                  ? 'কার্ড দিয়ে কেনাকাটা করলে আপনার নেট সম্পদ কমে, কিন্তু ক্যাশ কমে না। বিল পেমেন্টের সময় সঠিক হিসাব হয়।'
+                  : 'Spending on credit doesn\'t reduce your cash balance immediately. Pay your statement with zero double-counting.'}
               </p>
             </div>
 
-            <div className="p-7 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-emerald-500/50 transition-all shadow-sm space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-600">
+            <div className="p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-purple-500/30 transition-all hover:shadow-md group">
+              <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-4 group-hover:scale-110 transition-transform">
                 <PieChart size={24} />
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text-primary)]">{isBn ? 'ডাইনামিক অ্যানালিটিক্স' : 'Dynamic Reports & CSV'}</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                {isBn ? 'মাসিক ও বাৎসরিক আয়ের খাতভিত্তিক বিশ্লেষণ ও এক ক্লিকে সিএসভি এক্সপোর্ট।' : 'Filter by month or year, view category breakdowns and export data cleanly.'}
+              <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2">
+                {isBn ? 'নেট ওয়েলথ ট্র্যাকিং' : 'Net Worth Tracking'}
+              </h3>
+              <p className="text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">
+                {isBn
+                  ? 'সম্পদ এবং দায়ের সঠিক পার্থক্যের মাধ্যমে আপনার রিয়েল-টাইম ফাইন্যান্সিয়াল হেলথ জানুন।'
+                  : 'Get a real-time, accurate picture of your financial health by properly contrasting assets and liabilities.'}
               </p>
             </div>
           </div>
         </section>
 
-        {/* Security & Privacy */}
-        <section className="w-full bg-[var(--color-bg-surface)] border-y border-[var(--color-border)] py-16">
-          <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
-            <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 mx-auto">
-              <Lock size={22} />
+        {/* Footer */}
+        <footer className="w-full border-t border-[var(--color-border)] py-12 bg-[var(--color-bg-surface)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center">
+                <Wallet className="text-white h-5 w-5" />
+              </div>
+              <span className="font-bold text-xl tracking-tight text-[var(--color-text-primary)]">Safivra</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)]">
-              {isBn ? 'আপনার আর্থিক তথ্যের শতভাগ নিরাপত্তা' : 'Bank-Grade Security & User Privacy'}
-            </h2>
-            <p className="text-[var(--color-text-secondary)] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-              {isBn
-                ? 'রো-লেভেল সিকিউরিটি (RLS) এবং এনক্রিপশনের মাধ্যমে আপনার আর্থিক ডেটা শুধুমাত্র আপনার কাছেই সুরক্ষিত থাকে।'
-                : 'Protected with PostgreSQL Row Level Security (RLS) and strict authenticated access controls.'}
-            </p>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section id="faq" className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-8 text-center">
-            {isBn ? 'সাধারণ জিজ্ঞাসা (FAQ)' : 'Frequently Asked Questions'}
-          </h2>
-          <div className="space-y-3.5">
-            {[
-              {
-                q: isBn ? 'Safivra কি সম্পূর্ণ ফ্রি?' : 'Is Safivra free to use?',
-                a: isBn ? 'হ্যাঁ, Safivra-র কোর পার্সোনাল ফাইন্যান্স ফিচারসমূহ সম্পূর্ণ বিনামূল্যে ব্যবহার করতে পারবেন।' : 'Yes, Safivra core personal financial management features are completely free.'
-              },
-              {
-                q: isBn ? 'বাংলাদেশি টাকা (BDT) কি পুরোপুরি সাপোর্ট করে?' : 'Does it support Bangladeshi Taka (BDT)?',
-                a: isBn ? 'হ্যাঁ, বাংলাদেশি টাকা (৳) এবং দেশীয় হিসাব ব্যবস্থা (যেমন: ডিপিএস, ব্যাংক লোন, বিকাশ/নগদ) কেন্দ্রিক ডিজাইন করা।' : 'Yes, Safivra is built from the ground up tailored for BDT (৳) and Bangladeshi financial instruments.'
-              },
-              {
-                q: isBn ? 'ট্রানজ্যাকশন ডাটা কি এক্সপোর্ট করা যাবে?' : 'Can I export my financial data?',
-                a: isBn ? 'হ্যাঁ! Reports পেজ থেকে যেকোনো সময় সম্পূর্ণ বিস্তারিত সিএসভি (CSV) ফাইল এক ক্লিকে ডাউনলোড করতে পারবেন।' : 'Yes! You can export your full transaction records to CSV at any time from the Reports tab.'
-              },
-            ].map((faq, index) => (
-              <FAQItem key={index} question={faq.q} answer={faq.a} />
-            ))}
-          </div>
-        </section>
-
-        {/* Final Call to Action */}
-        <section className="w-full bg-gradient-to-b from-[var(--color-bg-page)] to-emerald-500/10 border-t border-[var(--color-border)] py-20 text-center">
-          <div className="max-w-4xl mx-auto px-4">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-text-primary)] mb-4">
-              {isBn ? 'আজই শুরু করুন আপনার আর্থিক স্বচ্ছতা' : 'Take Control of Your Finances Today'}
-            </h2>
-            <p className="text-lg text-[var(--color-text-secondary)] mb-8 max-w-xl mx-auto">
-              {isBn ? 'একটি অ্যাকাউন্ট যুক্ত করে পরিষ্কার ও নির্ভুল হিসাব উপভোগ করুন।' : 'Start in less than 2 minutes. Free and secure.'}
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link to="/auth/sign-up">
-                <Button size="lg" className="px-8 shadow-lg shadow-emerald-500/20">
-                  {isBn ? 'নতুন অ্যাকাউন্ট খুলুন' : 'Create Free Account'}
-                </Button>
-              </Link>
-              <Link to="/auth/sign-in">
-                <Button variant="secondary" size="lg" className="px-8">
-                  {isBn ? 'লগইন করুন' : 'Sign In'}
-                </Button>
-              </Link>
+            <div className="text-[var(--color-text-muted)] text-sm">
+              © {new Date().getFullYear()} Safivra. {isBn ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}
             </div>
           </div>
-        </section>
-
+        </footer>
       </div>
     </>
   );
 };
 
-const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-bg-surface)] overflow-hidden transition-colors">
-      <button 
-        className="w-full text-left px-6 py-4 font-semibold text-[var(--color-text-primary)] flex justify-between items-center focus:outline-none"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
-        <span>{question}</span>
-        {isOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]" /> : <ChevronDown size={18} className="text-[var(--color-text-muted)]" />}
-      </button>
-      {isOpen && (
-        <div className="px-6 pb-4 text-sm text-[var(--color-text-secondary)] leading-relaxed">
-          {answer}
-        </div>
-      )}
-    </div>
-  );
-};
+export default LandingPage;

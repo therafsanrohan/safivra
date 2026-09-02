@@ -13,6 +13,7 @@ import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths,
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { InfoPopover } from '@/components/ui/InfoPopover';
+import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
 import {
   BarChart, Bar, XAxis, YAxis,
   ResponsiveContainer, Tooltip, CartesianGrid,
@@ -58,7 +59,7 @@ interface DashboardData {
 
 export const DashboardPage: React.FC = () => {
   const { user, profile } = useAuthContext();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -66,8 +67,8 @@ export const DashboardPage: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there';
-  const greeting = getGreeting();
-  const headerDate = formatHeaderDate();
+  const greeting = getGreeting(locale);
+  const headerDate = formatHeaderDate(locale);
 
   const loadDashboard = useCallback(async () => {
     if (!user) return;
@@ -304,6 +305,9 @@ export const DashboardPage: React.FC = () => {
           </span>
         </div>
       </Card>
+
+      {/* Currency Exchange Widget */}
+      <CurrencyExchangeWidget />
 
       {/* Cash Flow Chart */}
       {data && data.cashflowHistory.length > 0 && (

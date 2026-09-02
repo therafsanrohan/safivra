@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, ReceiptText, Plus, Target, MoreHorizontal,
   Wallet, Landmark, CreditCard, BarChart3, Settings,
-  Bell, HandCoins, RefreshCw, BookOpen, Languages,
+  Bell, HandCoins, RefreshCw, BookOpen, Languages, Calculator
 } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
 import { useAuthContext } from '@/context/AuthContext';
@@ -148,10 +148,10 @@ const AddTransactionSheet: React.FC<{
   );
 };
 
-// ─── Desktop Sidebar ──────────────────────────────────────────────────────────
 export const Sidebar: React.FC = () => {
   const { profile } = useAuthContext();
   const { t, toggleLocale, locale } = useLanguage();
+  const isBn = locale === 'bn';
   const [addOpen, setAddOpen] = useState(false);
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
@@ -177,6 +177,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { to: '/dashboard/plans', label: t.nav.plansGoals, icon: Target },
         { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
+        { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },
       ],
     },
   ];
