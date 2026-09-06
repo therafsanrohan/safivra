@@ -9,6 +9,20 @@ import { Card, CardHeader, Skeleton, ErrorState, ProgressBar, Badge } from '@/co
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+
+const CustomDonutTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
+        <p className="font-bold text-[var(--color-text-primary)] mb-2">{payload[0].name}</p>
+        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: payload[0].payload.fill }}>
+          <span>৳ {payload[0].value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 import type { Database } from '@/types/database';
 
 interface TransactionWithEntries {
@@ -449,10 +463,7 @@ export const ReportsPage: React.FC = () => {
                         return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
                       })}
                     </Pie>
-                    <RechartsTooltip 
-                      formatter={(val: number) => `৳ ${formatCurrency(val)}`}
-                      contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', borderRadius: '8px', border: '1px solid var(--color-border)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)' }}
-                    />
+                    <RechartsTooltip content={<CustomDonutTooltip />} />
                   </RePieChart>
                 </ResponsiveContainer>
               </div>

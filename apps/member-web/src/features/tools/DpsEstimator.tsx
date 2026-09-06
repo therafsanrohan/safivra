@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { Input } from '@/components/ui/Input';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -66,42 +67,36 @@ export const DpsEstimator: React.FC = () => {
           <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'মাসিক জমা' : 'Monthly Deposit'}
           </label>
-          <div className="relative group">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-emerald-500 transition-colors">৳</div>
-            <input 
-              type="number" min="500" step="500" 
-              value={monthlyDeposit} onChange={(e) => setMonthlyDeposit(Number(e.target.value) || 0)}
-              className="w-full pl-8 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
-            />
-          </div>
+          <Input 
+            type="number" min="500" step="500" 
+            value={monthlyDeposit || ''} onChange={(e) => setMonthlyDeposit(Number(e.target.value))}
+            leftElement={<span className="font-semibold">৳</span>}
+            className="font-bold tabular-nums"
+          />
         </div>
         
         <div>
           <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'সুদের হার' : 'Interest Rate'}
           </label>
-          <div className="relative group">
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-emerald-500 transition-colors">%</div>
-            <input 
-              type="number" min="1" step="0.1" 
-              value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
-              className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
-            />
-          </div>
+          <Input 
+            type="number" min="1" step="0.1" 
+            value={interestRate || ''} onChange={(e) => setInterestRate(Number(e.target.value))}
+            rightElement={<span className="font-semibold">%</span>}
+            className="font-bold tabular-nums"
+          />
         </div>
         
         <div>
           <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'মেয়াদ' : 'Duration'}
           </label>
-          <div className="relative group">
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-emerald-500 transition-colors">YRS</div>
-            <input 
-              type="number" min="1" step="1" 
-              value={durationYears} onChange={(e) => setDurationYears(Number(e.target.value) || 0)}
-              className="w-full pl-3 pr-12 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
-            />
-          </div>
+          <Input 
+            type="number" min="1" step="1" 
+            value={durationYears || ''} onChange={(e) => setDurationYears(Number(e.target.value))}
+            rightElement={<span className="font-semibold text-[11px] mt-0.5">YRS</span>}
+            className="font-bold tabular-nums"
+          />
         </div>
       </div>
 

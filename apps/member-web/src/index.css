@@ -10,19 +10,26 @@
 @layer base {
   :root, :root[data-theme="light"] {
     /* ── Colour Tokens (Light Theme) ──────────────────────────────────────── */
-    --color-bg-page:         #F7F7F5;
+    --color-bg-page:         #F9FAFB; /* soft off-white */
     --color-bg-surface:      #FFFFFF;
-    --color-bg-subtle:       #F1F1EE;
-    --color-bg-hover:        #EBEBEA;
+    --color-bg-subtle:       #F3F4F6;
+    --color-bg-hover:        #E5E7EB;
 
-    --color-text-primary:    #171717;
-    --color-text-secondary:  #666663;
-    --color-text-muted:      #92928D;
-    --color-text-placeholder: #B0B0AB;
+    --color-text-primary:    #111827;
+    --color-text-secondary:  #4B5563;
+    --color-text-muted:      #9CA3AF;
+    --color-text-placeholder: #D1D5DB;
 
-    --color-border:          #E4E4DF;
-    --color-border-strong:   #D5D5CF;
+    --color-border:          #E5E7EB;
+    --color-border-strong:   #D1D5DB;
     --color-border-focus:    #234C3A;
+
+    /* ── Liquid Glass Tokens (Light) ──────────────────────────────────────── */
+    --glass-bg:              rgba(255, 255, 255, 0.75);
+    --glass-border:          rgba(255, 255, 255, 0.4);
+    --glass-highlight:       inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --glass-shadow:          0 4px 24px rgba(0, 0, 0, 0.04);
+    --glass-blur:            16px;
 
     /* ── Accent — Forest Green (restrained) ───────────────────────────────── */
     --color-accent:          #234C3A;
@@ -95,36 +102,96 @@
     --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
   }
 
-  /* Explicit dark mode tokens */
+  /* ── Colour Tokens (Dark Theme) - Applies to both manual toggle and system preference ── */
+  :root[data-theme="dark"],
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      & {
+        --is-dark: 1;
+      }
+    }
+  }
+
+  /* We apply dark variables if data-theme="dark", or if data-theme is unset and system is dark */
+  :root[data-theme="dark"] {
+    --color-bg-page:         #111113; /* deep charcoal, not pure black */
+    --color-bg-surface:      #18181B;
+    --color-bg-subtle:       #27272A;
+    --color-bg-hover:        #3F3F46;
+
+    --color-text-primary:    #F9FAFB;
+    --color-text-secondary:  #A1A1AA;
+    --color-text-muted:      #71717A;
+    --color-text-placeholder: #52525B;
+
+    --color-border:          #27272A;
+    --color-border-strong:   #3F3F46;
+    --color-border-focus:    #34D399; /* Mint accent for dark mode */
+
+    /* ── Liquid Glass Tokens (Dark) ───────────────────────────────────────── */
+    --glass-bg:              rgba(24, 24, 27, 0.65);
+    --glass-border:          rgba(255, 255, 255, 0.06);
+    --glass-highlight:       inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    --glass-shadow:          0 8px 32px rgba(0, 0, 0, 0.4);
+    --glass-blur:            16px;
+
+    --color-accent:          #34D399; /* Mint */
+    --color-accent-hover:    #10B981;
+    --color-accent-soft:     #064E3B;
+    --color-accent-text:     #022C22;
+
+    --color-positive:        #34D399;
+    --color-positive-soft:   #064E3B;
+    --color-negative:        #F87171;
+    --color-negative-soft:   #7F1D1D;
+    --color-warning:         #FBBF24;
+    --color-warning-soft:    #78350F;
+    --color-info:            #60A5FA;
+    --color-info-soft:       #1E3A8A;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.20);
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.15);
+    --shadow-sheet: 0 -4px 24px rgba(0, 0, 0, 0.40);
+
+    color-scheme: dark;
+  }
+
   @media (prefers-color-scheme: dark) {
-    :root {
-      --color-bg-page:         #09090B;
+    :root:not([data-theme="light"]) {
+      --color-bg-page:         #111113;
       --color-bg-surface:      #18181B;
       --color-bg-subtle:       #27272A;
       --color-bg-hover:        #3F3F46;
 
-      --color-text-primary:    #FAFAFA;
+      --color-text-primary:    #F9FAFB;
       --color-text-secondary:  #A1A1AA;
       --color-text-muted:      #71717A;
       --color-text-placeholder: #52525B;
 
       --color-border:          #27272A;
       --color-border-strong:   #3F3F46;
-      --color-border-focus:    #4FAF7B;
+      --color-border-focus:    #34D399;
 
-      --color-accent:          #4FAF7B;
-      --color-accent-hover:    #5FC08A;
-      --color-accent-soft:     #1A2F24;
-      --color-accent-text:     #111110;
+      --glass-bg:              rgba(24, 24, 27, 0.65);
+      --glass-border:          rgba(255, 255, 255, 0.06);
+      --glass-highlight:       inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      --glass-shadow:          0 8px 32px rgba(0, 0, 0, 0.4);
+      --glass-blur:            16px;
 
-      --color-positive:        #4FAF7B;
-      --color-positive-soft:   #1A2F24;
-      --color-negative:        #D46B66;
-      --color-negative-soft:   #2F1D1C;
-      --color-warning:         #D4A746;
-      --color-warning-soft:    #2A2214;
-      --color-info:            #6BA3C7;
-      --color-info-soft:       #1A2530;
+      --color-accent:          #34D399;
+      --color-accent-hover:    #10B981;
+      --color-accent-soft:     #064E3B;
+      --color-accent-text:     #022C22;
+
+      --color-positive:        #34D399;
+      --color-positive-soft:   #064E3B;
+      --color-negative:        #F87171;
+      --color-negative-soft:   #7F1D1D;
+      --color-warning:         #FBBF24;
+      --color-warning-soft:    #78350F;
+      --color-info:            #60A5FA;
+      --color-info-soft:       #1E3A8A;
 
       --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.20);
       --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.25);
@@ -133,44 +200,6 @@
 
       color-scheme: dark;
     }
-  }
-
-  /* Manual theme override classes for user preference */
-  :root[data-theme="dark"] {
-    --color-bg-page:         #09090B;
-    --color-bg-surface:      #18181B;
-    --color-bg-subtle:       #27272A;
-    --color-bg-hover:        #3F3F46;
-
-    --color-text-primary:    #FAFAFA;
-    --color-text-secondary:  #A1A1AA;
-    --color-text-muted:      #71717A;
-    --color-text-placeholder: #52525B;
-
-    --color-border:          #27272A;
-    --color-border-strong:   #3F3F46;
-    --color-border-focus:    #4FAF7B;
-
-    --color-accent:          #4FAF7B;
-    --color-accent-hover:    #5FC08A;
-    --color-accent-soft:     #1A2F24;
-    --color-accent-text:     #111110;
-
-    --color-positive:        #4FAF7B;
-    --color-positive-soft:   #1A2F24;
-    --color-negative:        #D46B66;
-    --color-negative-soft:   #2F1D1C;
-    --color-warning:         #D4A746;
-    --color-warning-soft:    #2A2214;
-    --color-info:            #6BA3C7;
-    --color-info-soft:       #1A2530;
-
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.20);
-    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.15);
-    --shadow-sheet: 0 -4px 24px rgba(0, 0, 0, 0.40);
-
-    color-scheme: dark;
   }
 
   :root[data-theme="light"] {
@@ -372,37 +401,26 @@
     padding: var(--space-5);
   }
 
-  /* ── Apple-Inspired Glass & Gradients ──────────────────────────────────── */
+  /* ── Liquid Glass Design System ───────────────────────────────────────── */
+  /* Fixes white box / clipping artifact using transform and overflow */
   .glass {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: var(--shadow-sm);
-  }
-
-  :root[data-theme="dark"] .glass,
-  @media (prefers-color-scheme: dark) {
-    .glass {
-      background: rgba(28, 28, 26, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    transform: translateZ(0); /* Force hardware acceleration */
+    overflow: hidden; /* Prevent blur bleeding */
   }
 
   .glass-panel {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.4);
-  }
-
-  :root[data-theme="dark"] .glass-panel,
-  @media (prefers-color-scheme: dark) {
-    .glass-panel {
-      background: rgba(28, 28, 26, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    background: var(--glass-bg);
+    backdrop-filter: blur(calc(var(--glass-blur) + 8px));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 8px));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md), var(--glass-highlight);
+    transform: translateZ(0);
+    overflow: hidden;
   }
 
   .gradient-emerald {

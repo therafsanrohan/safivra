@@ -23,7 +23,7 @@ export const Card: React.FC<CardProps> = ({
     <div
       className={[
         variantClass,
-        'rounded-[var(--radius-card)]',
+        'rounded-[var(--radius-card)] overflow-hidden relative',
         paddingClass,
         onClick
           ? 'cursor-pointer hover:border-[var(--color-border-strong)] hover-lift transition-colors duration-[var(--duration-fast)]'

@@ -134,7 +134,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 ? 'border-[var(--color-negative)] focus:border-[var(--color-negative)]'
                 : 'border-[var(--color-border)] focus:border-[var(--color-border-focus)]',
               'outline-none focus:ring-2 focus:ring-[var(--color-accent)]/20',
-              'placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium',
+              'placeholder:text-[var(--color-text-placeholder)] font-medium',
               'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-bg-subtle)]',
               leftElement ? 'pl-9' : '',
               rightElement ? 'pr-9' : '',
@@ -194,7 +194,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               ? 'border-[var(--color-negative)] focus:border-[var(--color-negative)]'
               : 'border-[var(--color-border)] focus:border-[var(--color-border-focus)]',
             'outline-none focus:ring-2 focus:ring-[var(--color-accent)]/20',
-            'placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium',
+            'placeholder:text-[var(--color-text-placeholder)] font-medium',
             'mt-1',
             className,
           ]

@@ -160,7 +160,7 @@ export const SettingsPage: React.FC = () => {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   type="tel"
-                  placeholder="1XXX XXXXXX"
+                  placeholder="17XX-XXXXXX"
                 />
               </div>
             </div>
