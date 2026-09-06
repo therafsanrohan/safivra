@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, Skeleton, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { RefreshCw, Calculator, History, AlertCircle } from 'lucide-react';
@@ -33,7 +32,7 @@ export function ZakatDashboardPage() {
         .single();
         
       if (rateError && rateError.code !== 'PGRST116') throw rateError;
-      setActiveRate(rateData as RateSnapshot);
+      setActiveRate(rateData as unknown as RateSnapshot | null);
 
       // Fetch active rules
       const { data: rulesData, error: rulesError } = await supabase
@@ -44,7 +43,7 @@ export function ZakatDashboardPage() {
         .single();
         
       if (rulesError && rulesError.code !== 'PGRST116') throw rulesError;
-      setActiveRules(rulesData as RuleSet);
+      setActiveRules(rulesData as unknown as RuleSet | null);
 
     } catch (err: any) {
       setError(err.message);
@@ -70,20 +69,20 @@ export function ZakatDashboardPage() {
 
   if (loading) {
     return (
-      <PageLayout title="Zakat Intelligence">
-        <div className="space-y-4">
-          <Skeleton className="h-40 rounded-2xl" />
-          <Skeleton className="h-64 rounded-2xl" />
-        </div>
-      </PageLayout>
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold mb-6 text-[var(--color-text-primary)]">Zakat Intelligence</h1>
+        <Skeleton className="h-40 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <PageLayout title="Zakat Intelligence">
-        <ErrorState title="Failed to load Zakat data" message={error} onRetry={fetchZakatData} />
-      </PageLayout>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold mb-6 text-[var(--color-text-primary)]">Zakat Intelligence</h1>
+        <ErrorState message={error} onRetry={fetchZakatData} />
+      </div>
     );
   }
 
@@ -96,8 +95,8 @@ export function ZakatDashboardPage() {
   const currentNisabValue = activeRules?.nisab_standard === 'gold' ? goldNisabValue : silverNisabValue;
 
   return (
-    <PageLayout title="Zakat Intelligence">
-      <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 pb-12">
+      <h1 className="text-2xl font-bold mb-2 text-[var(--color-text-primary)]">Zakat Intelligence</h1>
         
         {/* Welcome & Action Banner */}
         <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
@@ -152,7 +151,7 @@ export function ZakatDashboardPage() {
               
               <p className="text-sm text-[var(--color-text-secondary)] mb-1">Current Nisab Threshold</p>
               <h4 className="text-3xl font-bold tracking-tight text-[var(--color-text-primary)]">
-                {activeRate ? formatCurrency(currentNisabValue, activeRate.currency) : '---'}
+                {activeRate ? formatCurrency(currentNisabValue) : '---'}
               </h4>
               <p className="text-xs text-[var(--color-text-tertiary)] mt-3 flex items-center">
                 <AlertCircle className="w-3.5 h-3.5 mr-1" />
@@ -166,13 +165,13 @@ export function ZakatDashboardPage() {
                 <div className="flex justify-between items-center pb-3 border-b border-[var(--color-border)]">
                   <span className="text-[var(--color-text-secondary)] font-medium">Gold Rate (per gram)</span>
                   <span className="font-semibold text-[var(--color-text-primary)]">
-                    {activeRate ? formatCurrency(activeRate.gold_rate_per_gram, activeRate.currency) : '---'}
+                    {activeRate ? formatCurrency(activeRate.gold_rate_per_gram) : '---'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-3">
                   <span className="text-[var(--color-text-secondary)] font-medium">Silver Rate (per gram)</span>
                   <span className="font-semibold text-[var(--color-text-primary)]">
-                    {activeRate ? formatCurrency(activeRate.silver_rate_per_gram, activeRate.currency) : '---'}
+                    {activeRate ? formatCurrency(activeRate.silver_rate_per_gram) : '---'}
                   </span>
                 </div>
               </div>
@@ -196,6 +195,5 @@ export function ZakatDashboardPage() {
         </div>
 
       </div>
-    </PageLayout>
   );
 }
