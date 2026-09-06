@@ -102,10 +102,10 @@ export function ZakatDashboardPage() {
       </div>
         
         {/* Welcome & Action Banner */}
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-900 dark:from-emerald-800 dark:to-emerald-950 rounded-[2rem] p-6 md:p-10 text-white shadow-xl shadow-emerald-900/20 dark:shadow-none relative overflow-hidden border border-emerald-500/20">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 dark:from-emerald-800 dark:to-emerald-950 rounded-[2rem] p-6 md:p-10 text-white shadow-xl shadow-emerald-600/20 dark:shadow-none relative overflow-hidden border border-emerald-400/30 dark:border-emerald-500/20">
           {/* Background effects */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400 opacity-20 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-500 opacity-20 rounded-full -ml-10 -mb-10 blur-2xl pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-300 dark:bg-emerald-400 opacity-20 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-400 dark:bg-emerald-500 opacity-20 rounded-full -ml-10 -mb-10 blur-2xl pointer-events-none"></div>
           
           <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
             <div className="space-y-3 text-center md:text-left w-full md:w-auto flex-1">
@@ -116,13 +116,14 @@ export function ZakatDashboardPage() {
             </div>
             <div className="shrink-0 w-full md:w-auto flex flex-col gap-3">
               <Button 
+                variant="ghost"
                 onClick={() => navigate('/dashboard/zakat/calculator')}
-                className="w-full md:w-auto bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl h-14 px-8 font-bold shadow-lg shadow-black/10 transition-all active:scale-[0.98] border-0"
+                className="w-full md:w-auto bg-white text-emerald-900 hover:text-emerald-950 hover:bg-emerald-50 rounded-2xl h-14 px-8 font-bold shadow-lg shadow-black/10 transition-all active:scale-[0.98] border-0"
               >
                 <Calculator className="w-5 h-5 mr-2" />
                 Start Calculation
               </Button>
-              <Button variant="outline" className="w-full md:w-auto border-emerald-500/30 bg-emerald-950/20 text-emerald-50 hover:bg-emerald-800/40 rounded-2xl h-12 transition-all">
+              <Button variant="outline" className="w-full md:w-auto border-white/30 bg-white/10 text-white hover:bg-white/20 rounded-2xl h-12 transition-all">
                 <History className="w-4 h-4 mr-2" />
                 View History
               </Button>

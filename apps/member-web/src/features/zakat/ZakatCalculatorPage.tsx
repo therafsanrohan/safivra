@@ -407,10 +407,10 @@ export function ZakatCalculatorPage() {
 
                   {/* Final Result Card */}
                   <div className="flex flex-col">
-                    <div className={`flex-1 flex flex-col justify-center p-8 rounded-3xl border shadow-xl relative overflow-hidden transition-all ${calculationResult.isEligible ? 'bg-gradient-to-br from-emerald-600 to-emerald-900 border-emerald-500 text-white' : 'bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border-slate-300 dark:border-slate-700'}`}>
+                    <div className={`flex-1 flex flex-col justify-center p-8 rounded-3xl border shadow-xl relative overflow-hidden transition-all ${calculationResult.isEligible ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 dark:from-emerald-700 dark:to-emerald-950 border-emerald-400 dark:border-emerald-600 text-white shadow-emerald-600/20' : 'bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border-slate-300 dark:border-slate-700'}`}>
                       
                       {calculationResult.isEligible && (
-                        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-400 opacity-20 blur-3xl rounded-full"></div>
+                        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-300 dark:bg-emerald-400 opacity-20 blur-3xl rounded-full"></div>
                       )}
 
                       <div className="relative z-10 text-center space-y-2">

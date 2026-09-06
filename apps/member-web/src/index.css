@@ -10,32 +10,32 @@
 @layer base {
   :root, :root[data-theme="light"] {
     /* ── Colour Tokens (Light Theme) ──────────────────────────────────────── */
-    --color-bg-page:         #F3F8F5; /* soft mint-tinted off-white */
-    --bg-page-gradient:      linear-gradient(140deg, #EDF7F2 0%, #F8FDFB 50%, #F0F6F4 100%);
+    --color-bg-page:         #F8FAFC; /* crisp, cool slate-tinted off-white */
+    --bg-page-gradient:      radial-gradient(circle at top left, #FFFFFF 0%, #F1F5F9 100%);
     --color-bg-surface:      rgba(255, 255, 255, 0.95);
-    --color-bg-subtle:       #EBF2EF;
-    --color-bg-hover:        #DFEAE4;
+    --color-bg-subtle:       #F1F5F9;
+    --color-bg-hover:        #E2E8F0;
 
-    --color-text-primary:    #111827;
-    --color-text-secondary:  #4B5563;
-    --color-text-muted:      #9CA3AF;
-    --color-text-placeholder: #D1D5DB;
+    --color-text-primary:    #0F172A;
+    --color-text-secondary:  #475569;
+    --color-text-muted:      #94A3B8;
+    --color-text-placeholder: #CBD5E1;
 
-    --color-border:          #E5E7EB;
-    --color-border-strong:   #D1D5DB;
-    --color-border-focus:    #234C3A;
+    --color-border:          #E2E8F0;
+    --color-border-strong:   #CBD5E1;
+    --color-border-focus:    #10B981;
 
     /* ── Liquid Glass Tokens (Light) ──────────────────────────────────────── */
-    --glass-bg:              rgba(255, 255, 255, 0.75);
-    --glass-border:          rgba(255, 255, 255, 0.4);
-    --glass-highlight:       inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    --glass-shadow:          0 4px 24px rgba(0, 0, 0, 0.04);
-    --glass-blur:            16px;
+    --glass-bg:              rgba(255, 255, 255, 0.85);
+    --glass-border:          rgba(255, 255, 255, 0.8);
+    --glass-highlight:       inset 0 1px 0 rgba(255, 255, 255, 1);
+    --glass-shadow:          0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --glass-blur:            20px;
 
     /* ── Accent — Forest Green (restrained) ───────────────────────────────── */
-    --color-accent:          #234C3A;
-    --color-accent-hover:    #1D4031;
-    --color-accent-soft:     #E8F0EB;
+    --color-accent:          #10B981;
+    --color-accent-hover:    #059669;
+    --color-accent-soft:     #ECFDF5;
     --color-accent-text:     #FFFFFF;
 
     /* ── Semantic ─────────────────────────────────────────────────────────── */
