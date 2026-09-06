@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { Plus, Wallet, Landmark, CreditCard, TrendingUp, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
-import { PageLayout } from '@/components/layout/PageLayout';
+import { formatCurrency } from '@/lib/currency/formatter';
 import { Card, EmptyState, Skeleton, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-const getCardGradient = (type: string, name: string = '', inst: string = '') => {
+const getCardGradient = (type: string, name: string | null = '', inst: string | null = '') => {
   const t = type?.toLowerCase() || '';
   const n = name?.toLowerCase() || '';
   const i = inst?.toLowerCase() || '';
