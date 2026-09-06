@@ -32,6 +32,7 @@ const RecurringPage       = lazy(() => import('@/features/recurring/RecurringPag
 const GoalsPage           = lazy(() => import('@/features/goals/GoalsPage').then((m) => ({ default: m.GoalsPage })));
 const SavingsPage         = lazy(() => import('@/features/savings/SavingsPage').then((m) => ({ default: m.SavingsPage })));
 const ReportsPage         = lazy(() => import('@/features/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const ZakatDashboardPage  = lazy(() => import('@/features/zakat/ZakatDashboardPage').then((m) => ({ default: m.ZakatDashboardPage })));
 const NotificationsPage   = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
 const ToolsPage           = lazy(() => import('@/features/tools/ToolsPage').then((m) => ({ default: m.ToolsPage })));
 
@@ -150,16 +151,20 @@ const router = createBrowserRouter([
       { path: 'plans/budgets', element: <Suspense fallback={<PageLoader />}><BudgetsPage /></Suspense> },
       { path: 'plans/recurring', element: <Suspense fallback={<PageLoader />}><RecurringPage /></Suspense> },
       { path: 'plans/goals', element: <Suspense fallback={<PageLoader />}><GoalsPage /></Suspense> },
-      { path: 'tools', element: <Suspense fallback={<PageLoader />}><ToolsPage /></Suspense> },
-
       { path: 'plans/savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
       { path: 'savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
 
       // Reports
       { path: 'reports', element: <Suspense fallback={<PageLoader />}><ReportsPage /></Suspense> },
 
+      // Zakat
+      { path: 'zakat', element: <Suspense fallback={<PageLoader />}><ZakatDashboardPage /></Suspense> },
+
       // Notifications
       { path: 'notifications', element: <Suspense fallback={<PageLoader />}><NotificationsPage /></Suspense> },
+
+      // Tools
+      { path: 'tools', element: <Suspense fallback={<PageLoader />}><ToolsPage /></Suspense> },
 
       // Settings
       { path: 'settings', element: <Suspense fallback={<PageLoader />}><SettingsPage /></Suspense> },

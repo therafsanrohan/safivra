@@ -12,6 +12,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      zakat_rule_sets: {
+        Row: {
+          id: string;
+          name: string;
+          version: number;
+          effective_date: string;
+          nisab_standard: 'gold' | 'silver';
+          zakat_percentage: number;
+          hawl_days: number;
+          scholar_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          version: number;
+          effective_date?: string;
+          nisab_standard: 'gold' | 'silver';
+          zakat_percentage?: number;
+          hawl_days?: number;
+          scholar_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          version?: number;
+          effective_date?: string;
+          nisab_standard?: 'gold' | 'silver';
+          zakat_percentage?: number;
+          hawl_days?: number;
+          scholar_notes?: string | null;
+          updated_at?: string;
+        };
+      };
+      zakat_rate_snapshots: {
+        Row: {
+          id: string;
+          provider_name: string;
+          fetch_timestamp: string;
+          gold_rate_per_gram: number;
+          silver_rate_per_gram: number;
+          currency: string;
+          is_override: boolean;
+          override_reason: string | null;
+          override_admin_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider_name: string;
+          fetch_timestamp?: string;
+          gold_rate_per_gram: number;
+          silver_rate_per_gram: number;
+          currency?: string;
+          is_override?: boolean;
+          override_reason?: string | null;
+          override_admin_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          provider_name?: string;
+          fetch_timestamp?: string;
+          gold_rate_per_gram?: number;
+          silver_rate_per_gram?: number;
+          currency?: string;
+          is_override?: boolean;
+          override_reason?: string | null;
+          override_admin_id?: string | null;
+        };
+      };
       profiles: {
         Row: {
           id: string;

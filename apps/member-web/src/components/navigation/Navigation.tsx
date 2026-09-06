@@ -178,6 +178,7 @@ export const Sidebar: React.FC = () => {
         { to: '/dashboard/plans', label: t.nav.plansGoals, icon: Target },
         { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },
+        { to: '/dashboard/zakat', label: isBn ? 'যাকাত' : 'Zakat', icon: Calculator },
       ],
     },
   ];
