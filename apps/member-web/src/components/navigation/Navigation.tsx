@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, ReceiptText, Plus, Target, MoreHorizontal,
   Wallet, Landmark, CreditCard, BarChart3, Settings,
-  Bell, HandCoins, RefreshCw, BookOpen, Languages, Calculator
+  Bell, HandCoins, RefreshCw, BookOpen, Languages, Calculator, HandHeart
 } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
 import { useAuthContext } from '@/context/AuthContext';
@@ -178,7 +178,7 @@ export const Sidebar: React.FC = () => {
         { to: '/dashboard/plans', label: t.nav.plansGoals, icon: Target },
         { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },
-        { to: '/dashboard/zakat', label: isBn ? 'যাকাত' : 'Zakat', icon: Calculator },
+        { to: '/dashboard/zakat', label: isBn ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
       ],
     },
   ];

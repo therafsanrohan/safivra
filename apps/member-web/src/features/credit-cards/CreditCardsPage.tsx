@@ -8,6 +8,20 @@ import { Card, Skeleton, EmptyState, ErrorState, ProgressBar } from '@/component
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/context/LanguageContext';
 
+const getCardGradient = (type: string, name: string | null = '', inst: string | null = '') => {
+  const t = type?.toLowerCase() || '';
+  const n = name?.toLowerCase() || '';
+  const i = inst?.toLowerCase() || '';
+  
+  if (t === 'credit_card') return 'bank-card-credit';
+  if (t === 'cash') return 'bank-card-cash';
+  if (t === 'loan' || t === 'mortgage') return 'bank-card-loan';
+  if (n.includes('bkash') || i.includes('bkash')) return 'bank-card-wallet-bkash';
+  if (n.includes('nagad') || i.includes('nagad')) return 'bank-card-wallet-nagad';
+  if (t === 'mobile_money') return 'bank-card-wallet-bkash';
+  return 'bank-card-premium';
+};
+
 interface CardRow {
   id: string;
   nickname: string;
@@ -24,7 +38,8 @@ interface CardRow {
 
 export const CreditCardsPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const isBn = locale === 'bn';
   const [cards, setCards] = useState<CardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -146,55 +161,65 @@ export const CreditCardsPage: React.FC = () => {
             }
           />
         ) : (
-          <Card padding="none">
-            <div className="divide-y divide-[var(--color-border)]" role="list">
-              {displayCards.map((card) => {
-                const outstanding = card.account?.balance ? Math.abs(Number(card.account.balance)) : 0;
-                const limit = Number(card.credit_limit);
-                const utilizationPct = limit > 0 ? Math.round((outstanding / limit) * 100) : 0;
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+            {displayCards.map((card) => {
+              const outstanding = card.account?.balance ? Math.abs(Number(card.account.balance)) : 0;
+              const limit = Number(card.credit_limit);
+              const utilizationPct = limit > 0 ? Math.round((outstanding / limit) * 100) : 0;
 
-                return (
-                  <Link
-                    key={card.id}
-                    to={`/dashboard/credit-cards/${card.id}`}
-                    className="flex flex-col gap-2.5 p-5 hover:bg-[var(--color-bg-subtle)] transition-colors"
-                    role="listitem"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
-                          <CreditCard size={20} className="text-[var(--color-negative)]" />
+              return (
+                <Link
+                  key={card.id}
+                  to={`/dashboard/credit-cards/${card.id}`}
+                  className="block active-scale"
+                  role="listitem"
+                >
+                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between aspect-[1.586/1] transition-shadow hover:shadow-lg ${getCardGradient('credit_card', card.nickname, card.issuer)}`}>
+                    {/* Glass overlay elements for physical card feel */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8 blur-lg pointer-events-none"></div>
+                    
+                    <div className="flex items-start justify-between relative z-10 w-full">
+                      <div className="flex items-center gap-3 w-full pr-2">
+                        <div className="w-10 h-10 rounded-xl glass-chip flex items-center justify-center shrink-0 shadow-sm text-white">
+                          <CreditCard size={18} />
                         </div>
-                        <div>
-                          <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold text-white truncate tracking-wide drop-shadow-sm">
                             {card.nickname} {card.last_four ? `(•••• ${card.last_four})` : ''}
                           </p>
-                          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                            {card.issuer}
+                          <p className="text-[13px] text-white/75 truncate">
+                            {card.issuer} · {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(limit)}
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
-                          {formatCurrency(outstanding)}
-                        </span>
-                        <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                          {t.creditCards.limitLabel}: {formatCurrency(limit)}
+                    </div>
+                    <div className="relative z-10 mt-auto pt-4 w-full">
+                      <div className="flex justify-between items-end mb-2">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wider text-white/60 mb-0.5">
+                            {isBn ? 'বকেয়া পরিমাণ' : 'Outstanding Amount'}
+                          </p>
+                          <p className="text-2xl font-bold tracking-tight text-white tabular-nums drop-shadow-sm" data-financial>
+                            {formatCurrency(outstanding)}
+                          </p>
+                        </div>
+                        <p className="text-[11px] text-white/80 font-medium">
+                          {utilizationPct}% Used
                         </p>
                       </div>
+                      <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${utilizationPct > 80 ? 'bg-red-400' : 'bg-white/80'}`}
+                          style={{ width: `${Math.min(utilizationPct, 100)}%` }}
+                        />
+                      </div>
                     </div>
-
-                    <ProgressBar
-                      value={utilizationPct}
-                      size="sm"
-                      showValue
-                      label={t.creditCards.utilizationLabel}
-                    />
-                  </Link>
-                );
-              })}
-            </div>
-          </Card>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         )}
       </section>
     </div>

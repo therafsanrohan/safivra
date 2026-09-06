@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Wallet, Landmark, CreditCard, TrendingUp, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { Plus, Wallet, Landmark, CreditCard, TrendingUp, ChevronRight, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/currency/formatter';
@@ -36,6 +36,11 @@ export const AccountsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [balanceHidden, setBalanceHidden] = useState(false);
+
+  const [isAssetsOpen, setIsAssetsOpen] = useState(true);
+  const [isLoansOpen, setIsLoansOpen] = useState(true);
+  const [isCardsOpen, setIsCardsOpen] = useState(true);
+  const [isLiabilitiesOpen, setIsLiabilitiesOpen] = useState(true);
 
   const fetchAccounts = useCallback(async () => {
     if (!user) return;
@@ -189,10 +194,15 @@ export const AccountsPage: React.FC = () => {
       {/* Assets Section */}
       {displayAssetAccounts.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-            {t.accounts.assetAccounts} ({displayAssetAccounts.length})
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+          <button onClick={() => setIsAssetsOpen(!isAssetsOpen)} className="w-full flex items-center justify-between hover:opacity-80 transition-opacity outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
+            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+              {t.accounts.assetAccounts} ({displayAssetAccounts.length})
+            </h2>
+            {isAssetsOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]"/> : <ChevronDown size={18} className="text-[var(--color-text-muted)]"/>}
+          </button>
+          
+          {isAssetsOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-300" role="list">
             {displayAssetAccounts.map((acc) => (
               <Link
                 key={acc.account_id}
@@ -232,7 +242,8 @@ export const AccountsPage: React.FC = () => {
                 </div>
               </Link>
             ))}
-          </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -240,14 +251,19 @@ export const AccountsPage: React.FC = () => {
       {loans.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-              {isBn ? 'চলমান ঋণ ও লোন' : 'Active Loans'} ({loans.length})
-            </h2>
-            <Link to="/dashboard/loans" className="text-xs font-semibold text-[var(--color-accent)]">
+            <button onClick={() => setIsLoansOpen(!isLoansOpen)} className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
+              <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+                {isBn ? 'চলমান ঋণ ও লোন' : 'Active Loans'} ({loans.length})
+              </h2>
+              {isLoansOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]"/> : <ChevronDown size={18} className="text-[var(--color-text-muted)]"/>}
+            </button>
+            <Link to="/dashboard/loans" className="text-xs font-semibold text-[var(--color-accent)] shrink-0">
               {isBn ? 'সব দেখুন' : 'View all'} →
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+          
+          {isLoansOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-300" role="list">
             {loans.map((loan) => {
               const outstanding = Math.abs(Number(loan.balance || loan.original_principal));
               return (
@@ -289,7 +305,8 @@ export const AccountsPage: React.FC = () => {
                 </Link>
               );
             })}
-          </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -297,14 +314,19 @@ export const AccountsPage: React.FC = () => {
       {cards.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-              {isBn ? 'ক্রেডিট কার্ডসমূহ' : 'Credit Cards'} ({cards.length})
-            </h2>
-            <Link to="/dashboard/credit-cards" className="text-xs font-semibold text-[var(--color-accent)]">
+            <button onClick={() => setIsCardsOpen(!isCardsOpen)} className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
+              <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+                {isBn ? 'ক্রেডিট কার্ডসমূহ' : 'Credit Cards'} ({cards.length})
+              </h2>
+              {isCardsOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]"/> : <ChevronDown size={18} className="text-[var(--color-text-muted)]"/>}
+            </button>
+            <Link to="/dashboard/credit-cards" className="text-xs font-semibold text-[var(--color-accent)] shrink-0">
               {isBn ? 'সব দেখুন' : 'View all'} →
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+          
+          {isCardsOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-300" role="list">
             {cards.map((card) => {
               const outstanding = Math.abs(Number(card.balance));
               return (
@@ -346,17 +368,23 @@ export const AccountsPage: React.FC = () => {
                 </Link>
               );
             })}
-          </div>
+            </div>
+          )}
         </section>
       )}
 
       {/* Other Liabilities Section */}
       {displayLiabilityAccounts.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-            {t.accounts.liabilityAccounts} ({displayLiabilityAccounts.length})
-          </h2>
-          <Card padding="none">
+          <button onClick={() => setIsLiabilitiesOpen(!isLiabilitiesOpen)} className="w-full flex items-center justify-between hover:opacity-80 transition-opacity outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
+            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+              {t.accounts.liabilityAccounts} ({displayLiabilityAccounts.length})
+            </h2>
+            {isLiabilitiesOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]"/> : <ChevronDown size={18} className="text-[var(--color-text-muted)]"/>}
+          </button>
+          
+          {isLiabilitiesOpen && (
+            <Card padding="none" className="animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="divide-y divide-[var(--color-border)]" role="list">
               {displayLiabilityAccounts.map((acc) => (
                 <Link
@@ -385,7 +413,8 @@ export const AccountsPage: React.FC = () => {
                 </Link>
               ))}
             </div>
-          </Card>
+            </Card>
+          )}
         </section>
       )}
     </div>

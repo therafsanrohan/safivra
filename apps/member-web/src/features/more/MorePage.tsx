@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator
+  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -46,6 +46,7 @@ export const MorePage: React.FC = () => {
         { to: '/dashboard/plans/recurring', label: t.more.recurringCommitments, icon: RefreshCw },
         { to: '/dashboard/reports', label: t.more.reportsExports, icon: BookOpen },
         { to: '/dashboard/tools', label: locale === 'bn' ? 'ক্যালকুলেটর' : 'Calculators', icon: Calculator },
+        { to: '/dashboard/zakat', label: locale === 'bn' ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
         { to: '/dashboard/notifications', label: t.nav.notifications, icon: Bell },
       ],
     },
