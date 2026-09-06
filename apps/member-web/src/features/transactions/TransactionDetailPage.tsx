@@ -193,7 +193,7 @@ export const TransactionDetailPage: React.FC = () => {
         </button>
       </div>
 
-      <Card className="space-y-4">
+      <Card variant="glass" className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">

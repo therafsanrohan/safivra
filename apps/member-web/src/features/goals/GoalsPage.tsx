@@ -222,7 +222,7 @@ export const GoalsPage: React.FC = () => {
             const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
 
             return (
-              <Card key={g.id} className="space-y-3">
+              <Card variant="glass" key={g.id} className="space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">

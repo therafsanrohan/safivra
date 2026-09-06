@@ -218,7 +218,7 @@ export const BudgetsPage: React.FC = () => {
             const isAlert = pct > 80;
 
             return (
-              <Card key={b.id} className="space-y-3">
+              <Card variant="glass" key={b.id} className="space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2">

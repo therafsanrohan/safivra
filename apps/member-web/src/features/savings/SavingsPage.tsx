@@ -288,7 +288,7 @@ export const SavingsPage: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {filteredSchemes.map((s) => (
-            <Card key={s.id} className="space-y-3 relative group">
+            <Card variant="glass" key={s.id} className="space-y-3 relative group">
               <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => openEdit(s)} className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Scheme">
                   <Edit2 size={16} />

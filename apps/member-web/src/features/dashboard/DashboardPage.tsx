@@ -252,7 +252,7 @@ export const DashboardPage: React.FC = () => {
       </header>
 
       {/* Total Balance */}
-      <Card>
+      <Card variant="glass-panel">
         <div className="flex items-start justify-between mb-1">
           <p className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
             {t.dashboard.totalBalance}
@@ -284,7 +284,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Net Worth */}
-      <Card>
+      <Card variant="glass">
         <p className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-2">
           {t.dashboard.netWorth}
           <InfoPopover content={t.dashboard.netWorthDesc} />
@@ -453,7 +453,7 @@ const SummaryCard: React.FC<{
   icon: React.ReactNode; href?: string; tooltip?: string;
 }> = ({ label, value, masked, icon, href, tooltip }) => {
   const content = (
-    <Card className="flex flex-col gap-2">
+    <Card variant="glass" className="flex flex-col gap-2">
       <div className="flex items-center gap-1.5 text-[var(--color-text-muted)]">
         {icon}
         <span className="text-[var(--text-secondary)] font-medium">{label}</span>

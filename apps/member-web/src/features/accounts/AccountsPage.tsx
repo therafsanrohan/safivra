@@ -129,7 +129,7 @@ export const AccountsPage: React.FC = () => {
       </header>
 
       {/* Summary */}
-      <Card>
+      <Card variant="glass">
         <div className="flex justify-between items-center mb-2">
           <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">{t.accounts.totalNetAssets}</span>
           <button

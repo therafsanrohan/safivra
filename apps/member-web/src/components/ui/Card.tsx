@@ -5,6 +5,7 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   padding?: 'none' | 'sm' | 'md';
+  variant?: 'default' | 'glass' | 'glass-panel';
   onClick?: () => void;
 }
 
@@ -12,13 +13,16 @@ export const Card: React.FC<CardProps> = ({
   children,
   className = '',
   padding = 'md',
+  variant = 'default',
   onClick,
 }) => {
   const paddingClass = { none: '', sm: 'p-4', md: 'p-5' }[padding];
+  const variantClass = variant === 'glass' ? 'glass' : variant === 'glass-panel' ? 'glass-panel' : 'bg-[var(--color-bg-surface)] border border-[var(--color-border)]';
+  
   return (
     <div
       className={[
-        'bg-[var(--color-bg-surface)] border border-[var(--color-border)]',
+        variantClass,
         'rounded-[var(--radius-card)]',
         paddingClass,
         onClick

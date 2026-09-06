@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline' | 'glass';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -23,6 +23,8 @@ const variantStyles: Record<ButtonVariant, string> = {
     'bg-[var(--color-negative-soft)] text-[var(--color-negative)] hover:bg-red-100 active:opacity-90',
   outline:
     'border border-[var(--color-border-strong)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]',
+  glass:
+    'glass hover:bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] transition-all duration-[var(--duration-fast)] active:opacity-90',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

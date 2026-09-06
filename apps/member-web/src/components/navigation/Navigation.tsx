@@ -31,7 +31,7 @@ export const BottomNav: React.FC = () => {
         aria-label="Main navigation"
         className={[
           'fixed bottom-0 left-0 right-0 z-30',
-          'bg-[var(--color-bg-surface)] border-t border-[var(--color-border)]',
+          'glass border-t-0',
           'h-[var(--nav-height)] flex items-center',
           'pb-[env(safe-area-inset-bottom,0px)]',
           'lg:hidden',

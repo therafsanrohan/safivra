@@ -41,7 +41,7 @@
     --color-info-soft:       #EAF0F4;
 
     /* ── Typography ───────────────────────────────────────────────────────── */
-    --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-sans: "Inter", "Noto Sans Bengali", "Helvetica Neue", Helvetica, Arial, sans-serif;
     --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
 
     /* Type scale */
@@ -370,6 +370,59 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
     padding: var(--space-5);
+  }
+
+  /* ── Apple-Inspired Glass & Gradients ──────────────────────────────────── */
+  .glass {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: var(--shadow-sm);
+  }
+
+  :root[data-theme="dark"] .glass,
+  @media (prefers-color-scheme: dark) {
+    .glass {
+      background: rgba(28, 28, 26, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: var(--shadow-md);
+  }
+
+  :root[data-theme="dark"] .glass-panel,
+  @media (prefers-color-scheme: dark) {
+    .glass-panel {
+      background: rgba(28, 28, 26, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .gradient-emerald {
+    background: linear-gradient(135deg, #E8F0EB 0%, #CDE0D5 100%);
+  }
+  
+  .gradient-emerald-dark {
+    background: linear-gradient(135deg, #1A2F24 0%, #234C3A 100%);
+  }
+
+  .gradient-blue {
+    background: linear-gradient(135deg, #EAF0F4 0%, #D1E1EC 100%);
+  }
+  
+  .gradient-lavender {
+    background: linear-gradient(135deg, #F3F0F7 0%, #E2DCEB 100%);
+  }
+
+  .gradient-neutral {
+    background: linear-gradient(135deg, #F7F7F5 0%, #EBEBEA 100%);
   }
 
   /* Divider rows */

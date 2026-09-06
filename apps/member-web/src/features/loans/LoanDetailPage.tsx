@@ -242,7 +242,7 @@ export const LoanDetailPage: React.FC = () => {
       </div>
 
       {/* Loan Overview Header */}
-      <Card className="space-y-4">
+      <Card variant="glass" className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
             <span className="text-[var(--text-label)] uppercase font-semibold text-[var(--color-text-muted)] tracking-wider">

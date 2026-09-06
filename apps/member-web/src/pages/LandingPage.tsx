@@ -315,6 +315,7 @@ export const LandingPage: React.FC = () => {
                   ? 'সম্পদ এবং দায়ের সঠিক পার্থক্যের মাধ্যমে আপনার রিয়েল-টাইম ফাইন্যান্সিয়াল হেলথ জানুন।'
                   : 'Get a real-time, accurate picture of your financial health by properly contrasting assets and liabilities.'}
               </p>
+            </div>
           </div>
         </section>
       </div>

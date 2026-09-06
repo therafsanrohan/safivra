@@ -121,7 +121,7 @@ export const LoansPage: React.FC = () => {
       </header>
 
       {/* Summary */}
-      <Card>
+      <Card variant="glass">
         <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">{t.loans.totalOutstanding}</p>
         <p className="text-2xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
           {formatCurrency(totalOutstanding)}

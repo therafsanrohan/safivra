@@ -144,7 +144,7 @@ export const AccountDetailPage: React.FC = () => {
       </div>
 
       {/* Account Overview Header */}
-      <Card className="space-y-3">
+      <Card variant="glass" className="space-y-3">
         <div>
           <span className="text-[var(--text-label)] uppercase font-semibold text-[var(--color-text-muted)] tracking-wider">
             {account.account_type.replace(/_/g, ' ')} {account.institution ? `· ${account.institution}` : ''}
