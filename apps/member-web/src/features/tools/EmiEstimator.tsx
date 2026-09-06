@@ -3,6 +3,20 @@ import { useLanguage } from '@/context/LanguageContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
+        <p className="font-bold text-[var(--color-text-primary)] mb-2">{payload[0].name}</p>
+        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: payload[0].payload.color }}>
+          <span>৳ {formatCurrency(payload[0].value)}</span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const EmiEstimator: React.FC = () => {
   const { locale } = useLanguage();
   const isBn = locale === 'bn';
@@ -33,59 +47,65 @@ export const EmiEstimator: React.FC = () => {
   return (
     <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row">
       {/* Controls */}
-      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-slate-50 dark:bg-slate-900/50 space-y-6">
+      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-slate-50 dark:bg-slate-900/50 space-y-5">
         <div>
-          <label className="flex justify-between text-sm font-semibold text-[var(--color-text-primary)] mb-2">
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'লোনের পরিমাণ' : 'Loan Amount'}
-            <span className="text-blue-600">৳ {loanAmount.toLocaleString('en-IN')}</span>
           </label>
-          <input 
-            type="range" min="10000" max="10000000" step="10000" 
-            value={loanAmount} onChange={(e) => setLoanAmount(Number(e.target.value))}
-            className="w-full accent-blue-500"
-          />
+          <div className="relative group">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-blue-500 transition-colors">৳</div>
+            <input 
+              type="number" min="10000" step="10000" 
+              value={loanAmount} onChange={(e) => setLoanAmount(Number(e.target.value) || 0)}
+              className="w-full pl-8 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
+            />
+          </div>
         </div>
         
         <div>
-          <label className="flex justify-between text-sm font-semibold text-[var(--color-text-primary)] mb-2">
-            {isBn ? 'সুদের হার (%)' : 'Interest Rate (%)'}
-            <span className="text-blue-600">{interestRate}%</span>
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
+            {isBn ? 'সুদের হার' : 'Interest Rate'}
           </label>
-          <input 
-            type="range" min="1" max="25" step="0.1" 
-            value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))}
-            className="w-full accent-blue-500"
-          />
+          <div className="relative group">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-blue-500 transition-colors">%</div>
+            <input 
+              type="number" min="1" step="0.1" 
+              value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+              className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
+            />
+          </div>
         </div>
         
         <div>
-          <label className="flex justify-between text-sm font-semibold text-[var(--color-text-primary)] mb-2">
-            {isBn ? 'মেয়াদ (বছর)' : 'Duration (Years)'}
-            <span className="text-blue-600">{durationYears} Y</span>
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
+            {isBn ? 'মেয়াদ' : 'Duration'}
           </label>
-          <input 
-            type="range" min="1" max="30" step="1" 
-            value={durationYears} onChange={(e) => setDurationYears(Number(e.target.value))}
-            className="w-full accent-blue-500"
-          />
+          <div className="relative group">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-blue-500 transition-colors">YRS</div>
+            <input 
+              type="number" min="1" step="1" 
+              value={durationYears} onChange={(e) => setDurationYears(Number(e.target.value) || 0)}
+              className="w-full pl-3 pr-12 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
+            />
+          </div>
         </div>
       </div>
 
       {/* Results & Chart */}
       <div className="p-6 md:w-2/3 flex flex-col">
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="p-5 bg-blue-50 rounded-xl border border-blue-100 col-span-2 sm:col-span-1">
-            <span className="text-xs text-blue-600 uppercase tracking-wider font-semibold">{isBn ? 'মাসিক ইএমআই' : 'Monthly EMI'}</span>
-            <div className="text-3xl font-bold text-blue-700 mt-2" data-financial>৳ {formatCurrency(emi)}</div>
+          <div className="p-5 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-500/20 col-span-2 sm:col-span-1">
+            <span className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider font-semibold">{isBn ? 'মাসিক ইএমআই' : 'Monthly EMI'}</span>
+            <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mt-2" data-financial>৳ {formatCurrency(emi)}</div>
           </div>
           <div className="space-y-4 col-span-2 sm:col-span-1">
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
-              <span className="text-sm text-slate-600">{isBn ? 'আসল' : 'Principal'}</span>
-              <span className="font-semibold text-slate-900" data-financial>৳ {formatCurrency(loanAmount)}</span>
+            <div className="p-3 bg-[var(--color-bg-subtle)] rounded-lg border border-[var(--color-border)] flex justify-between items-center">
+              <span className="text-sm text-[var(--color-text-muted)]">{isBn ? 'আসল' : 'Principal'}</span>
+              <span className="font-semibold text-[var(--color-text-primary)]" data-financial>৳ {formatCurrency(loanAmount)}</span>
             </div>
-            <div className="p-3 bg-rose-50 rounded-lg border border-rose-100 flex justify-between items-center">
-              <span className="text-sm text-rose-600">{isBn ? 'মোট সুদ' : 'Total Interest'}</span>
-              <span className="font-semibold text-rose-700" data-financial>৳ {formatCurrency(totalInterest)}</span>
+            <div className="p-3 bg-rose-50 dark:bg-rose-500/10 rounded-lg border border-rose-200 dark:border-rose-500/20 flex justify-between items-center">
+              <span className="text-sm text-rose-600 dark:text-rose-400">{isBn ? 'মোট সুদ' : 'Total Interest'}</span>
+              <span className="font-semibold text-rose-700 dark:text-rose-300" data-financial>৳ {formatCurrency(totalInterest)}</span>
             </div>
           </div>
         </div>
@@ -97,9 +117,10 @@ export const EmiEstimator: React.FC = () => {
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
+                innerRadius={70}
+                outerRadius={90}
+                paddingAngle={6}
+                cornerRadius={6}
                 dataKey="value"
                 stroke="none"
               >
@@ -107,11 +128,8 @@ export const EmiEstimator: React.FC = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
-                formatter={(value: number) => [`৳ ${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, '']}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>

@@ -13,11 +13,27 @@ import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths,
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { InfoPopover } from '@/components/ui/InfoPopover';
-import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
-import {
+import { 
   BarChart, Bar, XAxis, YAxis,
-  ResponsiveContainer, Tooltip, CartesianGrid,
+  Tooltip, ResponsiveContainer, CartesianGrid, Cell
 } from 'recharts';
+
+const CustomBarTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
+        <p className="font-bold text-[var(--color-text-primary)] mb-2">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center justify-between gap-4 text-sm font-medium" style={{ color: entry.fill }}>
+            <span>{entry.name}:</span>
+            <span>৳ {formatCurrency(entry.value)}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 import type { Database } from '@/types/database';
 
 type AccountBalance = Database['public']['Views']['v_account_balances']['Row'];
@@ -317,24 +333,18 @@ export const DashboardPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Currency Exchange Widget */}
-      <CurrencyExchangeWidget />
-
       {/* Cash Flow Chart */}
       {data && data.cashflowHistory.length > 0 && (
         <Card>
           <CardHeader title={t.dashboard.monthlyCashFlow} subtitle={t.dashboard.last6Months} />
           <ResponsiveContainer width="100%" height={150}>
-            <BarChart data={data.cashflowHistory} barSize={14} barGap={2}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
+            <BarChart data={data.cashflowHistory} barSize={16} barGap={4}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} opacity={0.5} />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} dy={8} />
               <YAxis hide />
-              <Tooltip
-                contentStyle={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)', borderRadius: '10px', fontSize: '12px' }}
-                formatter={(v: number) => formatCurrency(v)}
-              />
-              <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expense" name={t.addTransaction.expense} fill="var(--color-negative-soft)" radius={[3, 3, 0, 0]} />
+              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'var(--color-bg-hover)', opacity: 0.5 }} />
+              <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name={t.addTransaction.expense} fill="var(--color-negative)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>

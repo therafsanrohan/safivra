@@ -9,6 +9,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { APP_CONFIG } from '@/config/app';
 import { Card, Skeleton } from '@/components/ui/Card';
 import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
+import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
 
 export const MorePage: React.FC = () => {
   const { profile, signOut } = useAuthContext();
@@ -102,6 +103,14 @@ export const MorePage: React.FC = () => {
           </Card>
         </div>
       ))}
+
+      {/* Tools Section */}
+      <div className="space-y-2">
+        <p className="px-1 text-[var(--text-label)] font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
+          {locale === 'bn' ? 'টুলস' : 'Tools'}
+        </p>
+        <CurrencyExchangeWidget />
+      </div>
 
       {/* Language Switcher */}
       <Card padding="none">

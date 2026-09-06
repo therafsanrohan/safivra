@@ -98,18 +98,18 @@
   /* Explicit dark mode tokens */
   @media (prefers-color-scheme: dark) {
     :root {
-      --color-bg-page:         #111110;
-      --color-bg-surface:      #1C1C1A;
-      --color-bg-subtle:       #252523;
-      --color-bg-hover:        #2E2E2B;
+      --color-bg-page:         #09090B;
+      --color-bg-surface:      #18181B;
+      --color-bg-subtle:       #27272A;
+      --color-bg-hover:        #3F3F46;
 
-      --color-text-primary:    #EDEDEC;
-      --color-text-secondary:  #A1A19B;
-      --color-text-muted:      #6E6E68;
-      --color-text-placeholder: #4A4A45;
+      --color-text-primary:    #FAFAFA;
+      --color-text-secondary:  #A1A1AA;
+      --color-text-muted:      #71717A;
+      --color-text-placeholder: #52525B;
 
-      --color-border:          #2E2E2B;
-      --color-border-strong:   #3A3A36;
+      --color-border:          #27272A;
+      --color-border-strong:   #3F3F46;
       --color-border-focus:    #4FAF7B;
 
       --color-accent:          #4FAF7B;
@@ -137,18 +137,18 @@
 
   /* Manual theme override classes for user preference */
   :root[data-theme="dark"] {
-    --color-bg-page:         #111110;
-    --color-bg-surface:      #1C1C1A;
-    --color-bg-subtle:       #252523;
-    --color-bg-hover:        #2E2E2B;
+    --color-bg-page:         #09090B;
+    --color-bg-surface:      #18181B;
+    --color-bg-subtle:       #27272A;
+    --color-bg-hover:        #3F3F46;
 
-    --color-text-primary:    #EDEDEC;
-    --color-text-secondary:  #A1A19B;
-    --color-text-muted:      #6E6E68;
-    --color-text-placeholder: #4A4A45;
+    --color-text-primary:    #FAFAFA;
+    --color-text-secondary:  #A1A1AA;
+    --color-text-muted:      #71717A;
+    --color-text-placeholder: #52525B;
 
-    --color-border:          #2E2E2B;
-    --color-border-strong:   #3A3A36;
+    --color-border:          #27272A;
+    --color-border-strong:   #3F3F46;
     --color-border-focus:    #4FAF7B;
 
     --color-accent:          #4FAF7B;
@@ -477,5 +477,22 @@
   input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
     background: var(--color-bg-hover);
+  }
+
+  /* ── Chart Tooltips ─────────────────────────────────────────────────── */
+  .glass-tooltip {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius-card);
+    padding: 12px 16px;
+  }
+  
+  .dark .glass-tooltip {
+    background: rgba(24, 24, 27, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 }

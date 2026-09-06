@@ -3,6 +3,23 @@ import { useLanguage } from '@/context/LanguageContext';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
+        <p className="font-bold text-[var(--color-text-primary)] mb-2">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center gap-2 text-sm font-medium" style={{ color: entry.stroke }}>
+            <span className="opacity-80">{entry.name}:</span>
+            <span>৳ {formatCurrency(entry.value)}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export const DpsEstimator: React.FC = () => {
   const { locale } = useLanguage();
   const isBn = locale === 'bn';
@@ -44,58 +61,64 @@ export const DpsEstimator: React.FC = () => {
   return (
     <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row">
       {/* Controls */}
-      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-slate-50 dark:bg-slate-900/50 space-y-6">
+      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-slate-50 dark:bg-slate-900/50 space-y-5">
         <div>
-          <label className="flex justify-between text-sm font-semibold text-[var(--color-text-primary)] mb-2">
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'মাসিক জমা' : 'Monthly Deposit'}
-            <span className="text-emerald-600">৳ {monthlyDeposit.toLocaleString('en-IN')}</span>
           </label>
-          <input 
-            type="range" min="500" max="50000" step="500" 
-            value={monthlyDeposit} onChange={(e) => setMonthlyDeposit(Number(e.target.value))}
-            className="w-full accent-emerald-500"
-          />
+          <div className="relative group">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-emerald-500 transition-colors">৳</div>
+            <input 
+              type="number" min="500" step="500" 
+              value={monthlyDeposit} onChange={(e) => setMonthlyDeposit(Number(e.target.value) || 0)}
+              className="w-full pl-8 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
+            />
+          </div>
         </div>
         
         <div>
-          <label className="flex justify-between text-sm font-semibold text-[var(--color-text-primary)] mb-2">
-            {isBn ? 'সুদের হার (%)' : 'Interest Rate (%)'}
-            <span className="text-emerald-600">{interestRate}%</span>
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
+            {isBn ? 'সুদের হার' : 'Interest Rate'}
           </label>
-          <input 
-            type="range" min="1" max="15" step="0.1" 
-            value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))}
-            className="w-full accent-emerald-500"
-          />
+          <div className="relative group">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-emerald-500 transition-colors">%</div>
+            <input 
+              type="number" min="1" step="0.1" 
+              value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+              className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
+            />
+          </div>
         </div>
         
         <div>
-          <label className="flex justify-between text-sm font-semibold text-[var(--color-text-primary)] mb-2">
-            {isBn ? 'মেয়াদ (বছর)' : 'Duration (Years)'}
-            <span className="text-emerald-600">{durationYears} Y</span>
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
+            {isBn ? 'মেয়াদ' : 'Duration'}
           </label>
-          <input 
-            type="range" min="1" max="20" step="1" 
-            value={durationYears} onChange={(e) => setDurationYears(Number(e.target.value))}
-            className="w-full accent-emerald-500"
-          />
+          <div className="relative group">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-semibold pointer-events-none group-focus-within:text-emerald-500 transition-colors">YRS</div>
+            <input 
+              type="number" min="1" step="1" 
+              value={durationYears} onChange={(e) => setDurationYears(Number(e.target.value) || 0)}
+              className="w-full pl-3 pr-12 py-2.5 bg-white dark:bg-slate-800 border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold tabular-nums text-[var(--color-text-primary)]"
+            />
+          </div>
         </div>
       </div>
 
       {/* Results & Chart */}
       <div className="p-6 md:w-2/3 flex flex-col">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <span className="text-xs text-slate-500 uppercase tracking-wider">{isBn ? 'মোট জমা' : 'Total Deposit'}</span>
-            <div className="text-xl font-bold text-slate-700 mt-1" data-financial>৳ {formatCurrency(totalPrincipal)}</div>
+          <div className="p-4 bg-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)]">
+            <span className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট জমা' : 'Total Deposit'}</span>
+            <div className="text-xl font-bold text-[var(--color-text-primary)] mt-1" data-financial>৳ {formatCurrency(totalPrincipal)}</div>
           </div>
-          <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-            <span className="text-xs text-emerald-600 uppercase tracking-wider">{isBn ? 'মোট লাভ' : 'Total Interest'}</span>
-            <div className="text-xl font-bold text-emerald-700 mt-1" data-financial>৳ {formatCurrency(totalInterest)}</div>
+          <div className="p-4 bg-[var(--color-accent-soft)] rounded-xl border border-[var(--color-accent)]/20">
+            <span className="text-xs text-[var(--color-accent)] uppercase tracking-wider">{isBn ? 'মোট লাভ' : 'Total Interest'}</span>
+            <div className="text-xl font-bold text-[var(--color-accent)] mt-1" data-financial>৳ {formatCurrency(totalInterest)}</div>
           </div>
-          <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 col-span-2 md:col-span-1">
-            <span className="text-xs text-indigo-600 uppercase tracking-wider">{isBn ? 'ম্যাচুরিটি ভ্যালু' : 'Maturity Value'}</span>
-            <div className="text-xl font-bold text-indigo-700 mt-1" data-financial>৳ {formatCurrency(maturityAmount)}</div>
+          <div className="p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-500/20 col-span-2 md:col-span-1">
+            <span className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider">{isBn ? 'ম্যাচুরিটি ভ্যালু' : 'Maturity Value'}</span>
+            <div className="text-xl font-bold text-blue-700 dark:text-blue-300 mt-1" data-financial>৳ {formatCurrency(maturityAmount)}</div>
           </div>
         </div>
 
@@ -104,24 +127,20 @@ export const DpsEstimator: React.FC = () => {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorPrincipal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#94a3b8" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="var(--color-text-muted)" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="var(--color-text-muted)" stopOpacity={0}/>
                 </linearGradient>
                 <linearGradient id="colorInterest" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-              <YAxis tickFormatter={(val) => `৳${(val/1000)}k`} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-              <Tooltip 
-                formatter={(value: number) => [`৳ ${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, '']}
-                labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              />
-              <Area type="monotone" dataKey="total" name={isBn ? "মোট" : "Total"} stroke="#10b981" fillOpacity={1} fill="url(#colorInterest)" />
-              <Area type="monotone" dataKey="principal" name={isBn ? "আসল" : "Principal"} stroke="#64748b" fillOpacity={1} fill="url(#colorPrincipal)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.4} />
+              <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }} dy={10} />
+              <YAxis tickFormatter={(val) => `৳${(val/1000)}k`} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }} dx={-10} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--color-border)', strokeWidth: 1, strokeDasharray: '3 3' }} />
+              <Area type="monotone" dataKey="total" name={isBn ? "মোট" : "Total"} stroke="var(--color-accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorInterest)" activeDot={{ r: 6, strokeWidth: 0, fill: 'var(--color-accent)' }} />
+              <Area type="monotone" dataKey="principal" name={isBn ? "আসল" : "Principal"} stroke="var(--color-text-muted)" strokeWidth={2} fillOpacity={1} fill="url(#colorPrincipal)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

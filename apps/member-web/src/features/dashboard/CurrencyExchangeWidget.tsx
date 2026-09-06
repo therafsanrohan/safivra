@@ -9,10 +9,10 @@ interface ExchangeRate {
 }
 
 const MOCK_RATES: ExchangeRate[] = [
-  { currency: 'USD', rate: 119.50, change: 0.15 },
-  { currency: 'GBP', rate: 153.20, change: -0.08 },
-  { currency: 'EUR', rate: 130.45, change: 0.22 },
-  { currency: 'SGD', rate: 89.10, change: -0.05 },
+  { currency: 'USD', rate: 119.50, change: 0.00 },
+  { currency: 'GBP', rate: 153.20, change: 0.00 },
+  { currency: 'EUR', rate: 130.45, change: 0.00 },
+  { currency: 'SGD', rate: 89.10, change: 0.00 },
 ];
 
 export const CurrencyExchangeWidget: React.FC = () => {
@@ -31,20 +31,13 @@ export const CurrencyExchangeWidget: React.FC = () => {
       if (data && data.rates && data.rates.BDT) {
         const bdt = data.rates.BDT;
         const newRates = [
-          { currency: 'USD', rate: bdt, change: 0.15 },
-          { currency: 'GBP', rate: bdt / data.rates.GBP, change: -0.08 },
-          { currency: 'EUR', rate: bdt / data.rates.EUR, change: 0.22 },
-          { currency: 'SGD', rate: bdt / data.rates.SGD, change: -0.05 },
+          { currency: 'USD', rate: bdt, change: 0 },
+          { currency: 'GBP', rate: bdt / data.rates.GBP, change: 0 },
+          { currency: 'EUR', rate: bdt / data.rates.EUR, change: 0 },
+          { currency: 'SGD', rate: bdt / data.rates.SGD, change: 0 },
         ];
         
-        // Add random variation to 'change' just to keep the UI dynamic
-        // since the free API doesn't provide daily change percentages easily
-        const variedRates = newRates.map((r) => ({
-          ...r,
-          change: Number((Math.random() * 0.5 - 0.25).toFixed(2)),
-        }));
-        
-        setRates(variedRates);
+        setRates(newRates);
         setLastUpdated(new Date());
       }
     } catch (error) {
@@ -100,8 +93,9 @@ export const CurrencyExchangeWidget: React.FC = () => {
               <div className="flex items-center gap-3">
                 <span className="font-medium tabular-nums" data-financial>৳ {rate.rate.toFixed(2)}</span>
                 <span className={`flex items-center text-[10px] font-medium w-10 justify-end ${rate.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {rate.change >= 0 ? <TrendingUp size={10} className="mr-0.5" /> : <TrendingDown size={10} className="mr-0.5" />}
-                  {Math.abs(rate.change).toFixed(2)}%
+                  {rate.change > 0 && <TrendingUp size={10} className="mr-0.5" />}
+                  {rate.change < 0 && <TrendingDown size={10} className="mr-0.5" />}
+                  {rate.change !== 0 ? `${Math.abs(rate.change).toFixed(2)}%` : 'Live'}
                 </span>
               </div>
             </div>
