@@ -394,7 +394,7 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.4);
   }
 
   :root[data-theme="dark"] .glass-panel,
@@ -436,6 +436,21 @@
   .badge-warning   { background: var(--color-warning-soft);  color: var(--color-warning);  }
   .badge-info      { background: var(--color-info-soft);     color: var(--color-info);     }
   .badge-neutral   { background: var(--color-bg-subtle);     color: var(--color-text-secondary); }
+
+  /* ── Micro-interactions ────────────────────────────────────────────────── */
+  .hover-lift {
+    transition: transform var(--duration-standard) var(--easing-standard), box-shadow var(--duration-standard) var(--easing-standard);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .active-scale {
+    transition: transform var(--duration-fast) var(--easing-standard);
+  }
+  .active-scale:active {
+    transform: scale(0.97);
+  }
 
   /* Safe area padding for iOS */
   .safe-bottom {

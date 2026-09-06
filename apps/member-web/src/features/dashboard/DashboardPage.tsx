@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Bell, Eye, EyeOff, ChevronRight, Wallet, Landmark,
   CreditCard, TrendingUp, TrendingDown, ArrowRightLeft,
-  ReceiptText,
+  ReceiptText, PieChart, ArrowUpRight, ArrowDownLeft
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase/client';
@@ -251,29 +251,40 @@ export const DashboardPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Total Balance */}
-      <Card variant="glass-panel">
-        <div className="flex items-start justify-between mb-1">
-          <p className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
+      {/* Hero Balance Card */}
+      <Card variant="hero" className="relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
+        
+        <div className="relative z-10 flex items-start justify-between mb-2">
+          <p className="flex items-center gap-1.5 text-white/90 font-medium">
             {t.dashboard.totalBalance}
             <InfoPopover content={t.dashboard.totalBalanceDesc} />
           </p>
           <button
             onClick={() => setBalanceHidden((v) => !v)}
             aria-label={balanceHidden ? 'Show balance' : 'Hide balance'}
-            className="p-1 -mr-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+            className="p-1.5 -mr-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
           >
             {balanceHidden ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
           </button>
         </div>
         <p
-          className="text-[var(--text-balance)] font-semibold tabular-nums text-[var(--color-text-primary)] leading-none"
+          className="relative z-10 text-[var(--text-balance)] font-bold tabular-nums text-white leading-none tracking-tight"
           data-financial
           aria-label={balanceHidden ? 'Balance hidden' : `Total: ${formatCurrency(totalBalance)}`}
         >
           {balanceHidden ? <span className="tracking-widest">৳ ••••••</span> : formatCurrency(totalBalance)}
         </p>
       </Card>
+
+      {/* Quick Actions Grid */}
+      <div className="grid grid-cols-4 gap-3 py-1">
+        <QuickAction icon={<ArrowDownLeft size={20} />} label={t.addTransaction.income} href="/dashboard/activity/add?type=income" color="text-[var(--color-positive)]" bg="bg-[var(--color-positive-soft)]" />
+        <QuickAction icon={<ArrowUpRight size={20} />} label={t.addTransaction.expense} href="/dashboard/activity/add?type=expense" color="text-[var(--color-negative)]" bg="bg-[var(--color-negative-soft)]" />
+        <QuickAction icon={<ArrowRightLeft size={20} />} label={t.addTransaction.transfer} href="/dashboard/activity/add?type=transfer" color="text-[var(--color-info)]" bg="bg-[var(--color-info-soft)]" />
+        <QuickAction icon={<PieChart size={20} />} label={locale === 'bn' ? 'রিপোর্টস' : 'Reports'} href="/dashboard/reports" color="text-[var(--color-accent)]" bg="bg-[var(--color-accent-soft)]" />
+      </div>
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-2 gap-3">
@@ -453,20 +464,35 @@ const SummaryCard: React.FC<{
   icon: React.ReactNode; href?: string; tooltip?: string;
 }> = ({ label, value, masked, icon, href, tooltip }) => {
   const content = (
-    <Card variant="glass" className="flex flex-col gap-2">
-      <div className="flex items-center gap-1.5 text-[var(--color-text-muted)]">
-        {icon}
-        <span className="text-[var(--text-secondary)] font-medium">{label}</span>
+    <Card variant="glass" className="flex flex-col gap-2 hover-lift h-full relative overflow-hidden group">
+      <div className="absolute -right-3 -top-3 opacity-[0.03] group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500 pointer-events-none">
+        <div className="w-20 h-20 text-[var(--color-text-primary)]">{icon}</div>
+      </div>
+      <div className="flex items-center gap-1.5 text-[var(--color-text-muted)] relative z-10">
+        <div className="text-[var(--color-accent)]">{icon}</div>
+        <span className="text-[var(--text-secondary)] font-medium text-[var(--color-text-secondary)]">{label}</span>
         {tooltip && <InfoPopover content={tooltip} />}
       </div>
-      <p className="text-[1.125rem] font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
+      <p className="text-[1.125rem] font-bold tabular-nums text-[var(--color-text-primary)] relative z-10 mt-0.5 tracking-tight" data-financial>
         {masked ? '••••' : formatCurrency(value)}
       </p>
     </Card>
   );
-  if (href) return <Link to={href} className="block">{content}</Link>;
-  return content;
+  if (href) return <Link to={href} className="block active-scale">{content}</Link>;
+  return <div className="block">{content}</div>;
 };
+
+// Quick Action Component
+const QuickAction: React.FC<{ icon: React.ReactNode; label: string; href: string; color: string; bg: string }> = ({ icon, label, href, color, bg }) => (
+  <Link to={href} className="flex flex-col items-center gap-2 active-scale group">
+    <div className={['w-12 h-12 rounded-[var(--radius-card)] flex items-center justify-center hover-lift shadow-sm group-hover:shadow-md transition-all', bg, color].join(' ')}>
+      {icon}
+    </div>
+    <span className="text-[0.75rem] font-medium text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors text-center leading-tight">
+      {label}
+    </span>
+  </Link>
+);
 
 // Skeleton
 const DashboardSkeleton: React.FC = () => (
