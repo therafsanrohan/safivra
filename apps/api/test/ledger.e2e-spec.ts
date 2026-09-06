@@ -1,28 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { LedgerController } from '../src/ledger/ledger.controller';
 import { LedgerService } from '../src/ledger/ledger.service';
+import { AuthModule } from '../src/auth/auth.module';
+import { SupabaseAuthGuard } from '../src/auth/auth.guard';
+import { vi } from 'vitest';
 
 describe('LedgerController (e2e)', () => {
   let app: INestApplication;
 
   const mockLedgerService = {
-    postTransaction: jest.fn().mockResolvedValue({ success: true, transaction_id: '123' }),
+    postTransaction: vi.fn().mockResolvedValue({ success: true, transaction_id: '123' }),
   };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AuthModule],
       controllers: [LedgerController],
       providers: [
         {
           provide: LedgerService,
-          useValue: mockLedgerService,
+          useFactory: () => mockLedgerService,
         },
       ],
     })
     // Bypassing guard for unit testing adapter logic
-    .overrideGuard('SupabaseAuthGuard').useValue({ canActivate: () => true })
+    .overrideGuard(SupabaseAuthGuard).useValue({ canActivate: () => true })
     .compile();
 
     app = moduleFixture.createNestApplication();

@@ -4,8 +4,8 @@ import { SupabaseStrategy } from './jwt.strategy';
 import { SupabaseAuthGuard } from './auth.guard';
 
 @Module({
-  imports: [PassportModule],
+  imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
   providers: [SupabaseStrategy, SupabaseAuthGuard],
-  exports: [SupabaseStrategy, SupabaseAuthGuard],
+  exports: [PassportModule, SupabaseStrategy, SupabaseAuthGuard],
 })
 export class AuthModule {}
