@@ -36,11 +36,30 @@ export const SettingsPage: React.FC = () => {
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const initialPhone = (profile?.phone as string) ?? '';
-  const initialCodeMatch = initialPhone.match(/^(\+\d{1,4})/);
-  const initialCode = initialCodeMatch ? initialCodeMatch[1] : '+880';
-  const initialNumber = initialCodeMatch ? initialPhone.slice(initialCode.length) : initialPhone;
-  const [phoneCode, setPhoneCode] = useState(initialCode);
-  const [phoneNumber, setPhoneNumber] = useState(initialNumber);
+  let defaultCode = '+880';
+  let defaultNum = '';
+  
+  if (initialPhone) {
+    if (initialPhone.startsWith('+')) {
+      const match = initialPhone.match(/^(\+\d{1,4})/);
+      if (match) {
+        defaultCode = match[1];
+        defaultNum = initialPhone.slice(defaultCode.length);
+      }
+    } else if (initialPhone.startsWith('8801')) {
+      defaultCode = '+880';
+      defaultNum = initialPhone.slice(3); // '1...'
+    } else if (initialPhone.startsWith('01') || initialPhone.startsWith('1')) {
+      defaultCode = '+880';
+      defaultNum = initialPhone;
+    } else {
+      defaultCode = '+880';
+      defaultNum = initialPhone;
+    }
+  }
+
+  const [phoneCode, setPhoneCode] = useState(defaultCode);
+  const [phoneNumber, setPhoneNumber] = useState(defaultNum);
   // @ts-ignore
   const [dob, setDob] = useState(profile?.date_of_birth ?? '');
   // @ts-ignore
@@ -66,9 +85,16 @@ export const SettingsPage: React.FC = () => {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    let numToSave = phoneNumber.trim();
+    if (phoneCode === '+880' && numToSave.startsWith('0')) {
+      numToSave = numToSave.slice(1);
+    }
+    const finalPhone = `${phoneCode}${numToSave}`;
+
     const res = await updateProfile({ 
       full_name: fullName,
-      phone: `${phoneCode}${phoneNumber}`,
+      phone: finalPhone,
       date_of_birth: dob,
       gender,
       address,

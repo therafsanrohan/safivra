@@ -91,7 +91,14 @@ export const ActivityPage: React.FC = () => {
   const filteredTransactions = transactions.filter((tx) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
+    
+    // Amount search normalization
+    const numericQuery = q.replace(/[^\d.]/g, '');
+    const amountStr = tx.amount.toString();
+    const matchesAmount = numericQuery && amountStr.includes(numericQuery);
+
     return (
+      matchesAmount ||
       tx.title.toLowerCase().includes(q) ||
       (tx.merchant && tx.merchant.toLowerCase().includes(q))
     );

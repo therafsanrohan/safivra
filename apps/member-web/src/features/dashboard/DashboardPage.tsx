@@ -15,20 +15,30 @@ import { Button } from '@/components/ui/Button';
 import { InfoPopover } from '@/components/ui/InfoPopover';
 import { 
   BarChart, Bar, XAxis, YAxis,
-  Tooltip, ResponsiveContainer, CartesianGrid, Cell
+  Tooltip, ResponsiveContainer, CartesianGrid, Cell,
+  ComposedChart, Line, ReferenceLine
 } from 'recharts';
 
 const CustomBarTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
-        <p className="font-bold text-[var(--color-text-primary)] mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center justify-between gap-4 text-sm font-medium" style={{ color: entry.fill }}>
-            <span>{entry.name}:</span>
-            <span>৳ {formatCurrency(entry.value)}</span>
-          </div>
-        ))}
+      <div className="bg-[var(--color-bg-surface)] backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl z-50">
+        <p className="font-bold text-[var(--text-label)] text-[var(--color-text-primary)] mb-2 uppercase tracking-wide">{label}</p>
+        <div className="space-y-1">
+          {payload.map((entry: any, index: number) => {
+            let val = entry.value;
+            if (entry.dataKey === 'negativeExpense') val = Math.abs(val);
+            
+            return (
+              <div key={index} className="flex justify-between gap-4 text-[var(--text-body)]">
+                <span style={{ color: entry.color }} className="font-medium">{entry.name}</span>
+                <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
+                  {formatCurrency(val)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -337,15 +347,24 @@ export const DashboardPage: React.FC = () => {
       {data && data.cashflowHistory.length > 0 && (
         <Card>
           <CardHeader title={t.dashboard.monthlyCashFlow} subtitle={t.dashboard.last6Months} />
-          <ResponsiveContainer width="100%" height={150}>
-            <BarChart data={data.cashflowHistory} barSize={16} barGap={4}>
+          <ResponsiveContainer width="100%" height={220}>
+            <ComposedChart 
+              data={data.cashflowHistory.map((item: any) => ({
+                ...item,
+                negativeExpense: -Math.abs(item.expense),
+                net: item.income - item.expense
+              }))} 
+              barSize={16} barGap={4}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} opacity={0.5} />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} dy={8} />
               <YAxis hide />
+              <ReferenceLine y={0} stroke="var(--color-border-strong)" />
               <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'var(--color-bg-hover)', opacity: 0.5 }} />
               <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expense" name={t.addTransaction.expense} fill="var(--color-negative)" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <Bar dataKey="negativeExpense" name={t.addTransaction.expense} fill="var(--color-negative)" radius={[0, 0, 4, 4]} />
+              <Line type="monotone" dataKey="net" name={t.dashboard.monthlyCashFlow || 'Net'} stroke="var(--color-info)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-info)', strokeWidth: 2, stroke: 'var(--color-bg-surface)' }} />
+            </ComposedChart>
           </ResponsiveContainer>
         </Card>
       )}

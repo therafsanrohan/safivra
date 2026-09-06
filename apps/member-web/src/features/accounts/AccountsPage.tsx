@@ -178,37 +178,44 @@ export const AccountsPage: React.FC = () => {
           <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
             {t.accounts.assetAccounts} ({displayAssetAccounts.length})
           </h2>
-          <Card padding="none">
-            <div className="divide-y divide-[var(--color-border)]" role="list">
-              {displayAssetAccounts.map((acc) => (
-                <Link
-                  key={acc.account_id}
-                  to={`/dashboard/accounts/${acc.account_id}`}
-                  className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
-                  role="listitem"
-                >
-                  <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-accent-soft)] flex items-center justify-center shrink-0">
-                    <AccountTypeIcon type={acc.account_type} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+            {displayAssetAccounts.map((acc) => (
+              <Link
+                key={acc.account_id}
+                to={`/dashboard/accounts/${acc.account_id}`}
+                className="block active-scale"
+                role="listitem"
+              >
+                <Card className="hover:shadow-md transition-shadow h-full flex flex-col justify-between">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-accent-soft)] flex items-center justify-center shrink-0">
+                        <AccountTypeIcon type={acc.account_type} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                          {acc.name}
+                        </p>
+                        <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] capitalize truncate">
+                          {acc.institution ? `${acc.institution} · ` : ''}
+                          {acc.account_type.replace(/_/g, ' ')}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight size={18} className="text-[var(--color-text-muted)] shrink-0 mt-1" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
-                      {acc.name}
+                  <div>
+                    <p className="text-[var(--text-label)] text-[var(--color-text-secondary)] mb-0.5">
+                      {isBn ? 'বর্তমান ব্যালেন্স' : 'Current Balance'}
                     </p>
-                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] capitalize">
-                      {acc.institution ? `${acc.institution} · ` : ''}
-                      {acc.account_type.replace(/_/g, ' ')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-positive)]" data-financial>
+                    <p className="text-xl font-semibold tabular-nums text-[var(--color-positive)]" data-financial>
                       {balanceHidden ? '••••' : formatCurrency(Number(acc.balance))}
-                    </span>
-                    <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                    </p>
                   </div>
-                </Link>
-              ))}
-            </div>
-          </Card>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
@@ -223,39 +230,46 @@ export const AccountsPage: React.FC = () => {
               {isBn ? 'সব দেখুন' : 'View all'} →
             </Link>
           </div>
-          <Card padding="none">
-            <div className="divide-y divide-[var(--color-border)]" role="list">
-              {loans.map((loan) => {
-                const outstanding = Math.abs(Number(loan.balance || loan.original_principal));
-                return (
-                  <Link
-                    key={loan.id}
-                    to={`/dashboard/loans/${loan.id}`}
-                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
-                    role="listitem"
-                  >
-                    <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
-                      <Landmark size={18} className="text-[var(--color-negative)]" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+            {loans.map((loan) => {
+              const outstanding = Math.abs(Number(loan.balance || loan.original_principal));
+              return (
+                <Link
+                  key={loan.id}
+                  to={`/dashboard/loans/${loan.id}`}
+                  className="block active-scale"
+                  role="listitem"
+                >
+                  <Card className="hover:shadow-md transition-shadow h-full flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
+                          <Landmark size={18} className="text-[var(--color-negative)]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                            {loan.name}
+                          </p>
+                          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] truncate">
+                            {loan.lender_name} · {loan.loan_type?.replace(/_/g, ' ')}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={18} className="text-[var(--color-text-muted)] shrink-0 mt-1" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
-                        {loan.name}
+                    <div>
+                      <p className="text-[var(--text-label)] text-[var(--color-text-secondary)] mb-0.5">
+                        {isBn ? 'বকেয়া পরিমাণ' : 'Outstanding Amount'}
                       </p>
-                      <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                        {loan.lender_name} · {loan.loan_type?.replace(/_/g, ' ')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
+                      <p className="text-xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
                         {balanceHidden ? '••••' : formatCurrency(outstanding)}
-                      </span>
-                      <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                      </p>
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </Card>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
         </section>
       )}
 
@@ -270,39 +284,46 @@ export const AccountsPage: React.FC = () => {
               {isBn ? 'সব দেখুন' : 'View all'} →
             </Link>
           </div>
-          <Card padding="none">
-            <div className="divide-y divide-[var(--color-border)]" role="list">
-              {cards.map((card) => {
-                const outstanding = Math.abs(Number(card.balance));
-                return (
-                  <Link
-                    key={card.id}
-                    to={`/dashboard/credit-cards/${card.id}`}
-                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
-                    role="listitem"
-                  >
-                    <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
-                      <CreditCard size={18} className="text-[var(--color-negative)]" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+            {cards.map((card) => {
+              const outstanding = Math.abs(Number(card.balance));
+              return (
+                <Link
+                  key={card.id}
+                  to={`/dashboard/credit-cards/${card.id}`}
+                  className="block active-scale"
+                  role="listitem"
+                >
+                  <Card className="hover:shadow-md transition-shadow h-full flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
+                          <CreditCard size={18} className="text-[var(--color-negative)]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                            {card.nickname}
+                          </p>
+                          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] truncate">
+                            {card.issuer} · {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(Number(card.credit_limit))}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={18} className="text-[var(--color-text-muted)] shrink-0 mt-1" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
-                        {card.nickname}
+                    <div>
+                      <p className="text-[var(--text-label)] text-[var(--color-text-secondary)] mb-0.5">
+                        {isBn ? 'বকেয়া পরিমাণ' : 'Outstanding Amount'}
                       </p>
-                      <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-                        {card.issuer} · {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(Number(card.credit_limit))}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
+                      <p className="text-xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
                         {balanceHidden ? '••••' : formatCurrency(outstanding)}
-                      </span>
-                      <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                      </p>
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </Card>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
         </section>
       )}
 
