@@ -345,27 +345,32 @@ export const DashboardPage: React.FC = () => {
 
       {/* Cash Flow Chart */}
       {data && data.cashflowHistory.length > 0 && (
-        <Card>
+        <Card className="w-full min-w-0 overflow-hidden">
           <CardHeader title={t.dashboard.monthlyCashFlow} subtitle={t.dashboard.last6Months} />
-          <ResponsiveContainer width="100%" height={220}>
-            <ComposedChart 
-              data={data.cashflowHistory.map((item: any) => ({
-                ...item,
-                negativeExpense: -Math.abs(item.expense),
-                net: item.income - item.expense
-              }))} 
-              barSize={16} barGap={4}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} opacity={0.5} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} dy={8} />
-              <YAxis hide />
-              <ReferenceLine y={0} stroke="var(--color-border-strong)" />
-              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'var(--color-bg-hover)', opacity: 0.5 }} />
-              <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="negativeExpense" name={t.addTransaction.expense} fill="var(--color-negative)" radius={[0, 0, 4, 4]} />
-              <Line type="monotone" dataKey="net" name={t.dashboard.monthlyCashFlow || 'Net'} stroke="var(--color-info)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-info)', strokeWidth: 2, stroke: 'var(--color-bg-surface)' }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div className="w-full min-w-0 overflow-x-auto pb-1 mt-2">
+            <div className="min-w-[300px]">
+              <ResponsiveContainer width="100%" height={220}>
+                <ComposedChart 
+                  data={data.cashflowHistory.map((item: any) => ({
+                    ...item,
+                    negativeExpense: -Math.abs(item.expense),
+                    net: item.income - item.expense
+                  }))} 
+                  barSize={16} barGap={4}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} opacity={0.5} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} dy={8} />
+                  <YAxis hide />
+                  <ReferenceLine y={0} stroke="var(--color-border-strong)" />
+                  <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'var(--color-bg-hover)', opacity: 0.5 }} />
+                  <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="negativeExpense" name={t.addTransaction.expense} fill="var(--color-negative)" radius={[0, 0, 4, 4]} />
+                  <Line type="monotone" dataKey="net" name={t.dashboard.monthlyCashFlow || 'Net'} stroke="var(--color-info)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-info)', strokeWidth: 2, stroke: 'var(--color-bg-surface)' }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </Card>
       )}
 

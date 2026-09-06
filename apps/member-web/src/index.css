@@ -272,8 +272,66 @@
 
   a:hover {
     text-decoration: none !important;
-    opacity: 0.85;
+    opacity: 0.8;
   }
+}
+
+@layer utilities {
+  .bank-card-premium {
+    background: linear-gradient(135deg, #0d1e2d 0%, #1a3c5a 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(13, 30, 45, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .bank-card-wallet-bkash {
+    background: linear-gradient(135deg, #E2136E 0%, #b80d56 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(226, 19, 110, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .bank-card-wallet-nagad {
+    background: linear-gradient(135deg, #F36F21 0%, #c95614 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(243, 111, 33, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .bank-card-credit {
+    background: linear-gradient(135deg, #1e1f20 0%, #383a3b 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(30, 31, 32, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .bank-card-cash {
+    background: linear-gradient(135deg, var(--color-accent) 0%, #3a755b 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(35, 76, 58, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .bank-card-loan {
+    background: linear-gradient(135deg, #3b1c1c 0%, #683030 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(59, 28, 28, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .bank-card-dps {
+    background: linear-gradient(135deg, #1c333b 0%, #325a68 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(28, 51, 59, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .bank-card-default {
+    background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(45, 55, 72, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-chip {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
 
   /* ── Form Elements ───────────────────────────────────────────────────────── */
   input, textarea, select, button {

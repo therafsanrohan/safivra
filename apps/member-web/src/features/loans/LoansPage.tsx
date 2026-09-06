@@ -169,17 +169,17 @@ export const LoansPage: React.FC = () => {
                     className="flex flex-col gap-2 p-5 hover:bg-[var(--color-bg-subtle)] transition-colors"
                     role="listitem"
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
                           {loan.name}
                         </p>
-                        <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+                        <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] truncate">
                           {loan.lender_name} · {loan.loan_type.replace(/_/g, ' ')}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <span className="font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
+                      <div className="text-left sm:text-right shrink-0">
+                        <span className="block font-semibold tabular-nums text-[var(--text-body)] text-[var(--color-negative)]" data-financial>
                           {formatCurrency(outstanding)}
                         </span>
                         <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">

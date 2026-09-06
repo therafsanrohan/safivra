@@ -297,26 +297,28 @@ export const SavingsPage: React.FC = () => {
                   <Trash2 size={16} />
                 </button>
               </div>
-              <div className="flex items-start justify-between pr-14">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pr-10 sm:pr-14">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)] truncate">
                       {s.scheme_name}
                     </h2>
-                    <Badge variant={s.scheme_type === 'fdr' ? 'info' : s.scheme_type === 'sanchaypatra' ? 'positive' : 'warning'}>
+                    <Badge variant={s.scheme_type === 'fdr' ? 'info' : s.scheme_type === 'sanchaypatra' ? 'positive' : 'warning'} className="shrink-0">
                       {s.scheme_type.toUpperCase()}
                     </Badge>
                   </div>
-                  <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] flex items-center gap-1 mt-0.5">
-                    <Landmark size={13} /> {s.institution} • {s.interest_rate > 0 ? `${s.interest_rate}${t.savings.profit}` : t.savings.noProfit}
+                  <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] flex items-center gap-1.5 truncate">
+                    <Landmark size={13} className="shrink-0" />
+                    <span className="truncate">{s.institution}</span>
+                    <span className="shrink-0">• {s.interest_rate > 0 ? `${s.interest_rate}${t.savings.profit}` : t.savings.noProfit}</span>
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className="font-semibold tabular-nums text-[var(--text-body)]" data-financial>
-                    {formatCurrency(s.deposit_amount)} {s.scheme_type === 'dps' ? t.savings.perMonth : ''}
+                <div className="text-left sm:text-right shrink-0">
+                  <span className="block font-semibold tabular-nums text-[var(--text-body)]" data-financial>
+                    {formatCurrency(s.deposit_amount)} <span className="text-[var(--text-secondary)] font-normal text-[var(--color-text-muted)]">{s.scheme_type === 'dps' ? t.savings.perMonth : ''}</span>
                   </span>
                   {s.maturity_amount > 0 && (
-                    <p className="text-[var(--text-secondary)] text-[var(--color-positive)] font-medium mt-1">
+                    <p className="text-[var(--text-secondary)] text-[var(--color-positive)] font-medium mt-0.5">
                       {t.savings.estimated} {formatCurrency(s.maturity_amount)}
                     </p>
                   )}

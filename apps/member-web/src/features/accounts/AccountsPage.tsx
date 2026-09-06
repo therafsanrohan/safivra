@@ -3,9 +3,23 @@ import { Link } from 'react-router-dom';
 import { Plus, Wallet, Landmark, CreditCard, TrendingUp, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
-import { formatCurrency } from '@/lib/currency/formatter';
-import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { Card, EmptyState, Skeleton, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+
+const getCardGradient = (type: string, name: string = '', inst: string = '') => {
+  const t = type?.toLowerCase() || '';
+  const n = name?.toLowerCase() || '';
+  const i = inst?.toLowerCase() || '';
+  
+  if (t === 'credit_card') return 'bank-card-credit';
+  if (t === 'cash') return 'bank-card-cash';
+  if (t === 'loan' || t === 'mortgage') return 'bank-card-loan';
+  if (n.includes('bkash') || i.includes('bkash')) return 'bank-card-wallet-bkash';
+  if (n.includes('nagad') || i.includes('nagad')) return 'bank-card-wallet-nagad';
+  if (t === 'mobile_money') return 'bank-card-wallet-bkash';
+  return 'bank-card-premium';
+};
 import { useLanguage } from '@/context/LanguageContext';
 import type { Database } from '@/types/database';
 
@@ -186,33 +200,36 @@ export const AccountsPage: React.FC = () => {
                 className="block active-scale"
                 role="listitem"
               >
-                <Card className="hover:shadow-md transition-shadow h-full flex flex-col justify-between">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-accent-soft)] flex items-center justify-center shrink-0">
+                <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between aspect-[1.586/1] transition-shadow hover:shadow-lg ${getCardGradient(acc.account_type, acc.name, acc.institution)}`}>
+                  {/* Glass overlay elements for physical card feel */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8 blur-lg pointer-events-none"></div>
+                  
+                  <div className="flex items-start justify-between relative z-10 w-full">
+                    <div className="flex items-center gap-3 w-full pr-2">
+                      <div className="w-10 h-10 rounded-xl glass-chip flex items-center justify-center shrink-0 shadow-sm text-white">
                         <AccountTypeIcon type={acc.account_type} />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold text-white truncate tracking-wide drop-shadow-sm">
                           {acc.name}
                         </p>
-                        <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] capitalize truncate">
+                        <p className="text-[13px] text-white/75 capitalize truncate">
                           {acc.institution ? `${acc.institution} · ` : ''}
                           {acc.account_type.replace(/_/g, ' ')}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight size={18} className="text-[var(--color-text-muted)] shrink-0 mt-1" />
                   </div>
-                  <div>
-                    <p className="text-[var(--text-label)] text-[var(--color-text-secondary)] mb-0.5">
+                  <div className="relative z-10 mt-auto pt-4">
+                    <p className="text-[11px] uppercase tracking-wider text-white/60 mb-0.5">
                       {isBn ? 'বর্তমান ব্যালেন্স' : 'Current Balance'}
                     </p>
-                    <p className="text-xl font-semibold tabular-nums text-[var(--color-positive)]" data-financial>
+                    <p className="text-2xl font-bold tracking-tight text-white tabular-nums drop-shadow-sm" data-financial>
                       {balanceHidden ? '••••' : formatCurrency(Number(acc.balance))}
                     </p>
                   </div>
-                </Card>
+                </div>
               </Link>
             ))}
           </div>
@@ -240,32 +257,35 @@ export const AccountsPage: React.FC = () => {
                   className="block active-scale"
                   role="listitem"
                 >
-                  <Card className="hover:shadow-md transition-shadow h-full flex flex-col justify-between">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
-                          <Landmark size={18} className="text-[var(--color-negative)]" />
+                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between aspect-[1.586/1] transition-shadow hover:shadow-lg ${getCardGradient('loan', loan.name, loan.lender_name)}`}>
+                    {/* Glass overlay elements for physical card feel */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8 blur-lg pointer-events-none"></div>
+                    
+                    <div className="flex items-start justify-between relative z-10 w-full">
+                      <div className="flex items-center gap-3 w-full pr-2">
+                        <div className="w-10 h-10 rounded-xl glass-chip flex items-center justify-center shrink-0 shadow-sm text-white">
+                          <Landmark size={18} />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold text-white truncate tracking-wide drop-shadow-sm">
                             {loan.name}
                           </p>
-                          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] truncate">
+                          <p className="text-[13px] text-white/75 capitalize truncate">
                             {loan.lender_name} · {loan.loan_type?.replace(/_/g, ' ')}
                           </p>
                         </div>
                       </div>
-                      <ChevronRight size={18} className="text-[var(--color-text-muted)] shrink-0 mt-1" />
                     </div>
-                    <div>
-                      <p className="text-[var(--text-label)] text-[var(--color-text-secondary)] mb-0.5">
+                    <div className="relative z-10 mt-auto pt-4">
+                      <p className="text-[11px] uppercase tracking-wider text-white/60 mb-0.5">
                         {isBn ? 'বকেয়া পরিমাণ' : 'Outstanding Amount'}
                       </p>
-                      <p className="text-xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
+                      <p className="text-2xl font-bold tracking-tight text-white tabular-nums drop-shadow-sm" data-financial>
                         {balanceHidden ? '••••' : formatCurrency(outstanding)}
                       </p>
                     </div>
-                  </Card>
+                  </div>
                 </Link>
               );
             })}
@@ -294,32 +314,35 @@ export const AccountsPage: React.FC = () => {
                   className="block active-scale"
                   role="listitem"
                 >
-                  <Card className="hover:shadow-md transition-shadow h-full flex flex-col justify-between">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] flex items-center justify-center shrink-0">
-                          <CreditCard size={18} className="text-[var(--color-negative)]" />
+                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between aspect-[1.586/1] transition-shadow hover:shadow-lg ${getCardGradient('credit_card', card.nickname, card.issuer)}`}>
+                    {/* Glass overlay elements for physical card feel */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8 blur-lg pointer-events-none"></div>
+                    
+                    <div className="flex items-start justify-between relative z-10 w-full">
+                      <div className="flex items-center gap-3 w-full pr-2">
+                        <div className="w-10 h-10 rounded-xl glass-chip flex items-center justify-center shrink-0 shadow-sm text-white">
+                          <CreditCard size={18} />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)] truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold text-white truncate tracking-wide drop-shadow-sm">
                             {card.nickname}
                           </p>
-                          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] truncate">
+                          <p className="text-[13px] text-white/75 truncate">
                             {card.issuer} · {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(Number(card.credit_limit))}
                           </p>
                         </div>
                       </div>
-                      <ChevronRight size={18} className="text-[var(--color-text-muted)] shrink-0 mt-1" />
                     </div>
-                    <div>
-                      <p className="text-[var(--text-label)] text-[var(--color-text-secondary)] mb-0.5">
+                    <div className="relative z-10 mt-auto pt-4">
+                      <p className="text-[11px] uppercase tracking-wider text-white/60 mb-0.5">
                         {isBn ? 'বকেয়া পরিমাণ' : 'Outstanding Amount'}
                       </p>
-                      <p className="text-xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
+                      <p className="text-2xl font-bold tracking-tight text-white tabular-nums drop-shadow-sm" data-financial>
                         {balanceHidden ? '••••' : formatCurrency(outstanding)}
                       </p>
                     </div>
-                  </Card>
+                  </div>
                 </Link>
               );
             })}
