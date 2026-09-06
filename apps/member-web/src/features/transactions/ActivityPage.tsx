@@ -93,8 +93,15 @@ export const ActivityPage: React.FC = () => {
     const q = searchQuery.toLowerCase();
     
     // Amount search normalization
+    const entries = tx.ledger_entries ?? [];
+    const isIncome = tx.transaction_type === 'income';
+    const primaryEntry = entries.find((e) =>
+      isIncome ? e.entry_role === 'asset_debit' : e.entry_role === 'asset_credit' || e.entry_role === 'expense_debit'
+    ) || entries[0];
+    const displayAmount = primaryEntry ? primaryEntry.amount : 0;
+    
     const numericQuery = q.replace(/[^\d.]/g, '');
-    const amountStr = tx.amount.toString();
+    const amountStr = displayAmount.toString();
     const matchesAmount = numericQuery && amountStr.includes(numericQuery);
 
     return (
