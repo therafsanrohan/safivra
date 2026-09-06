@@ -10,10 +10,11 @@
 @layer base {
   :root, :root[data-theme="light"] {
     /* ── Colour Tokens (Light Theme) ──────────────────────────────────────── */
-    --color-bg-page:         #F9FAFB; /* soft off-white */
-    --color-bg-surface:      #FFFFFF;
-    --color-bg-subtle:       #F3F4F6;
-    --color-bg-hover:        #E5E7EB;
+    --color-bg-page:         #F3F8F5; /* soft mint-tinted off-white */
+    --bg-page-gradient:      linear-gradient(140deg, #EDF7F2 0%, #F8FDFB 50%, #F0F6F4 100%);
+    --color-bg-surface:      rgba(255, 255, 255, 0.95);
+    --color-bg-subtle:       #EBF2EF;
+    --color-bg-hover:        #DFEAE4;
 
     --color-text-primary:    #111827;
     --color-text-secondary:  #4B5563;
@@ -115,6 +116,7 @@
   /* We apply dark variables if data-theme="dark", or if data-theme is unset and system is dark */
   :root[data-theme="dark"] {
     --color-bg-page:         #111113; /* deep charcoal, not pure black */
+    --bg-page-gradient:      radial-gradient(circle at top left, #18181B 0%, #111113 100%);
     --color-bg-surface:      #18181B;
     --color-bg-subtle:       #27272A;
     --color-bg-hover:        #3F3F46;
@@ -160,6 +162,7 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --color-bg-page:         #111113;
+      --bg-page-gradient:      radial-gradient(circle at top left, #18181B 0%, #111113 100%);
       --color-bg-surface:      #18181B;
       --color-bg-subtle:       #27272A;
       --color-bg-hover:        #3F3F46;
@@ -223,6 +226,8 @@
     line-height: 1.467; /* 22px at 15px base */
     color: var(--color-text-primary);
     background-color: var(--color-bg-page);
+    background-image: var(--bg-page-gradient, none);
+    background-attachment: fixed;
     margin: 0;
     min-height: 100svh;
     overflow-x: hidden;
