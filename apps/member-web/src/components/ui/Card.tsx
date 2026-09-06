@@ -89,10 +89,10 @@ interface ProgressBarProps {
 }
 
 const progressColors: Record<ProgressVariant, string> = {
-  default:  'bg-[var(--color-accent)]',
-  positive: 'bg-[var(--color-positive)]',
-  warning:  'bg-[var(--color-warning)]',
-  danger:   'bg-[var(--color-negative)]',
+  default:  'bg-gradient-to-r from-[var(--color-accent)] to-emerald-400 dark:to-emerald-500 shadow-[0_0_12px_rgba(79,175,123,0.4)]',
+  positive: 'bg-gradient-to-r from-[var(--color-positive)] to-emerald-400 dark:to-emerald-500 shadow-[0_0_12px_rgba(79,175,123,0.4)]',
+  warning:  'bg-gradient-to-r from-[var(--color-warning)] to-amber-400 dark:to-amber-500 shadow-[0_0_12px_rgba(212,167,70,0.4)]',
+  danger:   'bg-gradient-to-r from-[var(--color-negative)] to-rose-400 dark:to-rose-500 shadow-[0_0_12px_rgba(212,107,102,0.4)]',
 };
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -133,12 +133,15 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       >
         <div
           className={[
-            'rounded-full transition-all duration-[var(--duration-standard)]',
+            'rounded-full transition-all duration-1000 ease-out relative overflow-hidden',
             h,
             progressColors[barVariant],
           ].join(' ')}
           style={{ width: `${pct}%` }}
-        />
+        >
+          {/* Shimmer effect inside the bar */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+        </div>
       </div>
     </div>
   );

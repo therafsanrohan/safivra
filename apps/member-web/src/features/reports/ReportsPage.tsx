@@ -8,6 +8,8 @@ import { formatDate } from '@/lib/dates/formatter';
 import { Card, CardHeader, Skeleton, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
+import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import type { Database } from '@/types/database';
 
 interface TransactionWithEntries {
   id: string;
@@ -432,21 +434,49 @@ export const ReportsPage: React.FC = () => {
               {isBn ? 'নির্বাচিত সময়ে কোনো খরচের রেকর্ড পাওয়া যায়নি' : 'No expenses recorded in selected period.'}
             </p>
           ) : (
-            <div className="space-y-3.5">
-              {analytics.expenseCategories.map((cat) => (
-                <div key={cat.name} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-[var(--color-text-primary)]">{cat.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
-                      <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
-                        {formatCurrency(cat.total)}
-                      </span>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="w-full sm:w-1/2 min-h-[200px]">
+                <ResponsiveContainer width="100%" height={200}>
+                  <RePieChart>
+                    <Pie
+                      data={analytics.expenseCategories}
+                      cx="50%" cy="50%" innerRadius={50} outerRadius={80}
+                      paddingAngle={5} cornerRadius={4}
+                      dataKey="total" stroke="none"
+                    >
+                      {analytics.expenseCategories.map((entry, index) => {
+                        const colors = ['#f43f5e', '#f97316', '#eab308', '#84cc16', '#14b8a6', '#3b82f6', '#8b5cf6'];
+                        return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                      })}
+                    </Pie>
+                    <RechartsTooltip 
+                      formatter={(val: number) => `৳ ${formatCurrency(val)}`}
+                      contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', borderRadius: '8px', border: '1px solid var(--color-border)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)' }}
+                    />
+                  </RePieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-3.5 w-full sm:w-1/2">
+                {analytics.expenseCategories.map((cat, index) => {
+                  const colors = ['bg-rose-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-teal-500', 'bg-blue-500', 'bg-violet-500'];
+                  return (
+                    <div key={cat.name} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-[var(--color-text-primary)]">{cat.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
+                          <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
+                            {formatCurrency(cat.total)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-[var(--color-bg-subtle)] h-1.5 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${colors[index % colors.length]}`} style={{ width: `${cat.percentage}%` }} />
+                      </div>
                     </div>
-                  </div>
-                  <ProgressBar value={cat.percentage} size="sm" />
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           )}
         </Card>
