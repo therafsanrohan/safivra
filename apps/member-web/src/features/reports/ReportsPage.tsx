@@ -472,9 +472,9 @@ export const ReportsPage: React.FC = () => {
                   const colors = ['bg-rose-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-teal-500', 'bg-blue-500', 'bg-violet-500'];
                   return (
                     <div key={cat.name} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-[var(--color-text-primary)]">{cat.name}</span>
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between text-sm gap-2">
+                        <span className="font-medium text-[var(--color-text-primary)] truncate" title={cat.name}>{cat.name}</span>
+                        <div className="flex items-center gap-2 shrink-0">
                           <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
                           <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
                             {formatCurrency(cat.total)}
@@ -511,15 +511,15 @@ export const ReportsPage: React.FC = () => {
             <div className="space-y-3.5">
               {analytics.incomeCategories.map((cat) => (
                 <div key={cat.name} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-[var(--color-text-primary)]">{cat.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
-                      <span className="font-semibold tabular-nums text-[var(--color-positive)]" data-financial>
-                        {formatCurrency(cat.total)}
-                      </span>
+                    <div className="flex items-center justify-between text-sm gap-2">
+                      <span className="font-medium text-[var(--color-text-primary)] truncate" title={cat.name}>{cat.name}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
+                        <span className="font-semibold tabular-nums text-[var(--color-positive)]" data-financial>
+                          {formatCurrency(cat.total)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
                   <ProgressBar value={cat.percentage} size="sm" />
                 </div>
               ))}

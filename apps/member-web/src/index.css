@@ -7,6 +7,8 @@
    Spacing: 8-point base
    ============================================================================= */
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @layer base {
   :root, :root[data-theme="light"] {
     /* ── Colour Tokens (Light Theme) ──────────────────────────────────────── */

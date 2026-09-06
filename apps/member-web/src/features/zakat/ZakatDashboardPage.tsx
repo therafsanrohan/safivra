@@ -209,13 +209,11 @@ export function ZakatDashboardPage() {
         </section>
 
         {/* Info Disclaimer */}
-        <div className="bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/50 rounded-2xl p-5 flex items-start gap-4 shadow-sm mt-4">
-          <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-full shrink-0">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
-          </div>
-          <p className="text-sm text-amber-800 dark:text-amber-200/90 leading-relaxed pt-0.5">
-            <strong className="font-semibold block mb-1 text-amber-900 dark:text-amber-100">Disclaimer</strong>
-            The Zakat calculator provides an estimate based on the confirmed details you enter and the selected methodological rules (Version {activeRules?.version || '1.0'}). For personalized religious guidance, please consult a qualified Islamic scholar.
+        <div className="bg-amber-50/80 dark:bg-amber-950/20 p-5 rounded-2xl border border-amber-200/60 dark:border-amber-900/50 flex gap-3 text-sm text-amber-800 dark:text-amber-200/80 mt-4">
+          <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-500" />
+          <p>
+            <span className="font-semibold block mb-1 text-amber-900 dark:text-amber-100">Disclaimer</span>
+            The Zakat calculator provides an estimate based on the confirmed details you enter and the selected methodological rules (Version {activeRules?.version || '1'}). For personalized religious guidance, please consult a qualified Islamic scholar.
           </p>
         </div>
 
