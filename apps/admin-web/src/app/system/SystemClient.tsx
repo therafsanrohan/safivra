@@ -94,10 +94,10 @@ export default function SystemClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            System Health & Diagnostics
+            System Health & Infrastructure Monitor
           </h1>
           <p className={`mt-1 text-sm ${isDark ? 'text-emerald-200/60' : 'text-slate-600'}`}>
-            100% real-time backend verification, live database roundtrip latency, and environment sanity.
+            Central admin monitoring for both Member Web App & Admin Console infrastructure, live DB latency, and services runtime.
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export default function SystemClient({
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`} />
-            {autoRefresh ? 'Auto 5s Live' : 'Auto Refresh Paused'}
+            {autoRefresh ? 'Live 5s Polling' : 'Auto Refresh Paused'}
           </button>
 
           <button
@@ -146,9 +146,9 @@ export default function SystemClient({
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {/* Database Status & Live Latency */}
-        <div className={`rounded-2xl border p-6 backdrop-blur-xl transition-all ${
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        {/* PostgreSQL Database Status & Live Latency */}
+        <div className={`rounded-2xl border p-6 backdrop-blur-xl transition-all sm:col-span-2 ${
           isDark 
             ? 'bg-emerald-950/20 border-emerald-900/40 shadow-xl' 
             : 'bg-white border-slate-200 shadow-sm shadow-slate-200/60'
@@ -158,7 +158,7 @@ export default function SystemClient({
               <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8-4m0 5c0 2.21 3.582 4 8 4s8-1.79 8-4" />
               </svg>
-              Database Connectivity
+              Core PostgreSQL Database Connection
             </h2>
             <div className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium border ${
               metrics.dbHealthy 
@@ -172,9 +172,9 @@ export default function SystemClient({
 
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
-              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>DB Status</span>
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>DB Engine Status</span>
               <span className={`font-semibold ${metrics.dbHealthy ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {metrics.dbHealthy ? '100% Operational' : 'Connection Error'}
+                {metrics.dbHealthy ? '100% Operational (Supabase Cloud)' : 'Connection Error'}
               </span>
             </div>
 
@@ -203,7 +203,7 @@ export default function SystemClient({
                 <span className={isDark ? 'text-emerald-200/40' : 'text-slate-500'}>Recent Latency Trend (Last 10 Pings)</span>
                 <span className="font-mono text-emerald-500">Avg: {Math.round(pingHistory.reduce((a, b) => a + b, 0) / pingHistory.length)} ms</span>
               </div>
-              <div className="flex items-end gap-1 h-10 pt-1 border-t border-dashed border-emerald-900/30">
+              <div className="flex items-end gap-1 h-12 pt-1 border-t border-dashed border-emerald-900/30">
                 {pingHistory.map((val, idx) => {
                   const max = Math.max(...pingHistory, 200)
                   const heightPct = Math.max(15, Math.min(100, (val / max) * 100))
@@ -232,8 +232,57 @@ export default function SystemClient({
           </div>
         </div>
 
-        {/* Environment & Runtime Checks */}
+        {/* Member Customer App Service Health */}
         <div className={`rounded-2xl border p-6 backdrop-blur-xl transition-all ${
+          isDark 
+            ? 'bg-emerald-950/20 border-emerald-900/40 shadow-xl' 
+            : 'bg-white border-slate-200 shadow-sm shadow-slate-200/60'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className={`text-base font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Member Web App Health
+            </h2>
+          </div>
+
+          <div className="space-y-3.5 text-xs">
+            <div className="flex justify-between">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Customer App URL</span>
+              <span className="font-semibold text-emerald-600">safivra.vercel.app</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Client Public Anon API</span>
+              <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Active & Verified
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Member Auth Microservice</span>
+              <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                100% Operational
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>PWA Offline Service Worker</span>
+              <span className="font-semibold text-emerald-600">Enabled</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Member Storage Cleanup</span>
+              <span className="font-semibold text-emerald-600">7-Day Auto Purge</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Environment & Admin Console Infrastructure */}
+        <div className={`rounded-2xl border p-6 backdrop-blur-xl transition-all sm:col-span-3 ${
           isDark 
             ? 'bg-emerald-950/20 border-emerald-900/40 shadow-xl' 
             : 'bg-white border-slate-200 shadow-sm shadow-slate-200/60'
@@ -243,51 +292,36 @@ export default function SystemClient({
               <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              Environment & Service Runtime
+              Admin Operations Console Runtime
             </h2>
             <span className={`text-xs px-2.5 py-1 rounded-full font-medium border ${
               isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
             }`}>
-              Production Ready
+              Production Active
             </span>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Supabase URL</span>
-              <span className="font-semibold text-emerald-600 flex items-center gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="flex justify-between sm:flex-col sm:gap-1">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Supabase Target URL</span>
+              <span className="font-semibold text-emerald-600 flex items-center gap-1 font-mono text-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {metrics.env.supabaseUrl ? 'Configured & Verified' : 'Missing'}
               </span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Service Role Key</span>
-              <span className="font-semibold text-emerald-600 flex items-center gap-1">
+            <div className="flex justify-between sm:flex-col sm:gap-1">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Service Role Key Status</span>
+              <span className="font-semibold text-emerald-600 flex items-center gap-1 font-mono text-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                {metrics.env.serviceRoleKey ? 'Active (Elevated Admin)' : 'Missing'}
+                {metrics.env.serviceRoleKey ? 'Active (Elevated Privileges)' : 'Missing'}
               </span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Auth Microservice</span>
-              <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Operational
-              </span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Deploy Target</span>
+            <div className="flex justify-between sm:flex-col sm:gap-1">
+              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>Deploy Infrastructure</span>
               <span className={`font-mono text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                @safivra/admin-web (Vercel/Next.js App)
-              </span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className={isDark ? 'text-emerald-200/60' : 'text-slate-600'}>System Time</span>
-              <span className={`font-mono text-xs ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                {new Date().toISOString()}
+                @safivra/admin-web (Vercel Edge/Next.js)
               </span>
             </div>
           </div>

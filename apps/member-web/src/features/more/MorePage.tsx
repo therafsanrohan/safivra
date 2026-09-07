@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Activity
+  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -54,7 +54,6 @@ export const MorePage: React.FC = () => {
       title: t.more.appSection,
       items: [
         { to: '/dashboard/settings', label: t.nav.settings, icon: Settings },
-        { to: '/dashboard/system-health', label: locale === 'bn' ? 'সিস্টেম হেলথ ও ডায়াগনস্টিকস' : 'System Health & Diagnostics', icon: Activity },
       ],
     },
   ];
