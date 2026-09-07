@@ -278,8 +278,6 @@ export function useAuth(): UseAuthReturn {
   ): Promise<{ error?: string }> => {
     if (!state.user) return { error: 'Not authenticated' };
 
-
-
     const userId = state.user.id;
 
     const { error } = await supabase
@@ -292,9 +290,22 @@ export function useAuth(): UseAuthReturn {
       return { error: error.message || 'Failed to update profile' };
     }
 
+    // Also update Supabase Auth metadata for seamless admin dashboard detection
+    const metaToUpdate: Record<string, any> = {};
+    if (updates.full_name !== undefined) metaToUpdate.full_name = updates.full_name;
+    if (updates.phone !== undefined) metaToUpdate.phone = updates.phone;
+    if (updates.date_of_birth !== undefined) metaToUpdate.date_of_birth = updates.date_of_birth;
+
+    if (Object.keys(metaToUpdate).length > 0) {
+      await supabase.auth.updateUser({
+        data: metaToUpdate
+      }).catch(err => console.warn('[Auth] Auth metadata update warning:', err));
+    }
+
     await refreshProfile();
     return {};
   };
+
 
   const updatePreferences = async (
     updates: Database['public']['Tables']['user_preferences']['Update']

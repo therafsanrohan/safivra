@@ -97,16 +97,19 @@ export const SettingsPage: React.FC = () => {
     e.preventDefault();
     setSaving(true);
 
+    let finalPhone: string | null = null;
     let numToSave = phoneNumber.trim();
-    if (phoneCode === '+880' && numToSave.startsWith('0')) {
-      numToSave = numToSave.slice(1);
+    if (numToSave) {
+      if (phoneCode === '+880' && numToSave.startsWith('0')) {
+        numToSave = numToSave.slice(1);
+      }
+      finalPhone = `${phoneCode}${numToSave}`;
     }
-    const finalPhone = `${phoneCode}${numToSave}`;
 
     const res = await updateProfile({ 
       full_name: fullName,
       phone: finalPhone,
-      date_of_birth: dob,
+      date_of_birth: dob || null,
       gender,
       address,
       country
@@ -115,9 +118,10 @@ export const SettingsPage: React.FC = () => {
     if (res.error) {
       showError(isBn ? 'প্রোফাইল আপডেট ব্যর্থ' : 'Failed to update profile', res.error);
     } else {
-      success(isBn ? 'প্রোফাইল আপডেট হয়েছে' : 'Profile updated', isBn ? 'আপনার নাম আপডেট করা হয়েছে।' : 'Your full name has been updated.');
+      success(isBn ? 'প্রোফাইল আপডেট হয়েছে' : 'Profile updated', isBn ? 'আপনার প্রোফাইল তথ্য (নাম, ফোন নম্বর, জন্ম তারিখ) সফলভাবে আপডেট করা হয়েছে।' : 'Your profile details (name, phone, DOB) have been updated successfully.');
     }
   };
+
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
