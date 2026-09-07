@@ -69,14 +69,14 @@ SELECT
   fa.account_class,
   fa.institution,
   fa.currency_code,
-  fa.credit_limit::TEXT,
+  COALESCE(fa.credit_limit, 0)::NUMERIC AS credit_limit,
   fa.include_in_total,
   fa.include_in_net_worth,
   fa.is_active,
   fa.is_archived,
-  CASE fa.account_class
-    WHEN 'asset' THEN (
-      COALESCE((
+  COALESCE(
+    CASE fa.account_class
+      WHEN 'asset' THEN (
         SELECT SUM(CASE
           WHEN le.entry_role IN ('asset_debit', 'transfer_in')  THEN  le.amount
           WHEN le.entry_role IN ('asset_credit','transfer_out','fee_expense') THEN -le.amount
@@ -85,10 +85,8 @@ SELECT
         FROM public.ledger_entries le
         JOIN public.ledger_transactions lt ON lt.id = le.ledger_transaction_id
         WHERE le.financial_account_id = fa.id AND lt.status = 'posted'
-      ), 0)
-    )
-    WHEN 'liability' THEN (
-      COALESCE((
+      )
+      WHEN 'liability' THEN (
         SELECT SUM(CASE
           WHEN le.entry_role = 'liability_credit'  THEN  le.amount
           WHEN le.entry_role = 'liability_debit'   THEN -le.amount
@@ -97,10 +95,11 @@ SELECT
         FROM public.ledger_entries le
         JOIN public.ledger_transactions lt ON lt.id = le.ledger_transaction_id
         WHERE le.financial_account_id = fa.id AND lt.status = 'posted'
-      ), 0)
-    )
-    ELSE 0
-  END::TEXT AS balance
+      )
+      ELSE 0
+    END,
+    0
+  )::NUMERIC AS balance
 FROM public.financial_accounts fa;
 
 
