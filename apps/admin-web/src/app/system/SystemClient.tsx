@@ -203,17 +203,17 @@ export default function SystemClient({
                 <span className={isDark ? 'text-emerald-200/40' : 'text-slate-500'}>Recent Latency Trend (Last 10 Pings)</span>
                 <span className="font-mono text-emerald-500">Avg: {Math.round(pingHistory.reduce((a, b) => a + b, 0) / pingHistory.length)} ms</span>
               </div>
-              <div className="flex items-end gap-1 h-12 pt-1 border-t border-dashed border-emerald-900/30">
+              <div className="flex items-start gap-1 h-12 pb-1 border-b border-dashed border-emerald-900/30">
                 {pingHistory.map((val, idx) => {
                   const max = Math.max(...pingHistory, 200)
                   const heightPct = Math.max(15, Math.min(100, (val / max) * 100))
                   return (
                     <div
                       key={idx}
-                      className="flex-1 bg-emerald-500/40 hover:bg-emerald-400 rounded-t transition-all relative group"
+                      className="flex-1 bg-emerald-500/40 hover:bg-emerald-400 rounded-b transition-all relative group"
                       style={{ height: `${heightPct}%` }}
                     >
-                      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block px-1.5 py-0.5 bg-slate-900 text-white text-[10px] rounded font-mono z-10 whitespace-nowrap">
+                      <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 hidden group-hover:block px-1.5 py-0.5 bg-slate-900 text-white text-[10px] rounded font-mono z-10 whitespace-nowrap">
                         {val}ms
                       </div>
                     </div>
