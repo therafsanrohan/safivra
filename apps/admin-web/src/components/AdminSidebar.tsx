@@ -4,10 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { logout } from '../app/login/actions'
 import { useState } from 'react'
+import { useTheme } from './ThemeProvider'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const { theme, toggleTheme } = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const isDark = theme === 'dark'
 
   const navItems = [
     {
@@ -56,12 +60,33 @@ export default function AdminSidebar() {
         </svg>
       )
     },
+    {
+      name: 'Push Notifications',
+      href: '/notifications',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      )
+    },
+    {
+      name: 'Admin Profile',
+      href: '/profile',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      )
+    },
   ]
+
 
   return (
     <>
       {/* Mobile Top Navigation Header */}
-      <header className="md:hidden sticky top-0 z-30 bg-slate-900 border-b border-slate-800 text-white px-4 py-3 flex justify-between items-center shadow-lg">
+      <header className={`md:hidden sticky top-0 z-30 px-4 py-3 flex justify-between items-center shadow-md transition-colors ${
+        isDark ? 'bg-slate-900 border-b border-slate-800 text-white' : 'bg-white border-b border-slate-200 text-slate-900'
+      }`}>
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-sm">
             <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,19 +94,42 @@ export default function AdminSidebar() {
             </svg>
           </div>
           <div>
-            <div className="font-bold text-base tracking-tight leading-tight text-slate-100">Safivra Admin</div>
-            <div className="text-[10px] text-emerald-400 uppercase tracking-widest font-semibold">Ops Console</div>
+            <div className="font-bold text-base tracking-tight leading-tight">Safivra Admin</div>
+            <div className="text-[10px] text-emerald-500 uppercase tracking-widest font-semibold">Ops Console</div>
           </div>
         </div>
-        <button 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 active:scale-95 transition"
-          aria-label="Toggle Navigation Menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-          </svg>
-        </button>
+        <div className="flex items-center space-x-2">
+          {/* Mobile Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`p-2 rounded-lg transition-all ${
+              isDark ? 'bg-slate-800 text-amber-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+            title="Toggle Light / Dark Mode"
+            aria-label="Toggle Theme"
+          >
+            {isDark ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`p-2 rounded-lg transition ${
+              isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+            aria-label="Toggle Navigation Menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+            </svg>
+          </button>
+        </div>
       </header>
 
       {/* Mobile Menu Backdrop */}
@@ -95,23 +143,48 @@ export default function AdminSidebar() {
       {/* Sidebar Drawer */}
       <aside className={`
         fixed md:static inset-y-0 left-0 z-50
-        w-72 md:w-64 bg-slate-900 border-r border-slate-800 text-slate-100 shrink-0 min-h-screen flex flex-col
-        transition-transform duration-300 ease-in-out
+        w-72 md:w-64 shrink-0 min-h-screen flex flex-col
+        transition-all duration-300 ease-in-out
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        ${isDark ? 'bg-slate-900 border-r border-slate-800 text-slate-100' : 'bg-white border-r border-slate-200 text-slate-900'}
       `}>
         {/* Sidebar Brand Header */}
-        <div className="p-6 border-b border-slate-800">
+        <div className={`p-6 border-b flex items-center justify-between ${
+          isDark ? 'border-slate-800' : 'border-slate-100'
+        }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-bold text-emerald-400 shadow-sm">
-              <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-bold text-emerald-500 shadow-sm">
+              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
             <div>
-              <div className="font-bold text-lg tracking-tight text-white leading-tight">Safivra Admin</div>
-              <div className="text-emerald-400 text-[11px] uppercase tracking-wider font-semibold mt-0.5">Operations Console</div>
+              <div className={`font-bold text-lg tracking-tight leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Safivra Admin</div>
+              <div className="text-emerald-500 text-[11px] uppercase tracking-wider font-semibold mt-0.5">Operations Console</div>
             </div>
           </div>
+
+          {/* Desktop Theme Switcher Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`hidden md:flex p-2 rounded-xl border transition-all ${
+              isDark 
+                ? 'bg-slate-800/80 border-slate-700/60 text-amber-400 hover:bg-slate-800' 
+                : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+            }`}
+            title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            aria-label="Toggle Theme"
+          >
+            {isDark ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
         </div>
 
         {/* Navigation Items */}
@@ -126,11 +199,15 @@ export default function AdminSidebar() {
                 className={`
                   flex items-center space-x-3 px-4 py-3 rounded-xl transition-all text-sm font-medium
                   ${isActive 
-                    ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30 font-semibold' 
-                    : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'}
+                    ? isDark 
+                      ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30 font-semibold'
+                      : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-300 font-semibold'
+                    : isDark 
+                      ? 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}
                 `}
               >
-                <span className={isActive ? 'text-emerald-400' : 'text-slate-500'}>
+                <span className={isActive ? 'text-emerald-500' : isDark ? 'text-slate-500' : 'text-slate-400'}>
                   {item.icon}
                 </span>
                 <span>{item.name}</span>
@@ -140,11 +217,13 @@ export default function AdminSidebar() {
         </nav>
 
         {/* Sidebar Footer / Sign Out */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40">
+        <div className={`p-4 border-t ${
+          isDark ? 'border-slate-800 bg-slate-950/40' : 'border-slate-100 bg-slate-50/50'
+        }`}>
           <form action={logout}>
             <button
               type="submit"
-              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium text-red-400 hover:bg-red-950/40 hover:text-red-300 active:scale-98"
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium text-red-500 hover:bg-red-500/10 active:scale-98"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -157,3 +236,4 @@ export default function AdminSidebar() {
     </>
   )
 }
+

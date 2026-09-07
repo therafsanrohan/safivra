@@ -20,9 +20,12 @@ export default async function MembersPage() {
   ])
 
   const emailMap = new Map<string, string>()
+  const lastSignInMap = new Map<string, string | null>()
+
   authUsersData?.users?.forEach(u => {
-    if (u.id && u.email) {
-      emailMap.set(u.id, u.email)
+    if (u.id) {
+      if (u.email) emailMap.set(u.id, u.email)
+      lastSignInMap.set(u.id, u.last_sign_in_at || null)
     }
   })
 
@@ -33,6 +36,7 @@ export default async function MembersPage() {
     phone: p.phone || null,
     date_of_birth: p.date_of_birth || null,
     created_at: p.created_at,
+    last_sign_in_at: lastSignInMap.get(p.id) || null,
     onboarding_status: p.onboarding_status,
     currency: p.currency,
     is_suspended: p.is_suspended || false,
@@ -42,9 +46,9 @@ export default async function MembersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 tracking-tight">Members Directory</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Manage member profiles, view verified contact details, monitor onboarding, and enforce account suspensions.
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Members Directory</h1>
+        <p className="mt-1 text-sm text-emerald-200/60">
+          Manage member profiles, monitor 3-day activity status, view verified contact details, and enforce account suspensions.
         </p>
       </div>
 
@@ -52,3 +56,4 @@ export default async function MembersPage() {
     </div>
   )
 }
+
