@@ -20,10 +20,11 @@ interface Member {
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
 
-export default function MembersClientList({ members }: { members: Member[] }) {
+export default function MembersClientList({ members: initialMembers }: { members: Member[] }) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
+  const [members, setMembers] = useState<Member[]>(initialMembers)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all')
   const [loadingId, setLoadingId] = useState<string | null>(null)
@@ -53,17 +54,24 @@ export default function MembersClientList({ members }: { members: Member[] }) {
   })
 
   async function handleToggle(member: Member) {
+    const isCurrentlySuspended = member.is_suspended ?? false
+    const newSuspendedState = !isCurrentlySuspended
+    const reason = newSuspendedState ? 'Suspended by admin from operations console' : undefined
+
+    // ⚡ Optimistic UI update: Instantly reflect changes in 0ms without waiting for network!
+    setMembers(prev => prev.map(m => m.id === member.id ? { ...m, is_suspended: newSuspendedState, suspension_reason: reason || null } : m))
     setLoadingId(member.id)
     setErrorMsg(null)
-    const isCurrentlySuspended = member.is_suspended ?? false
-    const reason = !isCurrentlySuspended ? 'Suspended by admin from operations console' : undefined
-    
-    const result = await toggleUserSuspension(member.id, !isCurrentlySuspended, reason)
+
+    const result = await toggleUserSuspension(member.id, newSuspendedState, reason)
     if (result.error) {
+      // Revert optimistic state on failure
+      setMembers(prev => prev.map(m => m.id === member.id ? { ...m, is_suspended: isCurrentlySuspended } : m))
       setErrorMsg(result.error)
     }
     setLoadingId(null)
   }
+
 
   const totalCount = members.length
   const activeCount = members.filter(m => isUserActive(m) && !m.is_suspended).length

@@ -647,13 +647,15 @@ ON CONFLICT (name) DO NOTHING;
 -- Cleanup: Only keep actual admin accounts in admin_accounts table (do not treat general members as admins)
 DELETE FROM public.admin_accounts WHERE role_id IS NULL;
 
--- Ensure profile suspension columns exist
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT false;
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS suspension_reason TEXT;
+-- High Performance Database Indexes for Sub-Second Admin Queries
+CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action_created ON public.admin_audit_logs(action, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_accounts_role_status ON public.admin_accounts(role_id, status);
 
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
+
 
 
 

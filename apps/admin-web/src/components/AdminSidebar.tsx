@@ -195,6 +195,7 @@ export default function AdminSidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`
                   flex items-center space-x-3 px-4 py-3 rounded-xl transition-all text-sm font-medium
@@ -207,6 +208,7 @@ export default function AdminSidebar() {
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}
                 `}
               >
+
                 <span className={isActive ? 'text-emerald-500' : isDark ? 'text-slate-500' : 'text-slate-400'}>
                   {item.icon}
                 </span>
