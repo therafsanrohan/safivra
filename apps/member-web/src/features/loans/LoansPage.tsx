@@ -88,9 +88,15 @@ export const LoansPage: React.FC = () => {
     fetchLoans();
   }, [fetchLoans]);
 
+  const safeNum = (val: any) => {
+    const n = Number(val);
+    return isNaN(n) || !isFinite(n) ? 0 : n;
+  };
+
   const displayLoans = loans.filter((l) => l.status !== 'archived');
+
   const totalOutstanding = displayLoans.reduce((sum, l) => {
-    const bal = l.account?.balance ? Math.abs(Number(l.account.balance)) : Number(l.original_principal);
+    const bal = l.account?.balance ? Math.abs(safeNum(l.account.balance)) : safeNum(l.original_principal);
     return sum + bal;
   }, 0);
 

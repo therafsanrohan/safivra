@@ -174,19 +174,24 @@ export const DashboardPage: React.FC = () => {
       const loanAccountIds = new Set<string>(
         ((loansResult.data as Array<{id: string; account_id: string | null}>) ?? []).map((l) => l.account_id).filter((x): x is string => x != null)
       );
+      const safeNum = (val: any) => {
+        const n = Number(val);
+        return isNaN(n) || !isFinite(n) ? 0 : n;
+      };
+
       const loanOutstanding = accounts
         .filter((a) => loanAccountIds.has(a.account_id) || a.account_type === 'loan')
-        .reduce((s, a) => s + Math.abs(Number(a.balance)), 0);
+        .reduce((s, a) => s + Math.abs(safeNum(a.balance)), 0);
 
       const creditOutstanding = accounts
         .filter((a) => a.account_type === 'credit_card')
-        .reduce((s, a) => s + Math.abs(Number(a.balance)), 0);
+        .reduce((s, a) => s + Math.abs(safeNum(a.balance)), 0);
 
       // Upcoming payments
       const upcomingPayments: UpcomingPayment[] = ((upcomingLoansResult.data as Array<{id: string; name: string; monthly_installment: string | null; next_payment_date: string | null}>) ?? []).map((l) => ({
         id: l.id,
         title: l.name,
-        amount: Number(l.monthly_installment ?? 0),
+        amount: safeNum(l.monthly_installment),
         dueDate: l.next_payment_date!,
         type: 'loan' as const,
         overdue: isOverdue(l.next_payment_date!),
@@ -200,7 +205,7 @@ export const DashboardPage: React.FC = () => {
         const primaryEntry = entries.find((e) =>
           isIncome ? e.entry_role === 'asset_debit' : e.entry_role === 'asset_credit' || e.entry_role === 'expense_debit'
         ) || entries[0];
-        const amount = primaryEntry ? Math.abs(Number(primaryEntry.amount)) : 0;
+        const amount = primaryEntry ? Math.abs(safeNum(primaryEntry.amount)) : 0;
 
         return {
           id: tx.id,
@@ -224,13 +229,18 @@ export const DashboardPage: React.FC = () => {
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
 
+  const safeNum = (val: any) => {
+    const n = Number(val);
+    return isNaN(n) || !isFinite(n) ? 0 : n;
+  };
+
   const liquidAccounts = (data?.accounts ?? []).filter(
     (a) => a.include_in_total && a.is_active && ['cash', 'bank', 'savings', 'mobile_financial_service'].includes(a.account_type)
   );
 
-  const totalBalance = liquidAccounts.reduce((s, a) => s + Number(a.balance), 0);
-  const totalAssets = (data?.accounts ?? []).filter((a) => a.account_class === 'asset' && a.include_in_net_worth && a.is_active).reduce((s, a) => s + Number(a.balance), 0);
-  const totalLiabilities = (data?.accounts ?? []).filter((a) => a.account_class === 'liability' && a.include_in_net_worth && a.is_active).reduce((s, a) => s + Math.abs(Number(a.balance)), 0);
+  const totalBalance = liquidAccounts.reduce((s, a) => s + safeNum(a.balance), 0);
+  const totalAssets = (data?.accounts ?? []).filter((a) => a.account_class === 'asset' && a.include_in_net_worth && a.is_active).reduce((s, a) => s + safeNum(a.balance), 0);
+  const totalLiabilities = (data?.accounts ?? []).filter((a) => a.account_class === 'liability' && a.include_in_net_worth && a.is_active).reduce((s, a) => s + Math.abs(safeNum(a.balance)), 0);
   const netWorth = totalAssets - totalLiabilities;
 
   if (loading) return <DashboardSkeleton />;

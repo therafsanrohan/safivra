@@ -87,11 +87,15 @@ export const CreditCardsPage: React.FC = () => {
   }, [fetchCards]);
 
   const displayCards = cards.filter((c) => c.status !== 'archived');
-  const activeCards = cards.filter((c) => c.status === 'active' || !c.status);
+  const safeNum = (val: any) => {
+    const n = Number(val);
+    return isNaN(n) || !isFinite(n) ? 0 : n;
+  };
+
   const totalOutstanding = displayCards.reduce((sum, c) => {
-    return sum + (c.account?.balance ? Math.abs(Number(c.account.balance)) : 0);
+    return sum + (c.account?.balance ? Math.abs(safeNum(c.account.balance)) : 0);
   }, 0);
-  const totalLimit = displayCards.reduce((sum, c) => sum + Number(c.credit_limit), 0);
+  const totalLimit = displayCards.reduce((sum, c) => sum + safeNum(c.credit_limit), 0);
 
   if (loading) {
     return (

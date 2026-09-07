@@ -103,8 +103,13 @@ export const AccountsPage: React.FC = () => {
     (a) => !['loan', 'credit_card'].includes(a.account_type)
   );
 
-  const totalAssetBalance = assetAccounts.reduce((sum, a) => sum + Number(a.balance), 0);
-  const totalLiabilityBalance = liabilityAccounts.reduce((sum, a) => sum + Math.abs(Number(a.balance)), 0);
+  const safeNum = (val: any) => {
+    const n = Number(val);
+    return isNaN(n) || !isFinite(n) ? 0 : n;
+  };
+
+  const totalAssetBalance = assetAccounts.reduce((sum, a) => sum + safeNum(a.balance), 0);
+  const totalLiabilityBalance = liabilityAccounts.reduce((sum, a) => sum + Math.abs(safeNum(a.balance)), 0);
 
   const hasAnyItems = displayAssetAccounts.length > 0 || loans.length > 0 || cards.length > 0 || displayLiabilityAccounts.length > 0;
 
