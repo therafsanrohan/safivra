@@ -7,7 +7,7 @@
    Spacing: 8-point base
    ============================================================================= */
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
 
 @layer base {
   :root, :root[data-theme="light"] {

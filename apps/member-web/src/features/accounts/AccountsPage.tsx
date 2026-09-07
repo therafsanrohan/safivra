@@ -424,13 +424,13 @@ export const AccountsPage: React.FC = () => {
 const AccountTypeIcon: React.FC<{ type: string }> = ({ type }) => {
   switch (type) {
     case 'bank':
-      return <Landmark size={18} className="text-[var(--color-accent)]" />;
+      return <Landmark size={18} />;
     case 'credit_card':
-      return <CreditCard size={18} className="text-[var(--color-negative)]" />;
+      return <CreditCard size={18} />;
     case 'savings':
     case 'investment':
-      return <TrendingUp size={18} className="text-[var(--color-accent)]" />;
+      return <TrendingUp size={18} />;
     default:
-      return <Wallet size={18} className="text-[var(--color-accent)]" />;
+      return <Wallet size={18} />;
   }
 };

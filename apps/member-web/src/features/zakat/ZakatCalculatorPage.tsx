@@ -26,7 +26,7 @@ type RateSnapshot = Database['public']['Tables']['zakat_rate_snapshots']['Row'];
 type RuleSet = Database['public']['Tables']['zakat_rule_sets']['Row'];
 
 export function ZakatCalculatorPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { success, error: showError } = useToast();
   const navigate = useNavigate();
 
@@ -260,16 +260,17 @@ export function ZakatCalculatorPage() {
   return (
     <div className="flex-1 space-y-6 p-4 md:p-8 bg-[var(--color-bg-page)] min-h-svh max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
+      <div className="flex items-center gap-3">
+        <button
           onClick={() => navigate('/dashboard/zakat')}
-          className="rounded-full bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 backdrop-blur-sm border shadow-sm w-10 h-10 p-0 flex items-center justify-center"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+          <ArrowLeft className="h-4 w-4" />
+          <span>{locale === 'bn' ? 'ফিরে যান' : 'Back'}</span>
+        </button>
+        <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
             {t.zakat.calculatorTitle}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
@@ -314,7 +315,7 @@ export function ZakatCalculatorPage() {
                 <label className="block text-sm font-medium mb-2">{t.zakat.hawlDateLabel}</label>
                 <input
                   type="date"
-                  className="w-full rounded-2xl border border-[var(--color-border)] bg-white dark:bg-black/20 px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 shadow-sm transition-all"
+                  className="w-full rounded-2xl border border-[var(--color-border)] bg-white dark:bg-[#18181B] dark:text-white px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 shadow-sm transition-all"
                   value={formData.anniversaryDate}
                   onChange={(e) => setFormData({ ...formData, anniversaryDate: e.target.value })}
                 />
@@ -339,7 +340,7 @@ export function ZakatCalculatorPage() {
               </div>
               <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step2Desc}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-black/20 p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
+                <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
                     label={t.zakat.cashInHand}
                     value={formData.cashInHand}
@@ -347,7 +348,7 @@ export function ZakatCalculatorPage() {
                     size="lg"
                   />
                 </div>
-                <div className="bg-white dark:bg-black/20 p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
+                <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
                     label={t.zakat.bankBalance}
                     value={formData.bankBalance}
@@ -405,7 +406,7 @@ export function ZakatCalculatorPage() {
               </div>
               <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step4Desc}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-black/20 p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
+                <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
                     label={t.zakat.stocksInvestments}
                     value={formData.investments}
@@ -413,7 +414,7 @@ export function ZakatCalculatorPage() {
                     size="lg"
                   />
                 </div>
-                <div className="bg-white dark:bg-black/20 p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
+                <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
                     label={t.zakat.businessInventory}
                     value={formData.businessInventory}
@@ -552,7 +553,7 @@ export function ZakatCalculatorPage() {
 
                         {calculationResult.isEligible ? (
                           <>
-                            <p className="text-5xl md:text-6xl font-bold tracking-tight py-4 drop-shadow-md">
+                            <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight py-4 drop-shadow-md break-all leading-tight max-w-full overflow-hidden text-ellipsis">
                               {formatCurrency(calculationResult.liability)}
                             </p>
                             <p className="text-sm text-emerald-100/80">{t.zakat.zakatBasis}</p>

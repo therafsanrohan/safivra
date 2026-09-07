@@ -20,10 +20,17 @@ function applyTheme(mode: ThemeMode) {
   const root = document.documentElement;
   if (mode === 'dark') {
     root.setAttribute('data-theme', 'dark');
+    root.classList.add('dark');
   } else if (mode === 'light') {
     root.setAttribute('data-theme', 'light');
+    root.classList.remove('dark');
   } else {
     root.removeAttribute('data-theme');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
   }
   localStorage.setItem('safivra_theme', mode);
 }
@@ -44,14 +51,18 @@ export const SettingsPage: React.FC = () => {
       const match = initialPhone.match(/^(\+\d{1,4})/);
       if (match) {
         defaultCode = match[1];
-        defaultNum = initialPhone.slice(defaultCode.length);
+        let numPart = initialPhone.slice(defaultCode.length);
+        if (defaultCode === '+880' && !numPart.startsWith('0')) {
+          numPart = '0' + numPart;
+        }
+        defaultNum = numPart;
       }
     } else if (initialPhone.startsWith('8801')) {
       defaultCode = '+880';
-      defaultNum = initialPhone.slice(3); // '1...'
+      defaultNum = '0' + initialPhone.slice(3); // '01...'
     } else if (initialPhone.startsWith('01') || initialPhone.startsWith('1')) {
       defaultCode = '+880';
-      defaultNum = initialPhone;
+      defaultNum = initialPhone.startsWith('1') ? '0' + initialPhone : initialPhone;
     } else {
       defaultCode = '+880';
       defaultNum = initialPhone;

@@ -20,9 +20,9 @@ export function ZakatDashboardPage() {
   const [activeRules, setActiveRules] = useState<RuleSet | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchZakatData = async () => {
+  const fetchZakatData = async (showSkeleton = true) => {
     try {
-      setLoading(true);
+      if (showSkeleton) setLoading(true);
       setError(null);
 
       const { data: rateData, error: rateError } = await supabase
@@ -58,7 +58,7 @@ export function ZakatDashboardPage() {
   const handleRefreshRate = async () => {
     try {
       setRefreshing(true);
-      await fetchZakatData();
+      await fetchZakatData(false);
     } finally {
       setRefreshing(false);
     }
@@ -173,13 +173,13 @@ export function ZakatDashboardPage() {
               </div>
             </div>
 
-            <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <p className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300 mb-2">
               {t.zakat.nisabThreshold}
             </p>
-            <h4 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
+            <h4 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--color-text-primary)] dark:text-white">
               {activeRate ? formatCurrency(currentNisabValue) : '---'}
             </h4>
-            <p className="text-sm font-medium text-[var(--color-text-tertiary)] mt-4 flex items-center bg-white/50 dark:bg-black/20 w-fit px-3 py-1.5 rounded-lg border border-[var(--color-border)]">
+            <p className="text-sm font-medium text-[var(--color-text-tertiary)] dark:text-gray-300 mt-4 flex items-center bg-white/50 dark:bg-black/40 w-fit px-3 py-1.5 rounded-lg border border-[var(--color-border)]">
               <AlertCircle className="w-4 h-4 mr-1.5 text-amber-500" />
               {activeRules?.nisab_standard === 'gold'
                 ? `Based on ${nisabGoldWeight}g Gold`
@@ -194,12 +194,12 @@ export function ZakatDashboardPage() {
                 {t.zakat.marketRates}
               </h3>
 
-              <div className="flex justify-between items-center p-4 bg-yellow-50/50 dark:bg-yellow-950/10 border border-yellow-100 dark:border-yellow-900/30 rounded-2xl">
+              <div className="flex justify-between items-center p-4 bg-yellow-50/50 dark:bg-yellow-950/20 border border-yellow-100 dark:border-yellow-900/40 rounded-2xl">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                  <span className="text-[var(--color-text-secondary)] font-medium">{t.zakat.goldPerGram}</span>
+                  <span className="text-[var(--color-text-secondary)] dark:text-gray-300 font-medium">{t.zakat.goldPerGram}</span>
                 </div>
-                <span className="font-bold text-[var(--color-text-primary)] text-lg">
+                <span className="font-bold text-[var(--color-text-primary)] dark:text-white text-lg">
                   {activeRate ? formatCurrency(activeRate.gold_rate_per_gram) : '---'}
                 </span>
               </div>
@@ -207,9 +207,9 @@ export function ZakatDashboardPage() {
               <div className="flex justify-between items-center p-4 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-2xl">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-slate-400" />
-                  <span className="text-[var(--color-text-secondary)] font-medium">{t.zakat.silverPerGram}</span>
+                  <span className="text-[var(--color-text-secondary)] dark:text-gray-300 font-medium">{t.zakat.silverPerGram}</span>
                 </div>
-                <span className="font-bold text-[var(--color-text-primary)] text-lg">
+                <span className="font-bold text-[var(--color-text-primary)] dark:text-white text-lg">
                   {activeRate ? formatCurrency(activeRate.silver_rate_per_gram) : '---'}
                 </span>
               </div>

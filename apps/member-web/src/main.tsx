@@ -63,8 +63,12 @@ window.addEventListener('error', (event) => {
 const storedTheme = localStorage.getItem('safivra_theme');
 if (storedTheme === 'dark') {
   document.documentElement.setAttribute('data-theme', 'dark');
+  document.documentElement.classList.add('dark');
 } else if (storedTheme === 'light') {
   document.documentElement.setAttribute('data-theme', 'light');
+  document.documentElement.classList.remove('dark');
+} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.documentElement.classList.add('dark');
 }
 
 // ─── App Bootstrap ────────────────────────────────────────────────────────────

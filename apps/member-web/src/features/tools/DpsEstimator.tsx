@@ -61,7 +61,7 @@ export const DpsEstimator: React.FC = () => {
   return (
     <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row">
       {/* Controls */}
-      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-[var(--color-bg-subtle)] space-y-5">
+      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-[var(--color-bg-subtle)] dark:bg-[#18181B] space-y-5">
         <div>
           <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'মাসিক জমা' : 'Monthly Deposit'}
