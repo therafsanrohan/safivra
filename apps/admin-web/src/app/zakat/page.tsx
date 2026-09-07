@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { createAdminClient } from '../../../utils/supabase/server'
+import { createAdminClient } from '../../utils/supabase/server'
 
 export default async function ZakatAdminPage() {
   const supabase = createAdminClient()
@@ -160,4 +160,3 @@ export default async function ZakatAdminPage() {
     </div>
   )
 }
-

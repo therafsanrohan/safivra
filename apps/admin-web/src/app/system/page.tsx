@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { createAdminClient } from '../../../utils/supabase/server'
+import { createAdminClient } from '../../utils/supabase/server'
 
 export default async function SystemPage() {
   const supabase = createAdminClient()
@@ -12,7 +12,7 @@ export default async function SystemPage() {
   try {
     const start = performance.now()
     // Simple fast query to check DB connectivity
-    const { error } = await supabase.from('roles').select('id').limit(1)
+    const { error } = await supabase.from('profiles').select('id').limit(1)
     responseTime = Math.round(performance.now() - start)
     if (error) {
       errorMessage = error.message

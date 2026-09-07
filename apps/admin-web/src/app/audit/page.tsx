@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { createAdminClient } from '../../../utils/supabase/server'
+import { createAdminClient } from '../../utils/supabase/server'
 
 export default async function AuditPage() {
   const supabase = createAdminClient()
