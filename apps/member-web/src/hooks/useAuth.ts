@@ -280,14 +280,30 @@ export function useAuth(): UseAuthReturn {
 
     const userId = state.user.id;
 
-    const { error } = await supabase
-      .from('profiles')
-      // @ts-ignore — Supabase generated types may lag behind schema
+    const { error, data: updatedData } = await (supabase
+      .from('profiles') as any)
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', userId);
+      .eq('id', userId)
+      .select('*')
+      .maybeSingle();
 
     if (error) {
+      console.error('[Auth] updateProfile Supabase error:', error.code, error.message, error.details, error.hint);
       return { error: error.message || 'Failed to update profile' };
+    }
+
+    // Immediately update local state with the returned row (avoids stale refreshProfile closure)
+    if (updatedData) {
+      setState(prev => ({ ...prev, profile: updatedData }));
+    } else {
+      // Fallback: re-fetch from DB
+      const { data: refetched } = await (supabase.from('profiles') as any)
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      if (refetched) {
+        setState(prev => ({ ...prev, profile: refetched }));
+      }
     }
 
     // Also update Supabase Auth metadata for seamless admin dashboard detection
@@ -302,9 +318,9 @@ export function useAuth(): UseAuthReturn {
       }).catch(err => console.warn('[Auth] Auth metadata update warning:', err));
     }
 
-    await refreshProfile();
     return {};
   };
+
 
 
   const updatePreferences = async (
