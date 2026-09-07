@@ -647,12 +647,14 @@ ON CONFLICT (name) DO NOTHING;
 -- Cleanup: Only keep actual admin accounts in admin_accounts table (do not treat general members as admins)
 DELETE FROM public.admin_accounts WHERE role_id IS NULL;
 
--- Automatically delete broadcast audit logs older than 30 days (1 month auto-purge)
-DELETE FROM public.admin_audit_logs WHERE created_at < NOW() - INTERVAL '30 days';
+-- Ensure profile suspension columns exist
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS suspension_reason TEXT;
 
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
+
 
 
 
