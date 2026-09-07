@@ -29,6 +29,9 @@ export default function MembersClientList({ members: initialMembers }: { members
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all')
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  
+  // Security PII Masking Toggle (Email, Phone, Date of Birth)
+  const [showPII, setShowPII] = useState<boolean>(false)
 
   const now = Date.now()
 
@@ -72,11 +75,31 @@ export default function MembersClientList({ members: initialMembers }: { members
     setLoadingId(null)
   }
 
-
   const totalCount = members.length
   const activeCount = members.filter(m => isUserActive(m) && !m.is_suspended).length
   const inactiveCount = members.filter(m => !isUserActive(m) && !m.is_suspended).length
   const suspendedCount = members.filter(m => m.is_suspended).length
+
+  // Helper renderer for sensitive PII data (Email, Phone, Date of Birth)
+  const renderSensitiveData = (value: string | null, fallback: string = 'Not Provided') => {
+    if (!value) return <span className="opacity-40">{fallback}</span>
+    if (showPII) {
+      return <span className="font-medium text-emerald-400 select-all">{value}</span>
+    }
+    return (
+      <span 
+        onClick={() => setShowPII(true)} 
+        title="Click Eye button in header or click here to reveal sensitive details"
+        className={`select-none blur-[4.5px] hover:blur-none transition-all cursor-pointer inline-block px-1.5 py-0.5 rounded border ${
+          isDark 
+            ? 'bg-slate-800/80 border-slate-700/60 text-slate-300' 
+            : 'bg-slate-100 border-slate-200 text-slate-700'
+        }`}
+      >
+        {value}
+      </span>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -148,25 +171,59 @@ export default function MembersClientList({ members: initialMembers }: { members
         </div>
       )}
 
-      {/* Filter and Search Bar */}
+      {/* Filter and Search Bar with Privacy Eye Toggle */}
       <div className={`rounded-2xl p-4 border flex flex-col sm:flex-row gap-4 items-center justify-between transition-all ${
         isDark ? 'bg-emerald-950/20 backdrop-blur-xl border-emerald-900/40' : 'bg-white border-slate-200 shadow-sm'
       }`}>
-        <div className="relative w-full sm:w-80">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by name, email, phone, ID..."
-            className={`w-full rounded-xl px-4 py-2.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-              isDark 
-                ? 'bg-emerald-950/60 border border-emerald-800/50 text-white placeholder-emerald-400/40' 
-                : 'bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400'
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, email, phone, ID..."
+              className={`w-full rounded-xl px-4 py-2.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+                isDark 
+                  ? 'bg-emerald-950/60 border border-emerald-800/50 text-white placeholder-emerald-400/40' 
+                  : 'bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400'
+              }`}
+            />
+            <svg className={`w-4 h-4 absolute left-3.5 top-3.5 ${isDark ? 'text-emerald-400/50' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          {/* Eye Toggle for Email, Phone & DOB Privacy */}
+          <button
+            onClick={() => setShowPII(!showPII)}
+            title={showPII ? "Hide Sensitive Details (Email, Phone, DOB)" : "Show Sensitive Details (Email, Phone, DOB)"}
+            className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 shrink-0 ${
+              showPII
+                ? isDark
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                : isDark
+                  ? 'bg-slate-900/80 text-slate-300 border-slate-800 hover:bg-slate-800'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
             }`}
-          />
-          <svg className={`w-4 h-4 absolute left-3.5 top-3.5 ${isDark ? 'text-emerald-400/50' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          >
+            {showPII ? (
+              <>
+                <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>PII Visible</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.016 10.016 0 015.68-.823c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18" />
+                </svg>
+                <span>PII Blurred (Protected)</span>
+              </>
+            )}
+          </button>
         </div>
 
         <div className="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto">
@@ -225,13 +282,22 @@ export default function MembersClientList({ members: initialMembers }: { members
                   Member Profile
                 </th>
                 <th scope="col" className={`px-6 py-4 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-slate-600'}`}>
-                  Email Address
+                  <div className="flex items-center gap-1.5">
+                    <span>Email Address</span>
+                    {!showPII && <span className="text-[10px] text-amber-400 font-mono low-opacity">(Blurred)</span>}
+                  </div>
                 </th>
                 <th scope="col" className={`px-6 py-4 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-slate-600'}`}>
-                  Phone Number
+                  <div className="flex items-center gap-1.5">
+                    <span>Phone Number</span>
+                    {!showPII && <span className="text-[10px] text-amber-400 font-mono low-opacity">(Blurred)</span>}
+                  </div>
                 </th>
                 <th scope="col" className={`px-6 py-4 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-slate-600'}`}>
-                  Date of Birth
+                  <div className="flex items-center gap-1.5">
+                    <span>Date of Birth</span>
+                    {!showPII && <span className="text-[10px] text-amber-400 font-mono low-opacity">(Blurred)</span>}
+                  </div>
                 </th>
                 <th scope="col" className={`px-6 py-4 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-slate-600'}`}>
                   Activity Status
@@ -246,6 +312,7 @@ export default function MembersClientList({ members: initialMembers }: { members
                 const isSuspended = person.is_suspended ?? false
                 const active = isUserActive(person)
                 const isLoading = loadingId === person.id
+                const formattedDob = person.date_of_birth ? new Date(person.date_of_birth).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : null
 
                 return (
                   <tr key={person.id} className={isDark ? 'hover:bg-emerald-900/20 transition-colors' : 'hover:bg-slate-50 transition-colors'}>
@@ -263,13 +330,13 @@ export default function MembersClientList({ members: initialMembers }: { members
                       </div>
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap font-mono text-xs ${isDark ? 'text-emerald-200/80' : 'text-slate-700'}`}>
-                      {person.email || 'N/A'}
+                      {renderSensitiveData(person.email, 'No Email')}
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap font-mono text-xs ${isDark ? 'text-emerald-200/80' : 'text-slate-700'}`}>
-                      {person.phone || 'Not Provided'}
+                      {renderSensitiveData(person.phone, 'Not Provided')}
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-xs ${isDark ? 'text-emerald-200/80' : 'text-slate-700'}`}>
-                      {person.date_of_birth ? new Date(person.date_of_birth).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Not Provided'}
+                      {renderSensitiveData(formattedDob, 'Not Provided')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {isSuspended ? (
@@ -325,5 +392,3 @@ export default function MembersClientList({ members: initialMembers }: { members
     </div>
   )
 }
-
-
