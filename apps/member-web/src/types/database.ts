@@ -84,6 +84,80 @@ export type Database = {
           override_admin_id?: string | null;
         };
       };
+      zakat_calculations: {
+        Row: {
+          id: string;
+          user_id: string;
+          rule_set_id: string;
+          rate_snapshot_id: string;
+          status: 'draft' | 'confirmed_snapshot' | 'paid';
+          zakat_anniversary_date: string | null;
+          total_assets: number;
+          total_deductions: number;
+          net_zakatable_wealth: number;
+          is_eligible: boolean;
+          estimated_zakat_amount: number;
+          currency: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          rule_set_id: string;
+          rate_snapshot_id: string;
+          status?: 'draft' | 'confirmed_snapshot' | 'paid';
+          zakat_anniversary_date?: string | null;
+          total_assets: number;
+          total_deductions: number;
+          net_zakatable_wealth: number;
+          is_eligible: boolean;
+          estimated_zakat_amount: number;
+          currency?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          status?: 'draft' | 'confirmed_snapshot' | 'paid';
+          zakat_anniversary_date?: string | null;
+          total_assets?: number;
+          total_deductions?: number;
+          net_zakatable_wealth?: number;
+          is_eligible?: boolean;
+          estimated_zakat_amount?: number;
+          currency?: string;
+          updated_at?: string;
+        };
+      };
+      zakat_calculation_items: {
+        Row: {
+          id: string;
+          calculation_id: string;
+          item_type: 'cash' | 'gold' | 'silver' | 'business' | 'investment' | 'liability' | 'other';
+          source_table: string | null;
+          source_id: string | null;
+          amount: number;
+          currency: string;
+          description: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          calculation_id: string;
+          item_type: 'cash' | 'gold' | 'silver' | 'business' | 'investment' | 'liability' | 'other';
+          source_table?: string | null;
+          source_id?: string | null;
+          amount: number;
+          currency?: string;
+          description?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          item_type?: 'cash' | 'gold' | 'silver' | 'business' | 'investment' | 'liability' | 'other';
+          amount?: number;
+          description?: string | null;
+        };
+      };
       profiles: {
         Row: {
           id: string;

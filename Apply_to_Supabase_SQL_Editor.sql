@@ -422,3 +422,51 @@ AND (p.onboarding_status IS DISTINCT FROM 'completed' OR p.onboarding_completed 
 
 -- Update the schema cache so PostgREST immediately recognizes the new columns
 NOTIFY pgrst, 'reload schema';
+
+
+-- ----------------------------------------------------------------
+-- 11. Zakat Enhancements (20260907000001)
+-- ----------------------------------------------------------------
+
+-- Add columns to zakat_calculations for richer storage
+ALTER TABLE public.zakat_calculations
+  ADD COLUMN IF NOT EXISTS nisab_standard TEXT DEFAULT 'gold',
+  ADD COLUMN IF NOT EXISTS nisab_threshold_amount NUMERIC NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- Add check constraint for nisab_standard values
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'chk_zakat_calculations_nisab_standard'
+  ) THEN
+    ALTER TABLE public.zakat_calculations
+      ADD CONSTRAINT chk_zakat_calculations_nisab_standard
+      CHECK (nisab_standard IN ('gold', 'silver'));
+  END IF;
+END $$;
+
+-- Ensure a baseline rate snapshot exists if the table is empty
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.zakat_rate_snapshots LIMIT 1) THEN
+    INSERT INTO public.zakat_rate_snapshots (
+      provider_name,
+      gold_rate_per_gram,
+      silver_rate_per_gram,
+      currency,
+      is_override,
+      override_reason
+    )
+    VALUES (
+      'BAJUS Market Standard',
+      9250.00,
+      105.50,
+      'BDT',
+      false,
+      'Initial baseline market snapshot'
+    );
+  END IF;
+END $$;
+
+-- Reload schema cache
+NOTIFY pgrst, 'reload schema';
+

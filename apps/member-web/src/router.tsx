@@ -34,6 +34,7 @@ const SavingsPage         = lazy(() => import('@/features/savings/SavingsPage').
 const ReportsPage         = lazy(() => import('@/features/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })));
 const ZakatDashboardPage  = lazy(() => import('@/features/zakat/ZakatDashboardPage').then((m) => ({ default: m.ZakatDashboardPage })));
 const ZakatCalculatorPage = lazy(() => import('@/features/zakat/ZakatCalculatorPage').then((m) => ({ default: m.ZakatCalculatorPage })));
+const ZakatHistoryPage    = lazy(() => import('@/features/zakat/ZakatHistoryPage').then((m) => ({ default: m.ZakatHistoryPage })));
 const NotificationsPage   = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
 const ToolsPage           = lazy(() => import('@/features/tools/ToolsPage').then((m) => ({ default: m.ToolsPage })));
 
@@ -161,6 +162,7 @@ const router = createBrowserRouter([
       // Zakat
       { path: 'zakat', element: <Suspense fallback={<PageLoader />}><ZakatDashboardPage /></Suspense> },
       { path: 'zakat/calculator', element: <Suspense fallback={<PageLoader />}><ZakatCalculatorPage /></Suspense> },
+      { path: 'zakat/history', element: <Suspense fallback={<PageLoader />}><ZakatHistoryPage /></Suspense> },
 
       // Notifications
       { path: 'notifications', element: <Suspense fallback={<PageLoader />}><NotificationsPage /></Suspense> },
