@@ -39,6 +39,7 @@ const NotificationsPage   = lazy(() => import('@/features/notifications/Notifica
 const ToolsPage           = lazy(() => import('@/features/tools/ToolsPage').then((m) => ({ default: m.ToolsPage })));
 
 const SettingsPage        = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const SystemHealthPage    = lazy(() => import('@/features/system/SystemHealthPage').then((m) => ({ default: m.SystemHealthPage })));
 const MorePage            = lazy(() => import('@/features/more/MorePage').then((m) => ({ default: m.MorePage })));
 const ErrorPage           = lazy(() => import('@/pages/ErrorPage').then((m) => ({ default: m.ErrorPage })));
 const NotFoundPage        = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
@@ -173,6 +174,9 @@ const router = createBrowserRouter([
       // Settings
       { path: 'settings', element: <Suspense fallback={<PageLoader />}><SettingsPage /></Suspense> },
       { path: 'settings/:section', element: <Suspense fallback={<PageLoader />}><SettingsPage /></Suspense> },
+
+      // System Health
+      { path: 'system-health', element: <Suspense fallback={<PageLoader />}><SystemHealthPage /></Suspense> },
 
       // More (mobile menu)
       { path: 'more', element: <Suspense fallback={<PageLoader />}><MorePage /></Suspense> },

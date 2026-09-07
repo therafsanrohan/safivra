@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/components/ui/Toast';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { APP_CONFIG } from '@/config/app';
-import { Sun, Moon, Monitor, Globe, Lock, Info, LogOut } from 'lucide-react';
+import { Sun, Moon, Monitor, Globe, Lock, Info, LogOut, Activity } from 'lucide-react';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -343,6 +344,27 @@ export const SettingsPage: React.FC = () => {
             {isBn ? 'পাসওয়ার্ড আপডেট করুন' : 'Update Password'}
           </Button>
         </form>
+      </Card>
+
+      {/* System Diagnostics */}
+      <Card>
+        <CardHeader title={isBn ? 'সিস্টেম ডায়াগনস্টিকস' : 'System Diagnostics'} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">
+              {isBn ? 'সিস্টেম হেলথ ও ডাটাবেস পিং' : 'System Health & Live Latency'}
+            </p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+              {isBn ? 'ডাটাবেস কানেক্টিভিটি, এপিআই লেটেন্সি এবং লোকাল মেমোরি যাচাই করুন' : 'Verify real-time database roundtrip, API response times, and local storage'}
+            </p>
+          </div>
+          <Link to="/dashboard/system-health">
+            <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+              <Activity size={14} />
+              {isBn ? 'ডায়াগনস্টিকস দেখুন' : 'View Diagnostics'}
+            </Button>
+          </Link>
+        </div>
       </Card>
 
       {/* App Info */}

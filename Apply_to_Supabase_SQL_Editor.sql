@@ -652,6 +652,26 @@ CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at
 CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action_created ON public.admin_audit_logs(action, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_accounts_role_status ON public.admin_accounts(role_id, status);
 
+-- 7-Day Notification Storage Cleanup Function & RLS Policy
+CREATE OR REPLACE FUNCTION public.purge_old_notifications()
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  deleted_count integer;
+BEGIN
+  DELETE FROM public.notifications
+  WHERE created_at < (NOW() - INTERVAL '7 days');
+  GET DIAGNOSTICS deleted_count = ROW_COUNT;
+  RETURN deleted_count;
+END;
+$$;
+
+DROP POLICY IF EXISTS "Users can delete own notifications" ON public.notifications;
+CREATE POLICY "Users can delete own notifications" ON public.notifications
+  FOR DELETE USING (auth.uid() = user_id);
+
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
