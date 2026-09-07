@@ -6,6 +6,8 @@ import NotificationClient from './NotificationClient'
 export default async function NotificationsPage() {
   const supabaseAdmin = createAdminClient()
 
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
   const [
     { data: profiles },
     { data: authUsersData },
@@ -18,10 +20,11 @@ export default async function NotificationsPage() {
     supabaseAdmin.auth.admin.listUsers(),
     supabaseAdmin
       .from('admin_audit_logs')
-      .select('id, action, created_at, details')
+      .select('id, action, created_at, details, after_snapshot')
       .eq('action', 'ADMIN_BROADCAST_NOTIFICATION_SENT')
+      .gte('created_at', thirtyDaysAgo)
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(50)
   ])
 
   const emailMap = new Map<string, string>()
@@ -35,10 +38,18 @@ export default async function NotificationsPage() {
     email: emailMap.get(p.id) || null
   }))
 
+  const pastBroadcasts = (auditLogs || []).map(log => ({
+    id: log.id,
+    action: log.action,
+    created_at: log.created_at,
+    details: log.details || log.after_snapshot || {}
+  }))
+
   return (
     <NotificationClient 
       members={memberOptions}
-      pastBroadcasts={auditLogs || []}
+      pastBroadcasts={pastBroadcasts}
     />
   )
 }
+

@@ -2,9 +2,13 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTheme } from './ThemeProvider'
 
 export default function LiveRefreshClock() {
   const router = useRouter()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   const [isPending, startTransition] = useTransition()
   const [currentTime, setCurrentTime] = useState<string>('')
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string>('')
@@ -39,15 +43,21 @@ export default function LiveRefreshClock() {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4 pt-4 border-t border-emerald-900/40">
-      <div className="flex items-center space-x-3 text-xs text-emerald-200/80 font-mono">
-        <div className="flex items-center space-x-1.5 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800/40">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-semibold text-emerald-300">LIVE CLOCK:</span>
-          <span className="text-white font-bold">{currentTime || 'Updating...'}</span>
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4 pt-4 border-t transition-colors ${
+      isDark ? 'border-emerald-900/40 text-emerald-200/80' : 'border-emerald-200/80 text-emerald-900'
+    }`}>
+      <div className="flex items-center space-x-3 text-xs font-mono">
+        <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border transition-colors ${
+          isDark 
+            ? 'bg-emerald-950/60 border-emerald-800/40 text-white' 
+            : 'bg-white border-emerald-200 text-slate-900 shadow-xs'
+        }`}>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className={`font-semibold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>LIVE CLOCK:</span>
+          <span className="font-bold">{currentTime || 'Updating...'}</span>
         </div>
 
-        <div className="hidden md:flex items-center space-x-1 text-emerald-300/60">
+        <div className={`hidden md:flex items-center space-x-1 ${isDark ? 'text-emerald-300/60' : 'text-emerald-700/70'}`}>
           <span>(Last telemetry sync: {lastRefreshedAt || 'Just now'})</span>
         </div>
       </div>
@@ -55,11 +65,15 @@ export default function LiveRefreshClock() {
       <button
         onClick={handleManualRefresh}
         disabled={isPending}
-        className="self-start sm:self-auto flex items-center space-x-2 bg-emerald-500/20 hover:bg-emerald-500/30 active:scale-95 text-emerald-300 text-xs font-semibold px-3 py-1.5 rounded-xl border border-emerald-500/40 transition-all disabled:opacity-50"
+        className={`self-start sm:self-auto flex items-center space-x-2 text-xs font-semibold px-3.5 py-1.5 rounded-xl border transition-all active:scale-95 disabled:opacity-50 ${
+          isDark 
+            ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40' 
+            : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-sm'
+        }`}
         title="Trigger live database re-query"
       >
         <svg 
-          className={`w-3.5 h-3.5 text-emerald-400 ${isPending ? 'animate-spin' : ''}`} 
+          className={`w-3.5 h-3.5 ${isDark ? 'text-emerald-400' : 'text-white'} ${isPending ? 'animate-spin' : ''}`} 
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor"
@@ -71,3 +85,4 @@ export default function LiveRefreshClock() {
     </div>
   )
 }
+

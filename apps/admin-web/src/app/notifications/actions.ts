@@ -81,18 +81,30 @@ export async function sendAdminNotification({
       return { error: `Failed to insert notifications: ${insertError.message}` }
     }
 
-    // Log admin audit log
+    // Log admin audit log & auto-purge logs older than 30 days (1 month)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    
+    // Auto purge old broadcast logs (> 30 days)
+    await supabase
+      .from('admin_audit_logs')
+      .delete()
+      .lt('created_at', thirtyDaysAgo)
+
+    const auditPayload = {
+      title,
+      body,
+      targetAudience,
+      recipientCount: targetUserIds.length,
+      timestamp: new Date().toISOString()
+    }
+
     await supabase.from('admin_audit_logs').insert({
-      actor_id: adminUser?.id || null,
+      actor_id: adminUser?.id || undefined,
       action: 'ADMIN_BROADCAST_NOTIFICATION_SENT',
       resource_type: 'notifications',
       resource_id: `${targetUserIds.length}_recipients`,
-      details: {
-        title,
-        body,
-        targetAudience,
-        recipientCount: targetUserIds.length
-      }
+      details: auditPayload,
+      after_snapshot: auditPayload
     })
 
     revalidatePath('/notifications')
@@ -105,3 +117,4 @@ export async function sendAdminNotification({
     return { error: err.message || 'An unexpected error occurred while sending notifications.' }
   }
 }
+

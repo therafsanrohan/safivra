@@ -613,6 +613,7 @@ CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
     action TEXT NOT NULL,
     resource_type TEXT,
     resource_id TEXT,
+    details JSONB,
     before_snapshot JSONB,
     after_snapshot JSONB,
     reason TEXT,
@@ -620,6 +621,9 @@ CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
     user_agent TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure details column exists if table was created previously
+ALTER TABLE public.admin_audit_logs ADD COLUMN IF NOT EXISTS details JSONB;
 
 ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.permissions ENABLE ROW LEVEL SECURITY;
@@ -640,15 +644,16 @@ INSERT INTO public.roles (name, description)
 VALUES ('Super Admin', 'Full system access and operational management')
 ON CONFLICT (name) DO NOTHING;
 
--- Auto-register all existing auth users into admin_accounts as active
-INSERT INTO public.admin_accounts (id, status)
-SELECT id, 'active'
-FROM auth.users
-ON CONFLICT (id) DO UPDATE SET status = 'active';
+-- Cleanup: Only keep actual admin accounts in admin_accounts table (do not treat general members as admins)
+DELETE FROM public.admin_accounts WHERE role_id IS NULL;
+
+-- Automatically delete broadcast audit logs older than 30 days (1 month auto-purge)
+DELETE FROM public.admin_audit_logs WHERE created_at < NOW() - INTERVAL '30 days';
 
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
+
 
 
 
