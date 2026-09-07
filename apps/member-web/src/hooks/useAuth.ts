@@ -21,7 +21,7 @@ interface AuthActions {
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
-  updateProfile: (updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone' | 'phone' | 'date_of_birth' | 'gender' | 'address' | 'country'>>) => Promise<{ error?: string }>;
+  updateProfile: (updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone' | 'phone' | 'date_of_birth' | 'gender' | 'address' | 'country' | 'onboarding_completed' | 'onboarding_status' | 'onboarding_completed_at' | 'onboarding_version'>>) => Promise<{ error?: string }>;
   updatePreferences: (updates: Database['public']['Tables']['user_preferences']['Update']) => Promise<{ error?: string }>;
   refreshProfile: () => Promise<void>;
 }
@@ -62,6 +62,8 @@ export function useAuth(): UseAuthReturn {
             preferred_currency: 'BDT',
             timezone: 'Asia/Dhaka',
             onboarding_completed: false,
+            onboarding_status: 'not_started',
+            onboarding_version: 'v1',
           })
           .select('*')
           .maybeSingle();
@@ -272,7 +274,7 @@ export function useAuth(): UseAuthReturn {
   };
 
   const updateProfile = async (
-    updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone' | 'phone' | 'date_of_birth' | 'gender' | 'address' | 'country'>>
+    updates: Partial<Pick<Profile, 'full_name' | 'preferred_currency' | 'timezone' | 'phone' | 'date_of_birth' | 'gender' | 'address' | 'country' | 'onboarding_completed' | 'onboarding_status' | 'onboarding_completed_at' | 'onboarding_version'>>
   ): Promise<{ error?: string }> => {
     if (!state.user) return { error: 'Not authenticated' };
 

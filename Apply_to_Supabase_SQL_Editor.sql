@@ -319,13 +319,23 @@ SET search_path = public
 AS $$
 BEGIN
   BEGIN
-    INSERT INTO public.profiles (id, full_name, preferred_currency, timezone, onboarding_completed)
+    INSERT INTO public.profiles (
+      id,
+      full_name,
+      preferred_currency,
+      timezone,
+      onboarding_completed,
+      onboarding_status,
+      onboarding_version
+    )
     VALUES (
       NEW.id,
       COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
       COALESCE(NEW.raw_user_meta_data->>'preferred_currency', 'BDT'),
       COALESCE(NEW.raw_user_meta_data->>'timezone', 'Asia/Dhaka'),
-      FALSE
+      FALSE,
+      'not_started',
+      'v1'
     )
     ON CONFLICT (id) DO NOTHING;
   EXCEPTION WHEN OTHERS THEN
@@ -363,15 +373,52 @@ CREATE TRIGGER on_auth_user_created
 GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres, service_role;
 
 COMMIT;
--- Migration: Add extra profile fields (Phase 10)
--- Safety: These are additive non-destructive changes. We use IF NOT EXISTS to prevent errors.
 
+-- ----------------------------------------------------------------
+-- 10. Additional Profile Fields and Persistent Onboarding State
+-- ----------------------------------------------------------------
 ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS phone text,
-ADD COLUMN IF NOT EXISTS date_of_birth date,
-ADD COLUMN IF NOT EXISTS gender text,
-ADD COLUMN IF NOT EXISTS address text,
-ADD COLUMN IF NOT EXISTS country text DEFAULT 'Bangladesh';
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS date_of_birth date,
+  ADD COLUMN IF NOT EXISTS gender text,
+  ADD COLUMN IF NOT EXISTS address text,
+  ADD COLUMN IF NOT EXISTS country text DEFAULT 'Bangladesh',
+  ADD COLUMN IF NOT EXISTS onboarding_status text DEFAULT 'not_started',
+  ADD COLUMN IF NOT EXISTS onboarding_completed_at timestamptz,
+  ADD COLUMN IF NOT EXISTS onboarding_version text DEFAULT 'v1';
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'chk_profiles_onboarding_status'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT chk_profiles_onboarding_status
+      CHECK (onboarding_status IN ('not_started', 'in_progress', 'completed'));
+  END IF;
+END $$;
+
+-- Idempotent existing user protection backfill
+UPDATE public.profiles
+SET 
+  onboarding_status = 'completed',
+  onboarding_completed = TRUE,
+  onboarding_completed_at = COALESCE(onboarding_completed_at, updated_at, created_at, NOW())
+WHERE (onboarding_completed = TRUE OR onboarding_status = 'completed')
+  AND (onboarding_status IS DISTINCT FROM 'completed' OR onboarding_completed_at IS NULL);
+
+UPDATE public.profiles p
+SET
+  onboarding_status = 'completed',
+  onboarding_completed = TRUE,
+  onboarding_completed_at = COALESCE(p.onboarding_completed_at, p.updated_at, p.created_at, NOW())
+WHERE (
+  EXISTS (SELECT 1 FROM public.financial_accounts fa WHERE fa.user_id = p.id)
+  OR EXISTS (SELECT 1 FROM public.ledger_transactions lt WHERE lt.user_id = p.id)
+  OR EXISTS (SELECT 1 FROM public.loans l WHERE l.user_id = p.id)
+  OR EXISTS (SELECT 1 FROM public.credit_cards cc WHERE cc.user_id = p.id)
+  OR (p.created_at < NOW() - INTERVAL '1 hour' AND (p.full_name <> '' OR p.phone IS NOT NULL))
+)
+AND (p.onboarding_status IS DISTINCT FROM 'completed' OR p.onboarding_completed = FALSE);
 
 -- Update the schema cache so PostgREST immediately recognizes the new columns
 NOTIFY pgrst, 'reload schema';

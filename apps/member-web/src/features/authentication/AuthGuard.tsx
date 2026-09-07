@@ -40,8 +40,26 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     );
   }
 
-  if (requireOnboarding && profile && !profile.onboarding_completed) {
-    return <Navigate to="/onboarding" replace />;
+  const isCompleted = profile?.onboarding_status === 'completed' || profile?.onboarding_completed === true;
+
+  // If route requires onboarding (e.g. /dashboard) and user has not completed it:
+  if (requireOnboarding) {
+    if (profile && !isCompleted) {
+      return (
+        <Navigate
+          to="/onboarding"
+          state={{ from: location.pathname }}
+          replace
+        />
+      );
+    }
+  } else {
+    // If on onboarding route itself and user is already completed, redirect to dashboard:
+    if (isCompleted) {
+      const from = (location.state as { from?: string })?.from ?? '/dashboard';
+      const safePath = from.startsWith('/') && !from.startsWith('/onboarding') ? from : '/dashboard';
+      return <Navigate to={safePath} replace />;
+    }
   }
 
   return <>{children}</>;

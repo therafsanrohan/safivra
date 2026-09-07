@@ -91,6 +91,9 @@ export type Database = {
           preferred_currency: string;
           timezone: string;
           onboarding_completed: boolean;
+          onboarding_status: 'not_started' | 'in_progress' | 'completed';
+          onboarding_completed_at: string | null;
+          onboarding_version: string | null;
           avatar_url: string | null;
           phone: string | null;
           date_of_birth: string | null;
@@ -106,6 +109,9 @@ export type Database = {
           preferred_currency?: string;
           timezone?: string;
           onboarding_completed?: boolean;
+          onboarding_status?: 'not_started' | 'in_progress' | 'completed';
+          onboarding_completed_at?: string | null;
+          onboarding_version?: string | null;
           avatar_url?: string | null;
           phone?: string | null;
           date_of_birth?: string | null;
@@ -121,6 +127,9 @@ export type Database = {
           preferred_currency?: string;
           timezone?: string;
           onboarding_completed?: boolean;
+          onboarding_status?: 'not_started' | 'in_progress' | 'completed';
+          onboarding_completed_at?: string | null;
+          onboarding_version?: string | null;
           avatar_url?: string | null;
           phone?: string | null;
           date_of_birth?: string | null;
