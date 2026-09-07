@@ -425,27 +425,120 @@ NOTIFY pgrst, 'reload schema';
 
 
 -- ----------------------------------------------------------------
--- 11. Zakat Enhancements (20260907000001)
+-- 11. Zakat Module Full Foundation & Enhancements
 -- ----------------------------------------------------------------
 
--- Add columns to zakat_calculations for richer storage
-ALTER TABLE public.zakat_calculations
-  ADD COLUMN IF NOT EXISTS nisab_standard TEXT DEFAULT 'gold',
-  ADD COLUMN IF NOT EXISTS nisab_threshold_amount NUMERIC NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS notes TEXT;
+-- 1. Zakat Rule Sets
+CREATE TABLE IF NOT EXISTS public.zakat_rule_sets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    version NUMERIC NOT NULL,
+    effective_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    nisab_standard TEXT NOT NULL CHECK (nisab_standard IN ('gold', 'silver')),
+    zakat_percentage NUMERIC NOT NULL DEFAULT 2.5,
+    hawl_days INTEGER NOT NULL DEFAULT 354,
+    scholar_notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
--- Add check constraint for nisab_standard values
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'chk_zakat_calculations_nisab_standard'
-  ) THEN
-    ALTER TABLE public.zakat_calculations
-      ADD CONSTRAINT chk_zakat_calculations_nisab_standard
-      CHECK (nisab_standard IN ('gold', 'silver'));
-  END IF;
-END $$;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_zakat_rule_sets_version ON public.zakat_rule_sets(version);
 
--- Ensure a baseline rate snapshot exists if the table is empty
+-- 2. Zakat Rate Snapshots
+CREATE TABLE IF NOT EXISTS public.zakat_rate_snapshots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provider_name TEXT NOT NULL,
+    fetch_timestamp TIMESTAMPTZ NOT NULL DEFAULT now(),
+    gold_rate_per_gram NUMERIC NOT NULL,
+    silver_rate_per_gram NUMERIC NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'BDT',
+    is_override BOOLEAN NOT NULL DEFAULT false,
+    override_reason TEXT,
+    override_admin_id UUID REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_zakat_rate_snapshots_fetch_timestamp ON public.zakat_rate_snapshots(fetch_timestamp DESC);
+
+-- 3. Zakat Calculations Table
+CREATE TABLE IF NOT EXISTS public.zakat_calculations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    rule_set_id UUID NOT NULL REFERENCES public.zakat_rule_sets(id),
+    rate_snapshot_id UUID NOT NULL REFERENCES public.zakat_rate_snapshots(id),
+    status TEXT NOT NULL CHECK (status IN ('draft', 'confirmed_snapshot', 'paid')) DEFAULT 'draft',
+    zakat_anniversary_date DATE,
+    total_assets NUMERIC NOT NULL DEFAULT 0,
+    total_deductions NUMERIC NOT NULL DEFAULT 0,
+    net_zakatable_wealth NUMERIC NOT NULL DEFAULT 0,
+    is_eligible BOOLEAN NOT NULL DEFAULT false,
+    estimated_zakat_amount NUMERIC NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'BDT',
+    nisab_standard TEXT DEFAULT 'gold',
+    nisab_threshold_amount NUMERIC NOT NULL DEFAULT 0,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_zakat_calculations_user_id ON public.zakat_calculations(user_id);
+CREATE INDEX IF NOT EXISTS idx_zakat_calculations_status ON public.zakat_calculations(status);
+
+-- 4. Zakat Calculation Items Table
+CREATE TABLE IF NOT EXISTS public.zakat_calculation_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    calculation_id UUID NOT NULL REFERENCES public.zakat_calculations(id) ON DELETE CASCADE,
+    item_type TEXT NOT NULL CHECK (item_type IN ('cash', 'gold', 'silver', 'business', 'investment', 'liability', 'other')),
+    source_table TEXT,
+    source_id UUID,
+    amount NUMERIC NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'BDT',
+    description TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_zakat_calculation_items_calc_id ON public.zakat_calculation_items(calculation_id);
+
+-- Enable RLS
+ALTER TABLE public.zakat_rule_sets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.zakat_rate_snapshots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.zakat_calculations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.zakat_calculation_items ENABLE ROW LEVEL SECURITY;
+
+-- Policies for Rule Sets & Rate Snapshots
+DROP POLICY IF EXISTS "Anyone can read zakat rule sets" ON public.zakat_rule_sets;
+CREATE POLICY "Anyone can read zakat rule sets" ON public.zakat_rule_sets FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can read rate snapshots" ON public.zakat_rate_snapshots;
+CREATE POLICY "Anyone can read rate snapshots" ON public.zakat_rate_snapshots FOR SELECT USING (true);
+
+-- Policies for Calculations & Items
+DROP POLICY IF EXISTS "Users can manage their own calculations" ON public.zakat_calculations;
+CREATE POLICY "Users can manage their own calculations"
+    ON public.zakat_calculations
+    FOR ALL TO authenticated
+    USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can manage their own calculation items" ON public.zakat_calculation_items;
+CREATE POLICY "Users can manage their own calculation items"
+    ON public.zakat_calculation_items
+    FOR ALL TO authenticated
+    USING (calculation_id IN (SELECT id FROM public.zakat_calculations WHERE user_id = auth.uid()))
+    WITH CHECK (calculation_id IN (SELECT id FROM public.zakat_calculations WHERE user_id = auth.uid()));
+
+-- Insert baseline rule set if empty
+INSERT INTO public.zakat_rule_sets (name, version, nisab_standard, zakat_percentage, hawl_days, scholar_notes)
+VALUES (
+    'Standard Global Rules (Gold/Silver)',
+    1.0,
+    'gold',
+    2.5,
+    354,
+    'Default rules mapping 2.5% on Zakatable assets after 1 Hijri year (354 days).'
+) ON CONFLICT (version) DO NOTHING;
+
+-- Insert baseline rate snapshot if empty
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM public.zakat_rate_snapshots LIMIT 1) THEN
     INSERT INTO public.zakat_rate_snapshots (
@@ -469,4 +562,5 @@ END $$;
 
 -- Reload schema cache
 NOTIFY pgrst, 'reload schema';
+
 

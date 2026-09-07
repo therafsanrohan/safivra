@@ -58,35 +58,82 @@ export function ZakatCalculatorPage() {
     typeof calculateZakatLocally
   > | null>(null);
 
-  // ─── Fetch Supabase config data ────────────────────────────────────────────
+  // ─── Fetch Supabase config & financial accounts data ───────────────────────
   const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [{ data: rateData, error: rateError }, { data: rulesData, error: rulesError }] =
-        await Promise.all([
-          supabase
-            .from('zakat_rate_snapshots')
-            .select('*')
-            .order('fetch_timestamp', { ascending: false })
-            .limit(1)
-            .single(),
-          supabase
-            .from('zakat_rule_sets')
-            .select('*')
-            .order('version', { ascending: false })
-            .limit(1)
-            .single(),
-        ]);
+      const [{ data: rateData }, { data: rulesData }] = await Promise.all([
+        supabase
+          .from('zakat_rate_snapshots')
+          .select('*')
+          .order('fetch_timestamp', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('zakat_rule_sets')
+          .select('*')
+          .order('version', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
-      if (rateError && rateError.code !== 'PGRST116') throw rateError;
-      if (rulesError && rulesError.code !== 'PGRST116') throw rulesError;
+      const effectiveRate: RateSnapshot = (rateData as unknown as RateSnapshot) || {
+        id: '',
+        provider_name: 'BAJUS Market Standard',
+        fetch_timestamp: new Date().toISOString(),
+        gold_rate_per_gram: 9250,
+        silver_rate_per_gram: 105.5,
+        currency: 'BDT',
+        is_override: false,
+        override_reason: null,
+        override_admin_id: null,
+        created_at: new Date().toISOString(),
+      };
 
-      setActiveRate(rateData as unknown as RateSnapshot | null);
-      setActiveRules(rulesData as unknown as RuleSet | null);
+      const effectiveRules: RuleSet = (rulesData as unknown as RuleSet) || {
+        id: '',
+        name: 'Standard Global Rules',
+        version: 1,
+        effective_date: new Date().toISOString(),
+        nisab_standard: 'gold',
+        zakat_percentage: 2.5,
+        hawl_days: 354,
+        scholar_notes: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setActiveRate(effectiveRate);
+      setActiveRules(effectiveRules);
+
+      // Auto-prefill cash & liabilities from existing user accounts if present
+      const { data: accountsData } = await supabase
+        .from('v_account_balances')
+        .select('*');
+
+      if (accountsData && accountsData.length > 0) {
+        let totalCash = 0;
+        let totalLiabilities = 0;
+
+        accountsData.forEach((acc: any) => {
+          const bal = parseFloat(acc.balance || '0');
+          if (acc.account_class === 'asset' && bal > 0) {
+            totalCash += bal;
+          } else if (acc.account_class === 'liability' && bal > 0) {
+            totalLiabilities += bal;
+          }
+        });
+
+        setFormData((prev) => ({
+          ...prev,
+          bankBalance: totalCash,
+          personalDebts: totalLiabilities,
+        }));
+      }
     } catch (err: any) {
-      setError(err.message);
+      console.warn('[Zakat] Error loading initial data:', err.message);
     } finally {
       setLoading(false);
     }
@@ -111,63 +158,75 @@ export function ZakatCalculatorPage() {
 
   // ─── Run local calculation when entering the Review step ──────────────────
   useEffect(() => {
-    if (step === TOTAL_STEPS && activeRate) {
+    if (step === TOTAL_STEPS) {
+      const goldRate = activeRate?.gold_rate_per_gram ?? 9250;
+      const silverRate = activeRate?.silver_rate_per_gram ?? 105.5;
       const result = calculateZakatLocally(
         getNetWealth(),
-        activeRate.gold_rate_per_gram,
-        activeRate.silver_rate_per_gram,
+        goldRate,
+        silverRate,
         activeRules?.nisab_standard ?? 'gold',
         activeRules?.zakat_percentage ?? 2.5
       );
       setCalculationResult(result);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, activeRate, activeRules]);
+  }, [step, activeRate, activeRules, formData]);
 
   // ─── Save snapshot to Supabase ────────────────────────────────────────────
   const handleSave = async () => {
-    if (!activeRules || !activeRate || !calculationResult) return;
     setSaving(true);
+    try {
+      const currentCalcResult = calculationResult || calculateZakatLocally(
+        getNetWealth(),
+        activeRate?.gold_rate_per_gram ?? 9250,
+        activeRate?.silver_rate_per_gram ?? 105.5,
+        activeRules?.nisab_standard ?? 'gold',
+        activeRules?.zakat_percentage ?? 2.5
+      );
 
-    const res = await saveZakatCalculationApi({
-      rule_set_id: activeRules.id,
-      rate_snapshot_id: activeRate.id,
-      status: 'confirmed_snapshot',
-      zakat_anniversary_date: formData.anniversaryDate,
-      total_assets: getTotalAssets(),
-      total_deductions: getTotalDeductions(),
-      net_zakatable_wealth: getNetWealth(),
-      is_eligible: calculationResult.isEligible,
-      estimated_zakat_amount: calculationResult.liability,
-      currency: 'BDT',
-      items: [
-        {
-          item_type: 'cash',
-          amount: formData.cashInHand + formData.bankBalance,
-          description: 'Cash & Bank',
-        },
-        { item_type: 'gold', amount: formData.goldValue, description: 'Gold Value' },
-        { item_type: 'silver', amount: formData.silverValue, description: 'Silver Value' },
-        {
-          item_type: 'investment',
-          amount: formData.investments + formData.businessInventory,
-          description: 'Investments & Business',
-        },
-        {
-          item_type: 'liability',
-          amount: formData.personalDebts + formData.businessDebts,
-          description: 'Debts & Liabilities',
-        },
-      ].filter((item) => item.amount > 0),
-    });
+      const res = await saveZakatCalculationApi({
+        rule_set_id: activeRules?.id || '',
+        rate_snapshot_id: activeRate?.id || '',
+        status: 'confirmed_snapshot',
+        zakat_anniversary_date: formData.anniversaryDate,
+        total_assets: getTotalAssets(),
+        total_deductions: getTotalDeductions(),
+        net_zakatable_wealth: getNetWealth(),
+        is_eligible: currentCalcResult.isEligible,
+        estimated_zakat_amount: currentCalcResult.liability,
+        currency: 'BDT',
+        items: [
+          {
+            item_type: 'cash',
+            amount: formData.cashInHand + formData.bankBalance,
+            description: 'Cash & Bank Balance',
+          },
+          { item_type: 'gold', amount: formData.goldValue, description: 'Gold Value' },
+          { item_type: 'silver', amount: formData.silverValue, description: 'Silver Value' },
+          {
+            item_type: 'investment',
+            amount: formData.investments + formData.businessInventory,
+            description: 'Investments & Business Inventory',
+          },
+          {
+            item_type: 'liability',
+            amount: formData.personalDebts + formData.businessDebts,
+            description: 'Debts & Liabilities',
+          },
+        ].filter((item) => item.amount > 0),
+      });
 
-    setSaving(false);
-
-    if (res.data) {
-      success(t.zakat.saveSnapshot, t.zakat.saveSuccess);
-      navigate('/dashboard/zakat');
-    } else {
-      showError(t.zakat.saveSnapshot, res.error?.message || t.zakat.saveError);
+      if (res.data) {
+        success(t.zakat.saveSnapshot, t.zakat.saveSuccess);
+        navigate('/dashboard/zakat');
+      } else {
+        showError(t.zakat.saveSnapshot, res.error?.message || t.zakat.saveError);
+      }
+    } catch (err: any) {
+      showError(t.zakat.saveSnapshot, err.message || t.zakat.saveError);
+    } finally {
+      setSaving(false);
     }
   };
 

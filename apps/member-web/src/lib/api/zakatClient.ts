@@ -80,13 +80,73 @@ export async function saveZakatCalculationApi(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { data: null, error: new Error('Not authenticated') };
 
+    // Ensure valid rule_set_id
+    let ruleSetId = payload.rule_set_id;
+    if (!ruleSetId) {
+      const { data: existingRule } = await supabase
+        .from('zakat_rule_sets')
+        .select('id')
+        .order('version', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingRule) {
+        ruleSetId = (existingRule as { id: string }).id;
+      } else {
+        const { data: newRule } = await (supabase
+          .from('zakat_rule_sets') as any)
+          .insert({
+            name: 'Standard Global Rules (Gold/Silver)',
+            version: 1.0,
+            nisab_standard: 'gold',
+            zakat_percentage: 2.5,
+            hawl_days: 354,
+            scholar_notes: 'Default global rules.',
+          })
+          .select('id')
+          .single();
+
+        if (newRule) ruleSetId = (newRule as { id: string }).id;
+      }
+    }
+
+    // Ensure valid rate_snapshot_id
+    let rateSnapshotId = payload.rate_snapshot_id;
+    if (!rateSnapshotId) {
+      const { data: existingRate } = await supabase
+        .from('zakat_rate_snapshots')
+        .select('id')
+        .order('fetch_timestamp', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingRate) {
+        rateSnapshotId = (existingRate as { id: string }).id;
+      } else {
+        const { data: newRate } = await (supabase
+          .from('zakat_rate_snapshots') as any)
+          .insert({
+            provider_name: 'BAJUS Market Standard',
+            gold_rate_per_gram: 9250.00,
+            silver_rate_per_gram: 105.50,
+            currency: 'BDT',
+            is_override: false,
+            override_reason: 'Initial baseline market snapshot',
+          })
+          .select('id')
+          .single();
+
+        if (newRate) rateSnapshotId = (newRate as { id: string }).id;
+      }
+    }
+
     // Insert the main calculation record
     const { data: calc, error: calcError } = await (supabase
       .from('zakat_calculations') as any)
       .insert({
         user_id: user.id,
-        rule_set_id: payload.rule_set_id,
-        rate_snapshot_id: payload.rate_snapshot_id,
+        rule_set_id: ruleSetId,
+        rate_snapshot_id: rateSnapshotId,
         status: payload.status,
         zakat_anniversary_date: payload.zakat_anniversary_date,
         total_assets: payload.total_assets,
