@@ -4,6 +4,7 @@ import { BottomNav, Sidebar } from '@/components/navigation/Navigation';
 import { usePlatform } from '@/context/PlatformContext';
 import { useAuthContext } from '@/context/AuthContext';
 import { syncNotifications } from '@/lib/notifications/sync';
+import { trackFeatureUsage } from '@/lib/analytics/tracker';
 
 /**
  * Main application layout shell.
@@ -21,6 +22,27 @@ export const AppLayout: React.FC = () => {
       syncNotifications(user.id);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !location.pathname) return;
+    const path = location.pathname;
+    let featureName = 'Dashboard';
+    if (path.includes('/activity')) featureName = 'Transactions & Activity';
+    else if (path.includes('/accounts')) featureName = 'Accounts & Wallets';
+    else if (path.includes('/loans')) featureName = 'Loans & Debts';
+    else if (path.includes('/credit-cards')) featureName = 'Credit Cards';
+    else if (path.includes('/plans/savings') || path.includes('/savings')) featureName = 'Savings & DPS';
+    else if (path.includes('/plans/budgets')) featureName = 'Budgets & Expense Planning';
+    else if (path.includes('/plans/recurring')) featureName = 'Recurring Commitments';
+    else if (path.includes('/zakat')) featureName = 'Zakat Intelligence';
+    else if (path.includes('/tools')) featureName = 'Financial Calculators & Tools';
+    else if (path.includes('/reports')) featureName = 'Financial Reports & Exports';
+    else if (path.includes('/notifications')) featureName = 'Notifications & Alerts';
+    else if (path.includes('/settings')) featureName = 'Settings & Profile';
+    else if (path.includes('/system-health')) featureName = 'System Health Diagnostics';
+
+    trackFeatureUsage(featureName, 'view', { path });
+  }, [user, location.pathname]);
 
      useEffect(() => {
        if (!platform.lifecycle.onBackButton) return;

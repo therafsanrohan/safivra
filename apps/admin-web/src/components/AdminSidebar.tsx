@@ -33,6 +33,15 @@ export default function AdminSidebar() {
       )
     },
     {
+      name: 'Feature Usage Analytics',
+      href: '/features',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2zm0-6V9a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2zM9 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5z" />
+        </svg>
+      )
+    },
+    {
       name: 'Zakat Management',
       href: '/zakat',
       icon: (

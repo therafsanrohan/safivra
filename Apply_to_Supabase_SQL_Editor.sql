@@ -672,6 +672,29 @@ DROP POLICY IF EXISTS "Users can delete own notifications" ON public.notificatio
 CREATE POLICY "Users can delete own notifications" ON public.notifications
   FOR DELETE USING (auth.uid() = user_id);
 
+-- 8. Real-Time User Feature Activity & Usage Logs Table
+CREATE TABLE IF NOT EXISTS public.user_feature_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    feature_name TEXT NOT NULL,
+    action_type TEXT NOT NULL DEFAULT 'view',
+    metadata JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_feature_logs_feature_created ON public.user_feature_logs(feature_name, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_feature_logs_user_id ON public.user_feature_logs(user_id);
+
+ALTER TABLE public.user_feature_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow users to insert feature logs" ON public.user_feature_logs;
+CREATE POLICY "Allow users to insert feature logs" ON public.user_feature_logs
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Allow admins to view feature logs" ON public.user_feature_logs;
+CREATE POLICY "Allow admins to view feature logs" ON public.user_feature_logs
+  FOR SELECT USING (true);
+
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
