@@ -15,11 +15,13 @@
     --color-bg-page:         #F8FAFC; /* crisp, cool slate-tinted off-white */
     --bg-page-gradient:      radial-gradient(circle at top left, #FFFFFF 0%, #F1F5F9 100%);
     --color-bg-surface:      rgba(255, 255, 255, 0.95);
+    --color-bg-elevated:     #FFFFFF;
     --color-bg-subtle:       #F1F5F9;
     --color-bg-hover:        #E2E8F0;
 
     --color-text-primary:    #0F172A;
     --color-text-secondary:  #475569;
+    --color-text-tertiary:   #64748B;
     --color-text-muted:      #94A3B8;
     --color-text-placeholder: #CBD5E1;
 
@@ -35,9 +37,11 @@
     --glass-blur:            20px;
 
     /* ── Accent — Forest Green (restrained) ───────────────────────────────── */
+    --color-primary:         #10B981;
     --color-accent:          #10B981;
     --color-accent-hover:    #059669;
     --color-accent-soft:     #ECFDF5;
+    --color-accent-muted:    rgba(16, 185, 129, 0.12);
     --color-accent-text:     #FFFFFF;
 
     /* ── Semantic ─────────────────────────────────────────────────────────── */
@@ -120,11 +124,13 @@
     --color-bg-page:         #111113; /* deep charcoal, not pure black */
     --bg-page-gradient:      radial-gradient(circle at top left, #18181B 0%, #111113 100%);
     --color-bg-surface:      #18181B;
+    --color-bg-elevated:     #27272A;
     --color-bg-subtle:       #27272A;
     --color-bg-hover:        #3F3F46;
 
     --color-text-primary:    #F9FAFB;
     --color-text-secondary:  #A1A1AA;
+    --color-text-tertiary:   #9CA3AF;
     --color-text-muted:      #71717A;
     --color-text-placeholder: #52525B;
 
@@ -139,9 +145,11 @@
     --glass-shadow:          0 8px 32px rgba(0, 0, 0, 0.4);
     --glass-blur:            16px;
 
+    --color-primary:         #34D399;
     --color-accent:          #34D399; /* Mint */
     --color-accent-hover:    #10B981;
     --color-accent-soft:     #064E3B;
+    --color-accent-muted:    rgba(52, 211, 153, 0.15);
     --color-accent-text:     #022C22;
 
     --color-positive:        #34D399;
@@ -166,11 +174,13 @@
       --color-bg-page:         #111113;
       --bg-page-gradient:      radial-gradient(circle at top left, #18181B 0%, #111113 100%);
       --color-bg-surface:      #18181B;
+      --color-bg-elevated:     #27272A;
       --color-bg-subtle:       #27272A;
       --color-bg-hover:        #3F3F46;
 
       --color-text-primary:    #F9FAFB;
       --color-text-secondary:  #A1A1AA;
+      --color-text-tertiary:   #9CA3AF;
       --color-text-muted:      #71717A;
       --color-text-placeholder: #52525B;
 
@@ -184,9 +194,11 @@
       --glass-shadow:          0 8px 32px rgba(0, 0, 0, 0.4);
       --glass-blur:            16px;
 
+      --color-primary:         #34D399;
       --color-accent:          #34D399;
       --color-accent-hover:    #10B981;
       --color-accent-soft:     #064E3B;
+      --color-accent-muted:    rgba(52, 211, 153, 0.15);
       --color-accent-text:     #022C22;
 
       --color-positive:        #34D399;

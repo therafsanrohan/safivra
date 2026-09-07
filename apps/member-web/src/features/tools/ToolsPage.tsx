@@ -27,8 +27,8 @@ export const ToolsPage: React.FC = () => {
           onClick={() => setActiveTab('dps')}
           className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all ${
             activeTab === 'dps'
-              ? 'bg-emerald-50 text-emerald-700 shadow-sm'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-slate-50'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]'
           }`}
         >
           <Sparkles size={18} />
@@ -38,8 +38,8 @@ export const ToolsPage: React.FC = () => {
           onClick={() => setActiveTab('emi')}
           className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all ${
             activeTab === 'emi'
-              ? 'bg-emerald-50 text-emerald-700 shadow-sm'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-slate-50'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]'
           }`}
         >
           <Landmark size={18} />

@@ -34,7 +34,7 @@ function StatusBadge({ status, t }: { status: string; t: any }) {
   };
 
   const { label, cls } =
-    map[status] ?? { label: status, cls: 'bg-gray-100 text-gray-600' };
+    map[status] ?? { label: status, cls: 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)]' };
 
   return (
     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cls}`}>
@@ -145,7 +145,7 @@ export function ZakatHistoryPage() {
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
                       calc.is_eligible
                         ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                        : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)]'
                     }`}
                   >
                     {calc.is_eligible ? (
@@ -161,7 +161,7 @@ export function ZakatHistoryPage() {
                         className={`text-sm font-semibold ${
                           calc.is_eligible
                             ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-slate-600 dark:text-slate-400'
+                            : 'text-[var(--color-text-secondary)]'
                         }`}
                       >
                         {calc.is_eligible ? t.zakat.eligible : t.zakat.notEligible}

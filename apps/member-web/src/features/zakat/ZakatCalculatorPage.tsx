@@ -483,7 +483,7 @@ export function ZakatCalculatorPage() {
                           className={`text-sm font-medium uppercase tracking-wider ${
                             calculationResult.isEligible
                               ? 'text-emerald-100'
-                              : 'text-slate-500 dark:text-slate-400'
+                              : 'text-[var(--color-text-secondary)]'
                           }`}
                         >
                           {calculationResult.isEligible
@@ -517,12 +517,12 @@ export function ZakatCalculatorPage() {
         </div>
 
         {/* Footer Actions */}
-        <div className="bg-gray-50/80 dark:bg-black/20 p-6 border-t border-[var(--color-border)] flex items-center justify-between backdrop-blur-md rounded-b-3xl">
+        <div className="bg-[var(--color-bg-subtle)] p-6 border-t border-[var(--color-border)] flex items-center justify-between backdrop-blur-md rounded-b-3xl">
           <Button
             variant="outline"
             onClick={prevStep}
             disabled={step === 1 || saving}
-            className="gap-2 rounded-xl px-6 h-12 bg-white dark:bg-transparent shadow-sm border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+            className="gap-2 rounded-xl px-6 h-12 bg-[var(--color-bg-surface)] shadow-sm border-[var(--color-border)] hover:bg-[var(--color-bg-hover)] transition-all"
           >
             <ChevronLeft className="h-5 w-5" />
             {t.zakat.back}

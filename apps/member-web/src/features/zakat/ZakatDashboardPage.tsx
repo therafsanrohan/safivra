@@ -204,7 +204,7 @@ export function ZakatDashboardPage() {
                 </span>
               </div>
 
-              <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800 rounded-2xl">
+              <div className="flex justify-between items-center p-4 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-2xl">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-slate-400" />
                   <span className="text-[var(--color-text-secondary)] font-medium">{t.zakat.silverPerGram}</span>

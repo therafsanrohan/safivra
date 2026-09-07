@@ -65,31 +65,29 @@ export const CurrencyExchangeWidget: React.FC = () => {
         <button 
           onClick={fetchRates} 
           disabled={loading}
-          className="p-1.5 rounded-full text-[var(--color-text-muted)] hover:bg-white dark:hover:bg-slate-800 hover:text-indigo-500 hover:shadow-sm transition-all disabled:opacity-50"
-          title={isBn ? 'রিফ্রেশ করুন' : 'Refresh rates'}
+          className="p-1.5 rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)] hover:text-indigo-500 hover:shadow-sm transition-all disabled:opacity-50"
+          title={isBn ? 'রিফ্রেশ রেট' : 'Refresh Rates'}
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       <div className="p-4 space-y-1">
-        {loading && rates.length === 0 ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="flex justify-between items-center animate-pulse py-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
-                  <div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded"></div>
-                </div>
-                <div className="w-20 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+        {loading ? (
+          <div className="space-y-2 animate-pulse">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-[var(--color-bg-subtle)] rounded-full"></div>
+                <div className="w-16 h-4 bg-[var(--color-bg-subtle)] rounded"></div>
               </div>
-            ))}
+              <div className="w-20 h-5 bg-[var(--color-bg-subtle)] rounded"></div>
+            </div>
           </div>
         ) : (
           rates.map((rate) => (
             <div key={rate.currency} className="group flex justify-between items-center py-2.5 px-3 rounded-lg hover:bg-[var(--color-bg-subtle)] transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-[var(--color-border)] flex items-center justify-center text-xs font-bold text-[var(--color-text-primary)] shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-xs font-bold text-[var(--color-text-primary)] shadow-sm">
                   {rate.currency === 'USD' ? '🇺🇸' : rate.currency === 'GBP' ? '🇬🇧' : rate.currency === 'EUR' ? '🇪🇺' : '🇸🇬'}
                 </div>
                 <div className="flex flex-col">

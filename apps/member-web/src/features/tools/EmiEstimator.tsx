@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
+      <div className="bg-[var(--color-bg-surface)] backdrop-blur-sm p-3 rounded-lg border border-[var(--color-border)] shadow-xl">
         <p className="font-bold text-[var(--color-text-primary)] mb-2">{payload[0].name}</p>
         <div className="flex items-center gap-2 text-sm font-medium" style={{ color: payload[0].payload.color }}>
           <span>৳ {formatCurrency(payload[0].value)}</span>
@@ -48,7 +48,7 @@ export const EmiEstimator: React.FC = () => {
   return (
     <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row">
       {/* Controls */}
-      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-slate-50 dark:bg-slate-900/50 space-y-5">
+      <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-[var(--color-border)] bg-[var(--color-bg-subtle)] space-y-5">
         <div>
           <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-1.5">
             {isBn ? 'লোনের পরিমাণ' : 'Loan Amount'}
