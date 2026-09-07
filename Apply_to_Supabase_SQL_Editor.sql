@@ -630,9 +630,16 @@ INSERT INTO public.roles (name, description)
 VALUES ('Super Admin', 'Full system access and operational management')
 ON CONFLICT (name) DO NOTHING;
 
+-- Auto-register all existing auth users into admin_accounts as active
+INSERT INTO public.admin_accounts (id, status)
+SELECT id, 'active'
+FROM auth.users
+ON CONFLICT (id) DO UPDATE SET status = 'active';
+
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
+
 
 
 
