@@ -15,53 +15,55 @@ export default async function AuditPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Audit Trail</h1>
-        <p className="mt-2 text-sm text-gray-500">
-          A secure, immutable record of all administrative actions.
+        <h1 className="text-3xl font-semibold text-white tracking-tight">Audit Trail</h1>
+        <p className="mt-2 text-sm text-emerald-200/60">
+          A secure, immutable record of all administrative actions and account governance events.
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-emerald-950/20 rounded-2xl border border-emerald-900/40 overflow-hidden backdrop-blur-xl">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-emerald-900/40">
+            <thead className="bg-emerald-950/40">
               <tr>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                   Timestamp
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                   Actor (Admin ID)
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                   Action
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                   Resource
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-emerald-900/30 text-sm">
               {logs?.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <tr key={log.id} className="hover:bg-emerald-900/20 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-emerald-200/70">
                     {new Date(log.created_at).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-xs text-gray-500 font-mono">{log.actor_id}</div>
+                    <div className="text-xs text-emerald-300/80 font-mono bg-emerald-900/40 px-2 py-1 rounded w-fit border border-emerald-800/40">
+                      {log.actor_id}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       {log.action}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
                     {log.resource_type} ({log.resource_id || 'N/A'})
                   </td>
                 </tr>
               ))}
               {(!logs || logs.length === 0) && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={4} className="px-6 py-12 text-center text-emerald-200/50">
                     No audit logs recorded yet.
                   </td>
                 </tr>
@@ -73,3 +75,4 @@ export default async function AuditPage() {
     </div>
   )
 }
+

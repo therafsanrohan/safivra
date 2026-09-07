@@ -420,8 +420,18 @@ WHERE (
 )
 AND (p.onboarding_status IS DISTINCT FROM 'completed' OR p.onboarding_completed = FALSE);
 
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS phone text,
+ADD COLUMN IF NOT EXISTS date_of_birth date,
+ADD COLUMN IF NOT EXISTS gender text,
+ADD COLUMN IF NOT EXISTS address text,
+ADD COLUMN IF NOT EXISTS country text DEFAULT 'Bangladesh',
+ADD COLUMN IF NOT EXISTS is_suspended boolean NOT NULL DEFAULT false,
+ADD COLUMN IF NOT EXISTS suspension_reason text;
+
 -- Update the schema cache so PostgREST immediately recognizes the new columns
 NOTIFY pgrst, 'reload schema';
+
 
 
 -- ----------------------------------------------------------------

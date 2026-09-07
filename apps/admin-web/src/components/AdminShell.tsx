@@ -11,7 +11,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row antialiased text-slate-800">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row antialiased selection:bg-emerald-500 selection:text-white">
       <AdminSidebar />
       <main className="flex-1 min-w-0 overflow-x-hidden p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-6">
