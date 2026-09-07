@@ -236,7 +236,7 @@ export function ZakatCalculatorPage() {
       </div>
 
       {/* Main Content Card */}
-      <Card className="min-h-[500px] flex flex-col border-0 shadow-xl shadow-black/5 bg-gradient-to-b from-white to-gray-50 dark:from-[var(--color-bg-elevated)] dark:to-[var(--color-bg-surface)] overflow-hidden rounded-3xl">
+      <Card className="min-h-[500px] flex flex-col border border-[var(--color-border)] shadow-xl shadow-black/5 bg-[var(--color-bg-surface)] overflow-hidden rounded-3xl">
         <div className="flex-1 p-6 md:p-8">
 
           {/* ── Step 1: Hawl Date ── */}
@@ -313,8 +313,7 @@ export function ZakatCalculatorPage() {
               </div>
               <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step3Desc}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 p-5 rounded-3xl border border-yellow-200 dark:border-yellow-900/50 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-yellow-300 opacity-20 blur-2xl rounded-full" />
+                <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm relative overflow-hidden">
                   <CurrencyInput
                     label={t.zakat.goldValue}
                     value={formData.goldValue}
@@ -322,8 +321,7 @@ export function ZakatCalculatorPage() {
                     size="lg"
                   />
                 </div>
-                <div className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/50 dark:to-gray-900/50 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-slate-400 opacity-20 blur-2xl rounded-full" />
+                <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm relative overflow-hidden">
                   <CurrencyInput
                     label={t.zakat.silverValue}
                     value={formData.silverValue}
@@ -381,7 +379,7 @@ export function ZakatCalculatorPage() {
               </div>
               <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step5Desc}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-rose-50/50 dark:bg-rose-950/20 p-5 rounded-3xl border border-rose-100 dark:border-rose-900/50 shadow-sm hover:shadow-md transition-all">
+                <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
                     label={t.zakat.personalDebts}
                     value={formData.personalDebts}
@@ -389,7 +387,7 @@ export function ZakatCalculatorPage() {
                     size="lg"
                   />
                 </div>
-                <div className="bg-rose-50/50 dark:bg-rose-950/20 p-5 rounded-3xl border border-rose-100 dark:border-rose-900/50 shadow-sm hover:shadow-md transition-all">
+                <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
                     label={t.zakat.businessDebts}
                     value={formData.businessDebts}
@@ -472,8 +470,8 @@ export function ZakatCalculatorPage() {
                     <div
                       className={`flex-1 flex flex-col justify-center p-8 rounded-3xl border shadow-xl relative overflow-hidden transition-all ${
                         calculationResult.isEligible
-                          ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 dark:from-emerald-700 dark:to-emerald-950 border-emerald-400 dark:border-emerald-600 text-white shadow-emerald-600/20'
-                          : 'bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border-slate-300 dark:border-slate-700'
+                          ? 'bg-emerald-600 text-white shadow-emerald-600/20'
+                          : 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]'
                       }`}
                     >
                       {calculationResult.isEligible && (

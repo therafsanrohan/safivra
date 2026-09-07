@@ -165,7 +165,13 @@ export const CreditCardsPage: React.FC = () => {
             {displayCards.map((card) => {
               const outstanding = card.account?.balance ? Math.abs(Number(card.account.balance)) : 0;
               const limit = Number(card.credit_limit);
-              const utilizationPct = limit > 0 ? Math.round((outstanding / limit) * 100) : 0;
+              const utilizationPctNum = limit > 0 ? (outstanding / limit) * 100 : 0;
+              let displayPct = Math.round(utilizationPctNum).toString();
+              if (utilizationPctNum > 99 && utilizationPctNum < 100) {
+                displayPct = utilizationPctNum.toFixed(1);
+              } else if (utilizationPctNum > 0 && utilizationPctNum < 1) {
+                displayPct = '<1';
+              }
 
               return (
                 <Link
@@ -174,7 +180,7 @@ export const CreditCardsPage: React.FC = () => {
                   className="block active-scale"
                   role="listitem"
                 >
-                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between aspect-[1.586/1] transition-shadow hover:shadow-lg ${getCardGradient('credit_card', card.nickname, card.issuer)}`}>
+                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[220px] transition-shadow hover:shadow-lg ${getCardGradient('credit_card', card.nickname, card.issuer)}`}>
                     {/* Glass overlay elements for physical card feel */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl pointer-events-none"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8 blur-lg pointer-events-none"></div>
@@ -185,12 +191,22 @@ export const CreditCardsPage: React.FC = () => {
                           <CreditCard size={18} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[15px] font-semibold text-white truncate tracking-wide drop-shadow-sm">
-                            {card.nickname} {card.last_four ? `(•••• ${card.last_four})` : ''}
+                          <p className="text-[15px] font-semibold text-white line-clamp-2 tracking-wide drop-shadow-sm leading-tight mb-1">
+                            {card.nickname}
                           </p>
-                          <p className="text-[13px] text-white/75 truncate">
-                            {card.issuer} · {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(limit)}
-                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            {card.last_four && (
+                              <p className="text-[13px] font-mono text-white/90">
+                                •••• {card.last_four}
+                              </p>
+                            )}
+                            <p className="text-[12px] text-white/75 truncate uppercase tracking-wider">
+                              {card.issuer}
+                            </p>
+                            <p className="text-[13px] text-white/90 font-medium mt-1">
+                              {isBn ? 'লিমিট' : 'Limit'}: {formatCurrency(limit)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -205,13 +221,13 @@ export const CreditCardsPage: React.FC = () => {
                           </p>
                         </div>
                         <p className="text-[11px] text-white/80 font-medium">
-                          {utilizationPct}% Used
+                          {displayPct}% Used
                         </p>
                       </div>
                       <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
                         <div 
-                          className={`h-full rounded-full transition-all duration-500 ${utilizationPct > 80 ? 'bg-red-400' : 'bg-white/80'}`}
-                          style={{ width: `${Math.min(utilizationPct, 100)}%` }}
+                          className={`h-full rounded-full transition-all duration-500 ${utilizationPctNum > 80 ? 'bg-red-400' : 'bg-white/80'}`}
+                          style={{ width: `${Math.min(utilizationPctNum, 100)}%` }}
                         />
                       </div>
                     </div>

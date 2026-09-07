@@ -50,7 +50,8 @@ export function formatCurrency(
 
   const formatted = formatter.format(Math.abs(amount));
   const prefix = showSymbol ? APP_CONFIG.currency.symbol : '';
-  return `${prefix}${formatted}`;
+  const sign = amount < 0 ? '-' : '';
+  return `${sign}${prefix}${formatted}`;
 }
 
 /**

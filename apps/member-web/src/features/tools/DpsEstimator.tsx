@@ -11,8 +11,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="font-bold text-[var(--color-text-primary)] mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center gap-2 text-sm font-medium" style={{ color: entry.stroke }}>
-            <span className="opacity-80">{entry.name}:</span>
-            <span>৳ {formatCurrency(entry.value)}</span>
+            <span>{formatCurrency(entry.value)}</span>
           </div>
         ))}
       </div>
@@ -105,15 +104,15 @@ export const DpsEstimator: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <div className="p-4 bg-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)]">
             <span className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">{isBn ? 'মোট জমা' : 'Total Deposit'}</span>
-            <div className="text-xl font-bold text-[var(--color-text-primary)] mt-1" data-financial>৳ {formatCurrency(totalPrincipal)}</div>
+            <div className="text-xl font-bold text-[var(--color-text-primary)] mt-1" data-financial>{formatCurrency(totalPrincipal)}</div>
           </div>
           <div className="p-4 bg-[var(--color-accent-soft)] rounded-xl border border-[var(--color-accent)]/20">
             <span className="text-xs text-[var(--color-accent)] uppercase tracking-wider">{isBn ? 'মোট লাভ' : 'Total Interest'}</span>
-            <div className="text-xl font-bold text-[var(--color-accent)] mt-1" data-financial>৳ {formatCurrency(totalInterest)}</div>
+            <div className="text-xl font-bold text-[var(--color-accent)] mt-1" data-financial>{formatCurrency(totalInterest)}</div>
           </div>
-          <div className="p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-500/20 col-span-2 md:col-span-1">
-            <span className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider">{isBn ? 'ম্যাচুরিটি ভ্যালু' : 'Maturity Value'}</span>
-            <div className="text-xl font-bold text-blue-700 dark:text-blue-300 mt-1" data-financial>৳ {formatCurrency(maturityAmount)}</div>
+          <div className="p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-500/20 col-span-2 md:col-span-1 break-words">
+            <span className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider whitespace-nowrap">{isBn ? 'ম্যাচুরিটি ভ্যালু' : 'Maturity Value'}</span>
+            <div className="text-xl md:text-2xl font-bold text-blue-700 dark:text-blue-300 mt-1" data-financial>{formatCurrency(maturityAmount)}</div>
           </div>
         </div>
 

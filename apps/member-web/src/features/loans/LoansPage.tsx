@@ -181,7 +181,7 @@ export const LoansPage: React.FC = () => {
                   className="block active-scale"
                   role="listitem"
                 >
-                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between aspect-[1.586/1] transition-shadow hover:shadow-lg ${getCardGradient('loan', loan.name, loan.lender_name)}`}>
+                  <div className={`rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[220px] transition-shadow hover:shadow-lg ${getCardGradient('loan', loan.name, loan.lender_name)}`}>
                     {/* Glass overlay elements for physical card feel */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl pointer-events-none"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8 blur-lg pointer-events-none"></div>

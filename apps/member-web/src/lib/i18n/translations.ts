@@ -332,7 +332,7 @@ export const translations = {
     // ─── Zakat ─────────────────────────────────────────────────────────────
     zakat: {
       pageTitle: 'Zakat Intelligence',
-      dashboardSubtitle: 'Determine your eligibility and estimate your Zakat easily using live Nisab rates.',
+      dashboardSubtitle: 'Determine your eligibility and estimate your Zakat easily using the latest available Nisab rates.',
       startCalculation: 'Start Calculation',
       viewHistory: 'View History',
       currentNisab: 'Current Nisab & Rates',
@@ -351,8 +351,8 @@ export const translations = {
       stepOf: 'Step {{current}} of {{total}}',
       step1Title: 'Zakat Anniversary (Hawl)',
       step1Desc: 'Zakat becomes obligatory after holding wealth above the Nisab threshold for one full lunar year (Hawl). Please select your Zakat due date.',
-      hawlDateLabel: 'Hawl Date',
-      hawlInfo: 'It is recommended to calculate your Zakat using the Hijri calendar, which is approximately 354 days long.',
+      hawlDateLabel: 'Hawl Date (Gregorian)',
+      hawlInfo: 'Note: This calculator uses the standard Gregorian calendar for date entry. A lunar (Hijri) year is approximately 11 days shorter than a Gregorian year.',
       step2Title: 'Cash & Bank Accounts',
       step2Desc: 'Include all liquid cash and money in bank accounts. Do not include money that is inaccessible.',
       cashInHand: 'Cash in Hand',
@@ -727,7 +727,7 @@ export const translations = {
     // ─── Zakat ─────────────────────────────────────────────────────────────
     zakat: {
       pageTitle: 'যাকাত ইন্টেলিজেন্স',
-      dashboardSubtitle: 'লাইভ নিসাব রেট ব্যবহার করে সহজেই আপনার যোগ্যতা নির্ধারণ করুন এবং যাকাত অনুমান করুন।',
+      dashboardSubtitle: 'সর্বশেষ উপলব্ধ নিসাব রেট ব্যবহার করে সহজেই আপনার যোগ্যতা নির্ধারণ করুন এবং যাকাত অনুমান করুন।',
       startCalculation: 'হিসাব শুরু করুন',
       viewHistory: 'ইতিহাস দেখুন',
       currentNisab: 'বর্তমান নিসাব ও রেট',
@@ -746,8 +746,8 @@ export const translations = {
       stepOf: 'ধাপ {{current}} / {{total}}',
       step1Title: 'যাকাতের বার্ষিকী (হাওল)',
       step1Desc: 'নিসাব সীমার উপরে সম্পদ এক পূর্ণ চন্দ্র বছর (হাওল) ধরে রাখার পর যাকাত ফরজ হয়। আপনার যাকাতের তারিখ নির্বাচন করুন।',
-      hawlDateLabel: 'হাওল তারিখ',
-      hawlInfo: 'হিজরি বর্ষপঞ্জি ব্যবহার করে যাকাত হিসাব করার পরামর্শ দেওয়া হয়, যা প্রায় ৩৫৪ দিন দীর্ঘ।',
+      hawlDateLabel: 'হাওল তারিখ (গ্রেগরীয়)',
+      hawlInfo: 'বিঃদ্রঃ এই ক্যালকুলেটর তারিখ প্রবেশের জন্য সাধারণ গ্রেগরীয় ক্যালেন্ডার ব্যবহার করে। একটি চন্দ্র (হিজরি) বছর একটি গ্রেগরীয় বছরের চেয়ে প্রায় ১১ দিন ছোট।',
       step2Title: 'নগদ ও ব্যাংক হিসাব',
       step2Desc: 'সমস্ত তরল নগদ ও ব্যাংক হিসাবের অর্থ অন্তর্ভুক্ত করুন। অপ্রাপ্য অর্থ অন্তর্ভুক্ত করবেন না।',
       cashInHand: 'হাতে নগদ',

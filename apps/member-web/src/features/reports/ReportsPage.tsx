@@ -8,7 +8,13 @@ import { formatDate } from '@/lib/dates/formatter';
 import { Card, CardHeader, Skeleton, ErrorState, ProgressBar, Badge } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
-import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { CartesianGrid, Cell, Pie, PieChart as RePieChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis, Area, AreaChart } from 'recharts';
+
+function formatDisplayPercentage(percentNum: number): string {
+  if (percentNum > 0 && percentNum < 1) return '<1';
+  if (percentNum > 99 && percentNum < 100) return '>99';
+  return Math.round(percentNum).toString();
+}
 
 const CustomDonutTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -158,7 +164,7 @@ export const ReportsPage: React.FC = () => {
       .map(([name, total]) => ({
         name,
         total,
-        percentage: expense > 0 ? Math.round((total / expense) * 100) : 0,
+        percentage: expense > 0 ? (total / expense) * 100 : 0,
       }))
       .sort((a, b) => b.total - a.total);
 
@@ -166,7 +172,7 @@ export const ReportsPage: React.FC = () => {
       .map(([name, total]) => ({
         name,
         total,
-        percentage: income > 0 ? Math.round((total / income) * 100) : 0,
+        percentage: income > 0 ? (total / income) * 100 : 0,
       }))
       .sort((a, b) => b.total - a.total);
 
@@ -475,7 +481,7 @@ export const ReportsPage: React.FC = () => {
                       <div className="flex items-center justify-between text-sm gap-2">
                         <span className="font-medium text-[var(--color-text-primary)] truncate" title={cat.name}>{cat.name}</span>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
+                          <span className="text-xs text-[var(--color-text-muted)]">{formatDisplayPercentage(cat.percentage)}%</span>
                           <span className="font-semibold tabular-nums text-[var(--color-text-primary)]" data-financial>
                             {formatCurrency(cat.total)}
                           </span>
@@ -514,7 +520,7 @@ export const ReportsPage: React.FC = () => {
                     <div className="flex items-center justify-between text-sm gap-2">
                       <span className="font-medium text-[var(--color-text-primary)] truncate" title={cat.name}>{cat.name}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-[var(--color-text-muted)]">{cat.percentage}%</span>
+                        <span className="text-xs text-[var(--color-text-muted)]">{formatDisplayPercentage(cat.percentage)}%</span>
                         <span className="font-semibold tabular-nums text-[var(--color-positive)]" data-financial>
                           {formatCurrency(cat.total)}
                         </span>

@@ -188,7 +188,7 @@ export function ZakatDashboardPage() {
           </div>
 
           {/* Metal Rates Card */}
-          <div className="p-6 md:p-8 rounded-[2rem] bg-white dark:bg-[var(--color-bg-elevated)] border border-[var(--color-border)] shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+          <div className="p-6 md:p-8 rounded-[2rem] bg-white dark:bg-[var(--color-bg-subtle)] border border-[var(--color-border)] shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
             <div className="space-y-5">
               <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2">
                 {t.zakat.marketRates}
@@ -225,7 +225,10 @@ export function ZakatDashboardPage() {
               <span className="flex items-center bg-[var(--color-bg-subtle)] px-2.5 py-1 rounded-md">
                 {t.zakat.updated}:{' '}
                 {activeRate
-                  ? new Date(activeRate.fetch_timestamp).toLocaleTimeString([], {
+                  ? new Date(activeRate.fetch_timestamp).toLocaleString([], {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
                     })

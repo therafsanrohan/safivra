@@ -102,7 +102,7 @@ export const ActivityPage: React.FC = () => {
     
     const numericQuery = q.replace(/[^\d.]/g, '');
     const amountStr = displayAmount.toString();
-    const matchesAmount = numericQuery && amountStr.includes(numericQuery);
+    const matchesAmount = numericQuery && amountStr === numericQuery;
 
     return (
       matchesAmount ||
