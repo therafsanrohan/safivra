@@ -564,3 +564,75 @@ END $$;
 NOTIFY pgrst, 'reload schema';
 
 
+-- ----------------------------------------------------------------
+-- 12. Admin RBAC Foundation & Access Policies
+-- ----------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.permissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.role_permissions (
+    role_id UUID REFERENCES public.roles(id) ON DELETE CASCADE,
+    permission_id UUID REFERENCES public.permissions(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_accounts (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role_id UUID REFERENCES public.roles(id),
+    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_id UUID REFERENCES public.admin_accounts(id),
+    action TEXT NOT NULL,
+    resource_type TEXT,
+    resource_id TEXT,
+    before_snapshot JSONB,
+    after_snapshot JSONB,
+    reason TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow select for auth users" ON public.admin_accounts;
+CREATE POLICY "Allow select for auth users" ON public.admin_accounts FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow select roles" ON public.roles;
+CREATE POLICY "Allow select roles" ON public.roles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow select audit logs" ON public.admin_audit_logs;
+CREATE POLICY "Allow select audit logs" ON public.admin_audit_logs FOR SELECT USING (true);
+
+INSERT INTO public.roles (name, description)
+VALUES ('Super Admin', 'Full system access and operational management')
+ON CONFLICT (name) DO NOTHING;
+
+NOTIFY pgrst, 'reload schema';
+
+COMMIT;
+
+
+
