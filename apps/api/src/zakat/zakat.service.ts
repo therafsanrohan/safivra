@@ -1,18 +1,18 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 
-export interface SaveCalculationDto {
-  rule_set_id: string;
-  rate_snapshot_id: string;
-  status: 'draft' | 'confirmed_snapshot';
-  zakat_anniversary_date: string;
-  total_assets: number;
-  total_deductions: number;
-  net_zakatable_wealth: number;
-  is_eligible: boolean;
-  estimated_zakat_amount: number;
-  currency: string;
-  items: any[];
+export class SaveCalculationDto {
+  rule_set_id!: string;
+  rate_snapshot_id!: string;
+  status!: 'draft' | 'confirmed_snapshot';
+  zakat_anniversary_date!: string;
+  total_assets!: number;
+  total_deductions!: number;
+  net_zakatable_wealth!: number;
+  is_eligible!: boolean;
+  estimated_zakat_amount!: number;
+  currency!: string;
+  items!: any[];
 }
 
 @Injectable()
