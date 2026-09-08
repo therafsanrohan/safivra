@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Target, RefreshCw, Trophy, ChevronRight, Coins } from 'lucide-react';
+import { Target, RefreshCw, Trophy, ChevronRight, Coins, Wallet, Calendar as CalendarIcon } from 'lucide-react';
 import { Card, Skeleton } from '@/components/ui/Card';
 import { useLanguage } from '@/context/LanguageContext';
 import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
@@ -29,7 +29,49 @@ export const PlansPage: React.FC = () => {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Link to="/dashboard/plans/available-to-spend" className="block">
+          <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between border-[var(--color-accent)] bg-[var(--color-accent-soft)]">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-accent)] flex items-center justify-center text-white">
+                <Wallet size={20} />
+              </div>
+              <div>
+                <h2 className="text-[var(--text-section)] font-bold text-[var(--color-text-primary)]">
+                  {t.plans.availableToSpend}
+                </h2>
+                <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
+                  {t.plans.availableToSpendDesc}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
+              {t.plans.manageAvailableToSpend} <ChevronRight size={16} />
+            </div>
+          </Card>
+        </Link>
+
+        <Link to="/dashboard/plans/calendar" className="block">
+          <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-info-soft)] flex items-center justify-center text-[var(--color-info)]">
+                <CalendarIcon size={20} />
+              </div>
+              <div>
+                <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+                  {t.plans.moneyCalendar}
+                </h2>
+                <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
+                  {t.plans.moneyCalendarDesc}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
+              {t.plans.manageMoneyCalendar} <ChevronRight size={16} />
+            </div>
+          </Card>
+        </Link>
+
         <Link to="/dashboard/plans/budgets" className="block">
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
             <div className="space-y-3">

@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, ReceiptText, Plus, Target, MoreHorizontal,
   Wallet, Landmark, CreditCard, BarChart3, Settings,
-  Bell, HandCoins, RefreshCw, BookOpen, Languages, Calculator, HandHeart
+  Bell, HandCoins, RefreshCw, BookOpen, Languages, Calculator, HandHeart, Calendar
 } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
 import { useAuthContext } from '@/context/AuthContext';
@@ -175,6 +175,8 @@ export const Sidebar: React.FC = () => {
     {
       label: t.nav.plan,
       items: [
+        { to: '/dashboard/plans/available-to-spend', label: isBn ? 'ব্যয়যোগ্য তহবিল' : 'Available to Spend', icon: Wallet },
+        { to: '/dashboard/plans/calendar', label: isBn ? 'অর্থ ক্যালেন্ডার' : 'Money Calendar', icon: Calendar },
         { to: '/dashboard/plans', label: t.nav.plansGoals, icon: Target },
         { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },

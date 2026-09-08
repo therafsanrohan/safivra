@@ -12,6 +12,143 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          event_type: 'income' | 'bill' | 'loan' | 'card' | 'transfer' | 'savings';
+          amount: number;
+          currency_code: string;
+          due_date: string;
+          account_id: string | null;
+          category_id: string | null;
+          status: 'upcoming' | 'paid' | 'partially_paid' | 'skipped' | 'cancelled';
+          is_estimated: boolean;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          event_type: 'income' | 'bill' | 'loan' | 'card' | 'transfer' | 'savings';
+          amount: number;
+          currency_code?: string;
+          due_date: string;
+          account_id?: string | null;
+          category_id?: string | null;
+          status?: 'upcoming' | 'paid' | 'partially_paid' | 'skipped' | 'cancelled';
+          is_estimated?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          title?: string;
+          event_type?: 'income' | 'bill' | 'loan' | 'card' | 'transfer' | 'savings';
+          amount?: number;
+          currency_code?: string;
+          due_date?: string;
+          account_id?: string | null;
+          category_id?: string | null;
+          status?: 'upcoming' | 'paid' | 'partially_paid' | 'skipped' | 'cancelled';
+          is_estimated?: boolean;
+          notes?: string | null;
+          updated_at?: string;
+        };
+      };
+      commitment_payments: {
+        Row: {
+          id: string;
+          user_id: string;
+          commitment_type: 'recurring_template' | 'loan_instalment' | 'credit_card' | 'custom_event';
+          commitment_id: string;
+          occurrence_date: string;
+          ledger_transaction_id: string;
+          amount_paid: number;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          commitment_type: 'recurring_template' | 'loan_instalment' | 'credit_card' | 'custom_event';
+          commitment_id: string;
+          occurrence_date: string;
+          ledger_transaction_id: string;
+          amount_paid: number;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          amount_paid?: number;
+          notes?: string | null;
+        };
+      };
+      occurrence_overrides: {
+        Row: {
+          id: string;
+          user_id: string;
+          template_id: string;
+          occurrence_date: string;
+          status: 'skipped' | 'cancelled' | 'modified';
+          override_amount: number | null;
+          override_date: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          template_id: string;
+          occurrence_date: string;
+          status?: 'skipped' | 'cancelled' | 'modified';
+          override_amount?: number | null;
+          override_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          status?: 'skipped' | 'cancelled' | 'modified';
+          override_amount?: number | null;
+          override_date?: string | null;
+          updated_at?: string;
+        };
+      };
+      protected_reserves: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          amount: number;
+          account_id: string;
+          linked_commitment_id: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          amount: number;
+          account_id: string;
+          linked_commitment_id?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          amount?: number;
+          account_id?: string;
+          linked_commitment_id?: string | null;
+          notes?: string | null;
+          updated_at?: string;
+        };
+      };
       zakat_rule_sets: {
         Row: {
           id: string;
