@@ -7,9 +7,9 @@ import { redirect } from 'next/navigation'
 export default async function ProfilePage() {
   const supabase = createAdminClient()
 
-  // Fetch current session
+  // Fetch current session 
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) {
     // If not authenticated, default to safe admin fallback or redirect to login
     redirect('/login')
