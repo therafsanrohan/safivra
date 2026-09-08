@@ -178,6 +178,13 @@ export const AddTransactionPage: React.FC = () => {
           submitting={submitting}
         />
       )}
+      {txType === 'balance_adjustment' && (
+        <BalanceAdjustmentForm
+          accounts={assetAccounts}
+          onSubmit={handlePost}
+          submitting={submitting}
+        />
+      )}
     </div>
   );
 };
@@ -523,6 +530,58 @@ const CardPaymentForm: React.FC<{
       <Input label="Date" type="date" required error={errors.transaction_date?.message} {...register('transaction_date')} />
       <Input label="Note" optional {...register('description')} />
       <Button type="submit" fullWidth size="lg" loading={submitting}>Record Card Payment</Button>
+    </form>
+  );
+};
+
+// ─── Balance Adjustment Form ───────────────────────────────────────────────────
+const BalanceAdjustmentForm: React.FC<{
+  accounts: AccountRow[];
+  onSubmit: (type: TransactionType, params: Record<string, unknown>) => Promise<void>;
+  submitting: boolean;
+}> = ({ accounts, onSubmit, submitting }) => {
+  const { register, handleSubmit, control, formState: { errors } } = useForm<{
+    account_id: string;
+    amount: string | number;
+    transaction_date: string;
+    description?: string;
+  }>({
+    defaultValues: { transaction_date: todayString() },
+  });
+
+  const submit = handleSubmit(async (data) => {
+    await onSubmit('balance_adjustment', {
+      p_transaction_date: data.transaction_date,
+      p_title: 'Balance Adjustment',
+      p_amount: Number(data.amount),
+      p_account_id: data.account_id,
+      p_description: data.description || null,
+    });
+  });
+
+  return (
+    <form onSubmit={submit} noValidate className="space-y-4">
+      <Controller
+        name="amount"
+        control={control}
+        rules={{ required: 'Amount is required' }}
+        render={({ field }) => (
+          <CurrencyInput
+            label="Adjustment Amount"
+            required
+            size="lg"
+            error={errors.amount?.message}
+            value={field.value}
+            onChange={field.onChange}
+          />
+        )}
+      />
+      <Controller name="account_id" control={control} rules={{ required: 'Account is required' }} render={({ field }) => (
+        <Select label="Account to adjust" required value={field.value} onValueChange={field.onChange} error={errors.account_id?.message} options={accounts.map((a) => ({ value: a.account_id, label: a.name }))} placeholder="Select account" />
+      )} />
+      <Input label="Date" type="date" required error={errors.transaction_date?.message} {...register('transaction_date')} />
+      <Input label="Note" optional {...register('description')} />
+      <Button type="submit" fullWidth size="lg" loading={submitting}>Record Adjustment</Button>
     </form>
   );
 };

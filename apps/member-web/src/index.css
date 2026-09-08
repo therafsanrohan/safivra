@@ -561,7 +561,21 @@
     -webkit-appearance: none;
     position: relative;
     font-family: inherit;
-    color-scheme: light;
+    /* Use the page color-scheme so the native calendar picker matches the theme */
+    color-scheme: inherit;
+  }
+
+  /* In dark mode, force the date picker to use dark color-scheme */
+  :root[data-theme="dark"] input[type="date"],
+  :root[data-theme="dark"] input[type="datetime-local"] {
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) input[type="date"],
+    :root:not([data-theme="light"]) input[type="datetime-local"] {
+      color-scheme: dark;
+    }
   }
 
   input[type="date"]::-webkit-calendar-picker-indicator {
