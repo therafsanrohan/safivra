@@ -4,7 +4,7 @@ import { SupabaseService } from '../supabase/supabase.service';
 @Injectable()
 export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name);
-  private readonly pythonServiceUrl = process.env.PYTHON_ANALYTICS_URL || 'http://127.0.0.1:8000';
+  private readonly pythonServiceUrl = process.env.PYTHON_ANALYTICS_URL || 'https://analyticsservice-beige.vercel.app';
   private readonly internalApiKey = process.env.INTERNAL_API_KEY || 'dev-secret-key';
 
   constructor(private readonly supabaseService: SupabaseService) {}
