@@ -4,7 +4,7 @@ from schemas.domain import FinancialSnapshot, Transaction
 from schemas.api import PeriodComparison
 from domain.rules import AccountingRules
 from datetime import date, timedelta
-
+ 
 
 def calculate_comparable_period_spending(
     snapshot: FinancialSnapshot,
