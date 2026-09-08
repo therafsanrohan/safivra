@@ -13,6 +13,7 @@ import { formatDate, formatDueLabel, getGreeting, formatHeaderDate, lastNMonths,
 import { Card, CardHeader, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { InfoPopover } from '@/components/ui/InfoPopover';
+import { InsightsWidget } from '../insights/InsightsWidget';
 import { 
   BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer, CartesianGrid, Cell,
@@ -352,6 +353,12 @@ export const DashboardPage: React.FC = () => {
           </span>
         </div>
       </Card>
+
+      {/* Financial Insights */}
+      <section className="pt-2">
+        <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)] mb-3 px-1">Financial Insights</h2>
+        <InsightsWidget />
+      </section>
 
       {/* Cash Flow Chart */}
       {data && data.cashflowHistory.length > 0 && (

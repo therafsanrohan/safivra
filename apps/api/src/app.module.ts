@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { LedgerModule } from './ledger/ledger.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { ZakatModule } from './zakat/zakat.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [LedgerModule, SupabaseModule, ZakatModule],
+  imports: [LedgerModule, SupabaseModule, ZakatModule, AnalyticsModule],
   controllers: [AppController],
   providers: [AppService],
 })
