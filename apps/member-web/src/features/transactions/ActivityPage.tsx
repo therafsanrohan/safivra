@@ -39,6 +39,16 @@ export const ActivityPage: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce the search query so we don't hammer the server on every keystroke
+  // Also clear stale results immediately so the UI doesn't show outdated data
+  useEffect(() => {
+    setTransactions([]);
+    const id = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
+
   const fetchTransactions = useCallback(async (offset = 0, append = false) => {
     if (!user) return;
     if (append) {
@@ -64,6 +74,12 @@ export const ActivityPage: React.FC = () => {
         query = query.eq('transaction_type', typeFilter);
       }
 
+      // Server-side text search across title and merchant (full history, not just loaded page)
+      if (debouncedSearch.trim()) {
+        const q = debouncedSearch.trim().replace(/[%_]/g, '\\$&'); // escape LIKE wildcards
+        query = query.or(`title.ilike.%${q}%,merchant.ilike.%${q}%`);
+      }
+
       const { data, error: fetchErr, count } = await query;
       if (fetchErr) throw fetchErr;
 
@@ -78,7 +94,7 @@ export const ActivityPage: React.FC = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [user, typeFilter]);
+  }, [user, typeFilter, debouncedSearch]);
 
   useEffect(() => {
     fetchTransactions(0, false);
@@ -88,28 +104,8 @@ export const ActivityPage: React.FC = () => {
     fetchTransactions(transactions.length, true);
   };
 
-  const filteredTransactions = transactions.filter((tx) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    
-    // Amount search normalization
-    const entries = tx.ledger_entries ?? [];
-    const isIncome = tx.transaction_type === 'income';
-    const primaryEntry = entries.find((e) =>
-      isIncome ? e.entry_role === 'asset_debit' : e.entry_role === 'asset_credit' || e.entry_role === 'expense_debit'
-    ) || entries[0];
-    const displayAmount = primaryEntry ? primaryEntry.amount : 0;
-    
-    const numericQuery = q.replace(/[^\d.]/g, '');
-    const amountStr = displayAmount.toString();
-    const matchesAmount = numericQuery && amountStr === numericQuery;
-
-    return (
-      matchesAmount ||
-      tx.title.toLowerCase().includes(q) ||
-      (tx.merchant && tx.merchant.toLowerCase().includes(q))
-    );
-  });
+  // No client-side filter needed — search is now fully server-side
+  const filteredTransactions = transactions;
 
   if (loading) {
     return (
