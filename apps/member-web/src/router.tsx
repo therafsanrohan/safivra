@@ -27,6 +27,8 @@ const CreditCardsPage     = lazy(() => import('@/features/credit-cards/CreditCar
 const CardDetailPage      = lazy(() => import('@/features/credit-cards/CardDetailPage').then((m) => ({ default: m.CardDetailPage })));
 const AddCardPage         = lazy(() => import('@/features/credit-cards/AddCardPage').then((m) => ({ default: m.AddCardPage })));
 const PlansPage           = lazy(() => import('@/features/plans/PlansPage').then((m) => ({ default: m.PlansPage })));
+const AvailableToSpendPage = lazy(() => import('@/features/plans/AvailableToSpendPage').then((m) => ({ default: m.AvailableToSpendPage })));
+const MoneyCalendarPage   = lazy(() => import('@/features/plans/MoneyCalendarPage').then((m) => ({ default: m.MoneyCalendarPage })));
 const BudgetsPage         = lazy(() => import('@/features/budgets/BudgetsPage').then((m) => ({ default: m.BudgetsPage })));
 const RecurringPage       = lazy(() => import('@/features/recurring/RecurringPage').then((m) => ({ default: m.RecurringPage })));
 const GoalsPage           = lazy(() => import('@/features/goals/GoalsPage').then((m) => ({ default: m.GoalsPage })));
@@ -150,6 +152,8 @@ const router = createBrowserRouter([
 
       // Plans
       { path: 'plans', element: <Suspense fallback={<PageLoader />}><PlansPage /></Suspense> },
+      { path: 'plans/available-to-spend', element: <Suspense fallback={<PageLoader />}><AvailableToSpendPage /></Suspense> },
+      { path: 'plans/calendar', element: <Suspense fallback={<PageLoader />}><MoneyCalendarPage /></Suspense> },
       { path: 'plans/budgets', element: <Suspense fallback={<PageLoader />}><BudgetsPage /></Suspense> },
       { path: 'plans/recurring', element: <Suspense fallback={<PageLoader />}><RecurringPage /></Suspense> },
       { path: 'plans/goals', element: <Suspense fallback={<PageLoader />}><GoalsPage /></Suspense> },
