@@ -8,9 +8,11 @@ import os
 
 from schemas.domain import FinancialSnapshot
 from schemas.api import InsightsResponse, BudgetPosition
+from schemas.scenario import ScenarioRequest, ScenarioResponse
 from domain.insights import calculate_comparable_period_spending
 from domain.forecast import calculate_7_day_baseline
 from domain.rules import AccountingRules
+from domain.scenario import calculate_scenario
 
 app = FastAPI(title="Safivra Analytics Service", version="1.0.0")
 
@@ -35,6 +37,27 @@ app.add_middleware(
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "analytics"}
+
+@app.get("/v1/scenario/health")
+def scenario_health():
+    return {"status": "ok", "service": "scenario", "version": "1.0.0"}
+
+@app.post("/v1/scenario/calculate", response_model=ScenarioResponse)
+def calculate_spending_scenario(
+    request: ScenarioRequest,
+    api_key: str = Depends(verify_api_key),
+):
+    """
+    Generate spending guidance options and a what-if preview.
+
+    The engine is read-only: it performs no database writes and does not
+    post transactions, modify balances, or alter any financial records.
+
+    Security: caller must supply a valid internal API key. The owner_id in
+    the request body must be pre-validated by the NestJS proxy (which
+    extracts it from the authenticated JWT) before forwarding here.
+    """
+    return calculate_scenario(request)
 
 @app.post("/v1/insights", response_model=InsightsResponse)
 def generate_insights(snapshot: FinancialSnapshot, api_key: str = Depends(verify_api_key)):

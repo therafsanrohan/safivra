@@ -17,7 +17,8 @@ export type FeatureFlagKey =
   | 'backend_accounts_enabled'
   | 'redis_cache_enabled'
   | 'available_to_spend_enabled'
-  | 'money_calendar_enabled';
+  | 'money_calendar_enabled'
+  | 'guidance_planner_enabled';
 
 export interface FeatureFlags {
   backend_v1_enabled: boolean;
@@ -27,6 +28,7 @@ export interface FeatureFlags {
   redis_cache_enabled: boolean;
   available_to_spend_enabled: boolean;
   money_calendar_enabled: boolean;
+  guidance_planner_enabled: boolean;
 }
 
 const DEFAULT_FLAGS: FeatureFlags = {
@@ -37,6 +39,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   redis_cache_enabled: false,
   available_to_spend_enabled: false,
   money_calendar_enabled: false,
+  guidance_planner_enabled: false,
 };
 
 /**
@@ -106,5 +109,6 @@ export function getFeatureFlags(userId?: string): FeatureFlags {
     redis_cache_enabled: isFeatureEnabled('redis_cache_enabled', userId),
     available_to_spend_enabled: isFeatureEnabled('available_to_spend_enabled', userId),
     money_calendar_enabled: isFeatureEnabled('money_calendar_enabled', userId),
+    guidance_planner_enabled: isFeatureEnabled('guidance_planner_enabled', userId),
   };
 }

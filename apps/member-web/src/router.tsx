@@ -34,6 +34,7 @@ const RecurringPage       = lazy(() => import('@/features/recurring/RecurringPag
 const GoalsPage           = lazy(() => import('@/features/goals/GoalsPage').then((m) => ({ default: m.GoalsPage })));
 const SavingsPage         = lazy(() => import('@/features/savings/SavingsPage').then((m) => ({ default: m.SavingsPage })));
 const ReportsPage         = lazy(() => import('@/features/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const GuidancePage        = lazy(() => import('@/features/guidance/GuidancePage').then((m) => ({ default: m.GuidancePage })));
 const ZakatDashboardPage  = lazy(() => import('@/features/zakat/ZakatDashboardPage').then((m) => ({ default: m.ZakatDashboardPage })));
 const ZakatCalculatorPage = lazy(() => import('@/features/zakat/ZakatCalculatorPage').then((m) => ({ default: m.ZakatCalculatorPage })));
 const ZakatHistoryPage    = lazy(() => import('@/features/zakat/ZakatHistoryPage').then((m) => ({ default: m.ZakatHistoryPage })));
@@ -158,6 +159,7 @@ const router = createBrowserRouter([
       { path: 'plans/recurring', element: <Suspense fallback={<PageLoader />}><RecurringPage /></Suspense> },
       { path: 'plans/goals', element: <Suspense fallback={<PageLoader />}><GoalsPage /></Suspense> },
       { path: 'plans/savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
+      { path: 'plans/guidance', element: <Suspense fallback={<PageLoader />}><GuidancePage /></Suspense> },
       { path: 'savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
 
       // Reports
