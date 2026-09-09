@@ -109,4 +109,58 @@ export class AnalyticsService {
       limitations: ["No active accounts found."]
     };
   }
+
+  async calculateScenario(userId: string, body: Record<string, unknown>) {
+    // Enforce owner scope: override any owner_id in the request body with the
+    // authenticated user's id. The Python service receives only what we send.
+    const ownedPayload = {
+      ...body,
+      owner_id: userId,
+      snapshot_revision: `snap-${userId.slice(0, 8)}-${Date.now()}`,
+    };
+
+    try {
+      const response = await fetch(`${this.pythonServiceUrl}/v1/scenario/calculate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Internal-API-Key': this.internalApiKey,
+        },
+        body: JSON.stringify(ownedPayload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error(`Python scenario service error: ${response.status} - ${errorText}`);
+        // Return a graceful degradation instead of throwing — core app stays usable
+        return {
+          owner_id: userId,
+          currency: body['currency'] || 'BDT',
+          planning_days: body['planning_days'] || 7,
+          options: [],
+          limitations: ['Financial guidance is temporarily unavailable. Your balances and transactions are not affected.'],
+          service_available: false,
+        };
+      }
+
+      const result = await response.json();
+      // Verify the Python service returned the correct owner scope
+      if (result.owner_id && result.owner_id !== userId) {
+        this.logger.error(`Scenario owner_id mismatch: expected ${userId}, got ${result.owner_id}`);
+        throw new Error('Owner scope violation in scenario response');
+      }
+
+      return { ...result, service_available: true };
+    } catch (error) {
+      this.logger.error('Error communicating with Python scenario service', error);
+      return {
+        owner_id: userId,
+        currency: body['currency'] || 'BDT',
+        planning_days: body['planning_days'] || 7,
+        options: [],
+        limitations: ['Financial guidance is temporarily unavailable. Your balances and transactions are not affected.'],
+        service_available: false,
+      };
+    }
+  }
 }

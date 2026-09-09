@@ -1,13 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Target, RefreshCw, Trophy, ChevronRight, Coins, Wallet, Calendar as CalendarIcon } from 'lucide-react';
+import { Target, RefreshCw, Trophy, ChevronRight, Coins, Wallet, Calendar as CalendarIcon, Lightbulb } from 'lucide-react';
 import { Card, Skeleton } from '@/components/ui/Card';
 import { useLanguage } from '@/context/LanguageContext';
 import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
+import { useAuthContext } from '@/context/AuthContext';
+import { isFeatureEnabled } from '@/lib/flags';
 
 export const PlansPage: React.FC = () => {
   const { t } = useLanguage();
   const { loaded } = useFeatureTranslation('plans');
+  const { user } = useAuthContext();
+  const guidanceEnabled = isFeatureEnabled('guidance_planner_enabled', user?.id);
 
   if (!loaded) {
     return (
@@ -155,6 +159,29 @@ export const PlansPage: React.FC = () => {
             </div>
           </Card>
         </Link>
+
+        {guidanceEnabled && (
+          <Link to="/dashboard/plans/guidance" className="block">
+            <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-[var(--radius-button)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] flex items-center justify-center">
+                  <Lightbulb size={20} className="text-[var(--color-accent)]" />
+                </div>
+                <div>
+                  <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+                    Financial Guidance
+                  </h2>
+                  <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
+                    Explore what-if scenarios and personalised spending options.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
+                Open Guidance <ChevronRight size={16} />
+              </div>
+            </Card>
+          </Link>
+        )}
       </div>
     </div>
   );
