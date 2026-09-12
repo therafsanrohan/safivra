@@ -42,7 +42,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   available_to_spend_enabled: false,
   money_calendar_enabled: false,
   guidance_planner_enabled: false,
-  real_wealth_intelligence_enabled: false,
+  real_wealth_intelligence_enabled: true,
 };
 
 /**
