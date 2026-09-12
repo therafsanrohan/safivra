@@ -50,6 +50,7 @@
     "@radix-ui/react-toast": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.1.6",
     "@radix-ui/react-visually-hidden": "^1.1.1",
+    "@safivra/finance-engine": "^1.0.0",
     "@sentry/react": "^8.54.0",
     "@supabase/server": "^1.4.1",
     "@supabase/supabase-js": "^2.111.0",

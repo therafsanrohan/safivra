@@ -38,9 +38,9 @@ const GuidancePage        = lazy(() => import('@/features/guidance/GuidancePage'
 const ZakatDashboardPage  = lazy(() => import('@/features/zakat/ZakatDashboardPage').then((m) => ({ default: m.ZakatDashboardPage })));
 const ZakatCalculatorPage = lazy(() => import('@/features/zakat/ZakatCalculatorPage').then((m) => ({ default: m.ZakatCalculatorPage })));
 const ZakatHistoryPage    = lazy(() => import('@/features/zakat/ZakatHistoryPage').then((m) => ({ default: m.ZakatHistoryPage })));
+const RealWealthDashboard = lazy(() => import('@/features/real-wealth/RealWealthDashboard').then((m) => ({ default: m.RealWealthDashboard })));
 const NotificationsPage   = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
 const ToolsPage           = lazy(() => import('@/features/tools/ToolsPage').then((m) => ({ default: m.ToolsPage })));
-
 const SettingsPage        = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const MorePage            = lazy(() => import('@/features/more/MorePage').then((m) => ({ default: m.MorePage })));
 const ErrorPage           = lazy(() => import('@/pages/ErrorPage').then((m) => ({ default: m.ErrorPage })));
@@ -164,6 +164,9 @@ const router = createBrowserRouter([
 
       // Reports
       { path: 'reports', element: <Suspense fallback={<PageLoader />}><ReportsPage /></Suspense> },
+
+      // Real Wealth
+      { path: 'real-wealth', element: <Suspense fallback={<PageLoader />}><RealWealthDashboard /></Suspense> },
 
       // Zakat
       { path: 'zakat', element: <Suspense fallback={<PageLoader />}><ZakatDashboardPage /></Suspense> },
