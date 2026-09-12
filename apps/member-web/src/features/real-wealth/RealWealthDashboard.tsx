@@ -3,13 +3,19 @@ import { Card, CardHeader } from '@/components/ui/Card';
 import { AssetTimeMachine } from './AssetTimeMachine';
 import { ScenarioEngine } from './ScenarioEngine';
 import { PurchasingPowerTool } from './PurchasingPowerTool';
-
-// A feature flag toggle at the top level
-const IS_REAL_WEALTH_ENABLED = import.meta.env.VITE_ENABLE_REAL_WEALTH === 'true';
+import { FutureTargetTool } from './FutureTargetTool';
+import { isFeatureEnabled } from '@/lib/flags';
+import { useAuthContext } from '@/context/AuthContext';
 
 export const RealWealthDashboard: React.FC = () => {
-  if (!IS_REAL_WEALTH_ENABLED) {
-    return null; // Or a coming soon placeholder if needed
+  const { user } = useAuthContext();
+
+  if (!isFeatureEnabled('real_wealth_intelligence_enabled', user?.id)) {
+    return (
+      <div className="p-8 text-center text-[var(--color-text-secondary)]">
+        Real Wealth Intelligence is not enabled for your account yet.
+      </div>
+    );
   }
 
   return (
@@ -43,7 +49,10 @@ export const RealWealthDashboard: React.FC = () => {
 
       <div className="grid gap-6 md:grid-cols-2">
         <ScenarioEngine />
-        <PurchasingPowerTool />
+        <div className="space-y-6">
+          <PurchasingPowerTool />
+          <FutureTargetTool />
+        </div>
       </div>
 
       <AssetTimeMachine />

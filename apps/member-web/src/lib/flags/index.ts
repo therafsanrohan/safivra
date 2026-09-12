@@ -18,7 +18,8 @@ export type FeatureFlagKey =
   | 'redis_cache_enabled'
   | 'available_to_spend_enabled'
   | 'money_calendar_enabled'
-  | 'guidance_planner_enabled';
+  | 'guidance_planner_enabled'
+  | 'real_wealth_intelligence_enabled';
 
 export interface FeatureFlags {
   backend_v1_enabled: boolean;
@@ -29,6 +30,7 @@ export interface FeatureFlags {
   available_to_spend_enabled: boolean;
   money_calendar_enabled: boolean;
   guidance_planner_enabled: boolean;
+  real_wealth_intelligence_enabled: boolean;
 }
 
 const DEFAULT_FLAGS: FeatureFlags = {
@@ -40,6 +42,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   available_to_spend_enabled: false,
   money_calendar_enabled: false,
   guidance_planner_enabled: false,
+  real_wealth_intelligence_enabled: false,
 };
 
 /**
@@ -110,5 +113,6 @@ export function getFeatureFlags(userId?: string): FeatureFlags {
     available_to_spend_enabled: isFeatureEnabled('available_to_spend_enabled', userId),
     money_calendar_enabled: isFeatureEnabled('money_calendar_enabled', userId),
     guidance_planner_enabled: isFeatureEnabled('guidance_planner_enabled', userId),
+    real_wealth_intelligence_enabled: isFeatureEnabled('real_wealth_intelligence_enabled', userId),
   };
 }
