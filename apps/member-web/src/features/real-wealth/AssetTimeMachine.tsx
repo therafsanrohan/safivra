@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Card, CardHeader } from '@/components/ui/Card';
+import { History, Sparkles } from 'lucide-react';
 
 export const AssetTimeMachine: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [amount, setAmount] = useState<number>(1000000);
-  const [purchaseYear, setPurchaseYear] = useState<number>(2018);
 
   const years = [2018, 2020, 2023, 2026, 2031, 2036, 2046];
 
@@ -26,43 +26,71 @@ export const AssetTimeMachine: React.FC = () => {
   const displayedValue = calculateRealValue(selectedYear);
 
   return (
-    <Card>
+    <Card className="border-[var(--color-border)] shadow-md overflow-hidden relative">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-[var(--color-accent)] to-blue-500"></div>
+      
       <CardHeader 
-        title="Asset Time Machine" 
-        subtitle="Travel through time to see how inflation affects your asset's value."
+        title={<div className="flex items-center gap-2"><History className="w-5 h-5 text-[var(--color-accent)]" /> Asset Time Machine</div>} 
+        subtitle="Travel through time to experience the true impact of inflation on your wealth."
       />
-      <div className="space-y-6">
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {years.map(y => (
-            <button
-              key={y}
-              onClick={() => setSelectedYear(y)}
-              className={[
-                'px-4 py-2 rounded-full whitespace-nowrap transition-colors font-medium text-sm border',
-                selectedYear === y
-                  ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]'
-                  : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-transparent hover:border-[var(--color-border)]'
-              ].join(' ')}
-            >
-              {y === new Date().getFullYear() ? 'Today (2026)' : y}
-            </button>
-          ))}
-        </div>
-
-        <div className="p-6 bg-[var(--color-bg-subtle)] rounded-[var(--radius-card)] text-center">
-          <p className="text-[var(--text-label)] uppercase text-[var(--color-text-muted)] font-semibold mb-2">
-            {isHistorical ? 'Inflation-adjusted purchase value' : selectedYear === new Date().getFullYear() ? 'Current Value' : 'Projected Value'}
-          </p>
-          <h3 className="text-4xl font-bold text-[var(--color-text-primary)]">
+      
+      <div className="p-6 pt-0 space-y-8">
+        
+        {/* Storytelling Canvas */}
+        <div className="p-8 bg-gradient-to-b from-[var(--color-bg-surface)] to-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)] text-center relative overflow-hidden group transition-all">
+          <Sparkles className="absolute top-4 left-4 w-6 h-6 text-[var(--color-accent)] opacity-20 group-hover:opacity-100 transition-opacity" />
+          <Sparkles className="absolute bottom-4 right-4 w-6 h-6 text-purple-500 opacity-20 group-hover:opacity-100 transition-opacity" />
+          
+          <h3 className="text-4xl md:text-6xl font-extrabold text-[var(--color-text-primary)] tracking-tight mb-4 transition-all">
             ৳{displayedValue.toLocaleString()}
           </h3>
-          <p className="text-sm text-[var(--color-text-secondary)] mt-3">
-            {isHistorical 
-              ? `What ৳${amount.toLocaleString()} in ${new Date().getFullYear()} would have been worth in ${selectedYear}.`
-              : selectedYear === new Date().getFullYear()
-                ? 'Your baseline asset valuation.'
-                : `The nominal amount required in ${selectedYear} to equal today's purchasing power.`}
+          
+          <p className="text-lg md:text-xl text-[var(--color-text-secondary)] font-medium max-w-2xl mx-auto leading-relaxed">
+            {isHistorical ? (
+              <span>If you went back to <strong className="text-[var(--color-text-primary)]">{selectedYear}</strong>, you would only need <strong>৳{displayedValue.toLocaleString()}</strong> to buy what costs <strong>৳{amount.toLocaleString()}</strong> today.</span>
+            ) : selectedYear === new Date().getFullYear() ? (
+              <span>Your baseline wealth today in <strong className="text-[var(--color-text-primary)]">{new Date().getFullYear()}</strong> is exactly <strong>৳{amount.toLocaleString()}</strong>.</span>
+            ) : (
+              <span>Fast forward to <strong className="text-[var(--color-text-primary)]">{selectedYear}</strong>, you will need <strong>৳{displayedValue.toLocaleString()}</strong> just to afford what <strong>৳{amount.toLocaleString()}</strong> buys you today.</span>
+            )}
           </p>
+        </div>
+
+        {/* Timeline UX */}
+        <div className="relative pt-4 pb-2 px-4">
+          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[var(--color-border)] -translate-y-1/2 z-0 hidden md:block"></div>
+          
+          <div className="flex gap-3 md:gap-0 overflow-x-auto md:justify-between relative z-10 no-scrollbar">
+            {years.map(y => {
+              const isSelected = selectedYear === y;
+              const isToday = y === new Date().getFullYear();
+              
+              return (
+                <button
+                  key={y}
+                  onClick={() => setSelectedYear(y)}
+                  className={[
+                    'flex flex-col items-center gap-2 min-w-[80px] transition-all',
+                    isSelected ? 'scale-110' : 'hover:scale-105 opacity-70 hover:opacity-100'
+                  ].join(' ')}
+                >
+                  <div className={[
+                    'w-4 h-4 rounded-full border-2 transition-colors',
+                    isSelected 
+                      ? 'bg-[var(--color-accent)] border-[var(--color-accent)] ring-4 ring-[var(--color-accent)]/20' 
+                      : 'bg-[var(--color-bg-surface)] border-[var(--color-border)]'
+                  ].join(' ')}></div>
+                  <span className={[
+                    'text-sm font-semibold',
+                    isSelected ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]',
+                    isToday && !isSelected ? 'text-[var(--color-accent)]' : ''
+                  ].join(' ')}>
+                    {isToday ? 'Today' : y}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </Card>
