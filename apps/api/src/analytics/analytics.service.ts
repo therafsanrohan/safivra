@@ -89,13 +89,13 @@ export class AnalyticsService {
       if (!response.ok) {
         const errorText = await response.text();
         this.logger.error(`Python service error: ${response.status} - ${errorText}`);
-        throw new InternalServerErrorException('Analytics service failed');
+        return this.fallbackInsights(userId);
       }
 
       return await response.json();
     } catch (error) {
       this.logger.error('Error communicating with Python service', error);
-      throw new InternalServerErrorException('Analytics service unavailable');
+      return this.fallbackInsights(userId);
     }
   }
 
@@ -107,6 +107,17 @@ export class AnalyticsService {
       budget_positions: [],
       seven_day_baseline: null,
       limitations: ["No active accounts found."]
+    };
+  }
+
+  private fallbackInsights(userId: string) {
+    return {
+      snapshot_id: `snap-fallback-${Date.now()}`,
+      as_of: new Date().toISOString(),
+      spending_comparison: null,
+      budget_positions: [],
+      seven_day_baseline: null,
+      limitations: ["Advanced financial insights are temporarily unavailable. The analytics engine is offline, but your core balances and transactions remain unaffected."]
     };
   }
 
