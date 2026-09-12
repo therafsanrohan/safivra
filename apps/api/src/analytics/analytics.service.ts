@@ -31,13 +31,13 @@ export class AnalyticsService {
 
     // 2. Fetch all posted transactions for the snapshot (in reality, bound this by a reasonable date range)
     const { data: ledger, error: txError } = await supabase
-      .from('journal_entries')
+      .from('ledger_entries')
       .select(`
         id,
         amount,
         type,
         currency,
-        journal_transactions (
+        ledger_transactions (
           id,
           date,
           status,
@@ -53,15 +53,15 @@ export class AnalyticsService {
 
     // 3. Map to Python Snapshot Contract
     const transactions = ledger
-      .filter((entry: any) => entry.journal_transactions && entry.journal_transactions.status === 'posted')
+      .filter((entry: any) => entry.ledger_transactions && entry.ledger_transactions.status === 'posted')
       .map((entry: any) => ({
         id: entry.id,
-        date: entry.journal_transactions.date,
+        date: entry.ledger_transactions.date,
         amount: entry.amount.toString(),
         currency: entry.currency,
         type: entry.type === 'debit' ? 'expense' : 'income', // Simplification for bridging flat to double-entry
-        status: entry.journal_transactions.status,
-        category_id: entry.journal_transactions.category_id,
+        status: entry.ledger_transactions.status,
+        category_id: entry.ledger_transactions.category_id,
         account_id: entry.account_id,
         is_refunded: false 
       }));
