@@ -22,66 +22,52 @@ export const PurchasingPowerTool: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4 flex-1">
         <div className="space-y-6 flex flex-col justify-center">
           
-          {/* Amount Slider */}
+          {/* Amount Input */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
-                <Coins className="w-4 h-4" /> Amount (৳)
-              </label>
-              <span className="font-bold text-[var(--color-text-primary)]">
-                ৳{amount.toLocaleString()}
-              </span>
-            </div>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">1</span>
+              <Coins className="w-4 h-4" /> Enter Current Amount (৳)
+            </label>
             <input 
-              type="range" 
-              min="10000" 
-              max="10000000" 
-              step="10000"
+              type="number" 
+              min="0"
               value={amount} 
               onChange={e => setAmount(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]"
+              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
 
-          {/* Inflation Slider */}
+          {/* Inflation Input */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
-                <Percent className="w-4 h-4" /> Inflation Assumption
-              </label>
-              <span className="font-bold text-[var(--color-text-primary)]">
-                {inflation}%
-              </span>
-            </div>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">2</span>
+              <Percent className="w-4 h-4" /> Expected Inflation Rate (%)
+            </label>
             <input 
-              type="range" 
+              type="number" 
               min="0" 
-              max="20" 
-              step="0.5"
+              max="100" 
+              step="0.1"
               value={inflation} 
               onChange={e => setInflation(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]"
+              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
 
-          {/* Years Slider */}
+          {/* Years Input */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
-                <CalendarDays className="w-4 h-4" /> Years
-              </label>
-              <span className="font-bold text-[var(--color-text-primary)]">
-                {years} years
-              </span>
-            </div>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">3</span>
+              <CalendarDays className="w-4 h-4" /> Years into the Future
+            </label>
             <input 
-              type="range" 
+              type="number" 
               min="1" 
-              max="50" 
+              max="100" 
               step="1"
               value={years} 
               onChange={e => setYears(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]"
+              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
         </div>

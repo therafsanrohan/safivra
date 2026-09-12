@@ -38,7 +38,10 @@ export const FutureTargetTool: React.FC = () => {
         <div className="space-y-6 flex flex-col justify-center">
           
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--color-text-secondary)]">Goal Category</label>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">1</span>
+              Goal Category
+            </label>
             <Select 
               options={goals} 
               value={goal} 
@@ -47,62 +50,48 @@ export const FutureTargetTool: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
-                <Coins className="w-4 h-4" /> Today's Cost (৳)
-              </label>
-              <span className="font-bold text-[var(--color-text-primary)]">
-                ৳{currentCost.toLocaleString()}
-              </span>
-            </div>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">2</span>
+              <Coins className="w-4 h-4" /> Today's Cost (৳)
+            </label>
             <input 
-              type="range" 
-              min="50000" 
-              max="50000000" 
-              step="50000"
+              type="number" 
+              min="0"
               value={currentCost} 
               onChange={e => setCurrentCost(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]"
+              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
-                <CalendarDays className="w-4 h-4" /> Target Year
-              </label>
-              <span className="font-bold text-[var(--color-text-primary)]">
-                {targetYear} <span className="text-xs text-[var(--color-text-muted)] font-normal">({years} yrs)</span>
-              </span>
-            </div>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">3</span>
+              <CalendarDays className="w-4 h-4" /> Target Year
+            </label>
             <input 
-              type="range" 
+              type="number" 
               min={currentYear} 
-              max={currentYear + 40} 
+              max={currentYear + 100}
               step="1"
               value={targetYear} 
               onChange={e => setTargetYear(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]"
+              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
-                <Percent className="w-4 h-4" /> Inflation
-              </label>
-              <span className="font-bold text-[var(--color-text-primary)]">
-                {inflation}%
-              </span>
-            </div>
+            <label className="text-sm font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold mr-1">4</span>
+              <Percent className="w-4 h-4" /> Expected Inflation (%)
+            </label>
             <input 
-              type="range" 
+              type="number" 
               min="0" 
-              max="20" 
-              step="0.5"
+              max="100" 
+              step="0.1"
               value={inflation} 
               onChange={e => setInflation(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]"
+              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
         </div>
