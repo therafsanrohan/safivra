@@ -50,7 +50,7 @@ export const AssetTimeMachine: React.FC = () => {
       <div className="p-6 pt-0 space-y-6">
         
         {/* Dynamic Inputs */}
-        <div className="max-w-md mx-auto grid grid-cols-2 gap-4 text-center">
+        <div className="max-w-md mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--color-text-secondary)]">Target Amount (৳)</label>
             <input 

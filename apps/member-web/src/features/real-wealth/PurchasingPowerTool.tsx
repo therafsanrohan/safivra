@@ -19,8 +19,8 @@ export const PurchasingPowerTool: React.FC = () => {
         title="Purchasing Power Erosion" 
         subtitle="See how inflation silently reduces the value of cash."
       />
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4 flex-1">
-        <div className="space-y-6 flex flex-col justify-center">
+      <div className="flex flex-col gap-6 mt-4 flex-1">
+        <div className="space-y-4 flex flex-col justify-center">
           
           {/* Amount Input */}
           <div className="space-y-2">
@@ -33,7 +33,7 @@ export const PurchasingPowerTool: React.FC = () => {
               min="0"
               value={amount} 
               onChange={e => setAmount(Number(e.target.value))}
-              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+              className="w-full p-2.5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-base focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
 
@@ -50,7 +50,7 @@ export const PurchasingPowerTool: React.FC = () => {
               step="0.1"
               value={inflation} 
               onChange={e => setInflation(Number(e.target.value))}
-              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+              className="w-full p-2.5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-base focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
 
@@ -67,18 +67,18 @@ export const PurchasingPowerTool: React.FC = () => {
               step="1"
               value={years} 
               onChange={e => setYears(Number(e.target.value))}
-              className="w-full p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+              className="w-full p-2.5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-semibold text-base focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
         </div>
 
         {/* Results Glassmorphic Container */}
-        <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-bg-surface)] to-[var(--color-bg-subtle)] p-6 shadow-sm">
+        <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-bg-surface)] to-[var(--color-bg-subtle)] p-5 shadow-sm mt-auto">
           <div className="absolute top-0 right-0 p-4 opacity-5">
             <TrendingDown className="w-32 h-32" />
           </div>
           
-          <div className="space-y-6 relative z-10">
+          <div className="space-y-4 relative z-10">
             <div>
               <p className="text-xs text-[var(--color-text-muted)] uppercase font-bold tracking-wider mb-1">In {years} Years, Your ৳{amount.toLocaleString()} will feel like:</p>
               <p className="text-3xl font-extrabold text-[var(--color-negative)]">
@@ -95,7 +95,7 @@ export const PurchasingPowerTool: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[var(--color-border)]/50">
+            <div className="pt-3 border-t border-[var(--color-border)]/50">
               <p className="text-xs text-[var(--color-text-muted)] uppercase font-semibold mb-1">To buy the same things, you will need:</p>
               <p className="text-2xl font-bold text-[var(--color-text-primary)]">
                 ৳{Math.round(futureRequired).toLocaleString()}
