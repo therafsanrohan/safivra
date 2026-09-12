@@ -34,8 +34,20 @@ export const AssetTimeMachine: React.FC = () => {
         subtitle="Travel through time to experience the true impact of inflation on your wealth."
       />
       
-      <div className="p-6 pt-0 space-y-8">
+      <div className="p-6 pt-0 space-y-6">
         
+        {/* Amount Input */}
+        <div className="max-w-xs mx-auto text-center space-y-2">
+          <label className="text-sm font-medium text-[var(--color-text-secondary)]">Enter Target Amount (৳)</label>
+          <input 
+            type="number" 
+            min="0"
+            value={amount} 
+            onChange={e => setAmount(Number(e.target.value))}
+            className="w-full p-2 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-bold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+          />
+        </div>
+
         {/* Storytelling Canvas */}
         <div className="p-8 bg-gradient-to-b from-[var(--color-bg-surface)] to-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)] text-center relative overflow-hidden group transition-all">
           <Sparkles className="absolute top-4 left-4 w-6 h-6 text-[var(--color-accent)] opacity-20 group-hover:opacity-100 transition-opacity" />
