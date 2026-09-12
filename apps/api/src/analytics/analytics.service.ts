@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class AnalyticsService {
@@ -116,42 +117,47 @@ export class AnalyticsService {
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    let currentPeriodAmount = 0;
-    let priorPeriodAmount = 0;
-    let sevenDayAmount = 0;
+    let currentPeriodAmount = new Decimal(0);
+    let priorPeriodAmount = new Decimal(0);
+    let sevenDayAmount = new Decimal(0);
     let currency = 'BDT';
 
     for (const tx of transactions) {
       if (tx.type === 'expense') {
         const txDate = new Date(tx.date);
-        const amount = parseFloat(tx.amount);
         
-        if (!isNaN(amount)) {
+        try {
+          const amount = new Decimal(tx.amount);
           currency = tx.currency || currency;
           
           if (txDate >= thirtyDaysAgo && txDate <= now) {
-            currentPeriodAmount += amount;
+            currentPeriodAmount = currentPeriodAmount.plus(amount);
           }
           if (txDate >= sixtyDaysAgo && txDate < thirtyDaysAgo) {
-            priorPeriodAmount += amount;
+            priorPeriodAmount = priorPeriodAmount.plus(amount);
           }
           if (txDate >= sevenDaysAgo && txDate <= now) {
-            sevenDayAmount += amount;
+            sevenDayAmount = sevenDayAmount.plus(amount);
           }
+        } catch (e) {
+          this.logger.warn(`Invalid amount in transaction ${tx.id}: ${tx.amount}`);
         }
       }
     }
 
-    const absoluteChange = currentPeriodAmount - priorPeriodAmount;
-    const percentageChange = priorPeriodAmount > 0 ? (absoluteChange / priorPeriodAmount) * 100 : null;
+    const absoluteChange = currentPeriodAmount.minus(priorPeriodAmount);
+    let percentageChange = null;
+    if (priorPeriodAmount.greaterThan(0)) {
+      percentageChange = absoluteChange.dividedBy(priorPeriodAmount).times(100).toNumber();
+    }
 
     return {
       snapshot_id: `snap-native-${Date.now()}`,
       as_of: new Date().toISOString(),
       spending_comparison: {
-        current_period_amount: currentPeriodAmount,
-        prior_period_amount: priorPeriodAmount,
-        absolute_change: absoluteChange,
+        current_period_amount: currentPeriodAmount.toNumber(),
+        prior_period_amount: priorPeriodAmount.toNumber(),
+        absolute_change: absoluteChange.toNumber(),
         percentage_change: percentageChange,
         currency: currency,
       },
@@ -159,14 +165,14 @@ export class AnalyticsService {
         {
           budget_id: 'mock-monthly-budget',
           total_budget: 50000,
-          spent_amount: currentPeriodAmount,
-          remaining_amount: 50000 - currentPeriodAmount,
-          is_overspent: currentPeriodAmount > 50000,
+          spent_amount: currentPeriodAmount.toNumber(),
+          remaining_amount: new Decimal(50000).minus(currentPeriodAmount).toNumber(),
+          is_overspent: currentPeriodAmount.greaterThan(50000),
           currency: currency
         }
       ],
       seven_day_baseline: {
-        forecast_amount: sevenDayAmount,
+        forecast_amount: sevenDayAmount.toNumber(),
         currency: currency,
         lookback_days: 7,
         data_quality_warning: null
