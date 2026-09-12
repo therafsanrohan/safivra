@@ -10,6 +10,7 @@ import { APP_CONFIG } from '@/config/app';
 import { Card, Skeleton } from '@/components/ui/Card';
 import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
+import { isFeatureEnabled } from '@/lib/flags';
 
 export const MorePage: React.FC = () => {
   const { profile, user, signOut } = useAuthContext();
@@ -49,7 +50,7 @@ export const MorePage: React.FC = () => {
         { to: '/dashboard/reports', label: t.more.reportsExports, icon: BookOpen },
         { to: '/dashboard/tools', label: locale === 'bn' ? 'ক্যালকুলেটর' : 'Calculators', icon: Calculator },
         { to: '/dashboard/zakat', label: locale === 'bn' ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
-        ...( ['admin@safivra.com'].includes(user?.email || '') ? [{ to: '/dashboard/real-wealth', label: locale === 'bn' ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] ),
+        ...( isFeatureEnabled('real_wealth_intelligence_enabled', user?.id) ? [{ to: '/dashboard/real-wealth', label: locale === 'bn' ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] ),
         { to: '/dashboard/notifications', label: t.nav.notifications, icon: Bell },
       ],
     },

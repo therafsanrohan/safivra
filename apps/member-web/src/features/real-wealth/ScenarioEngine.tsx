@@ -36,7 +36,7 @@ export const ScenarioEngine: React.FC = () => {
         Real: Math.round(currentReal),
       });
       currentNominal *= (1 + assumptions.growth);
-      currentReal = currentNominal / Math.pow((1 + assumptions.inflation), year + 1); // rough approximation for real wealth
+      currentReal = currentNominal / Math.pow((1 + assumptions.inflation), year + 1);
     }
     return data;
   }, [scenario, assumptions]);
@@ -72,8 +72,8 @@ export const ScenarioEngine: React.FC = () => {
             <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
               <XAxis dataKey="year" fontSize={12} tickMargin={10} />
-              <YAxis fontSize={12} tickFormatter={(val) => `$${(val / 1000)}k`} />
-              <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, '']} />
+              <YAxis fontSize={12} tickFormatter={(val) => `৳${(val / 1000)}k`} />
+              <Tooltip formatter={(value: number) => [`৳${value.toLocaleString()}`, '']} />
               <Legend />
               <Line type="monotone" dataKey="Nominal" stroke="#8884d8" strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="Real" stroke="#82ca9d" strokeWidth={2} dot={false} />

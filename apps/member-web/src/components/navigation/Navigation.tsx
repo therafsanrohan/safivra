@@ -10,6 +10,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Sheet } from '@/components/ui/Dialog';
 import { Logo } from '@/components/ui/Logo';
+import { isFeatureEnabled } from '@/lib/flags';
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 export const BottomNav: React.FC = () => {
@@ -181,7 +182,7 @@ export const Sidebar: React.FC = () => {
         { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },
         { to: '/dashboard/zakat', label: isBn ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
-        ...( ['admin@safivra.com'].includes(user?.email || '') ? [{ to: '/dashboard/real-wealth', label: isBn ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] )
+        ...( isFeatureEnabled('real_wealth_intelligence_enabled', user?.id) ? [{ to: '/dashboard/real-wealth', label: isBn ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] )
       ],
     },
   ];
