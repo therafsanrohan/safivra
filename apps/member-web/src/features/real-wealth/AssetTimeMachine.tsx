@@ -1,28 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { History, Sparkles } from 'lucide-react';
+import { History, Sparkles, Percent } from 'lucide-react';
 
 export const AssetTimeMachine: React.FC = () => {
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [amount, setAmount] = useState<number>(1000000);
+  const [inflation, setInflation] = useState<number>(6.0);
 
-  const years = [2018, 2020, 2023, 2026, 2031, 2036, 2046];
+  // Generate dynamic years around current year instead of hardcoded
+  const years = useMemo(() => {
+    return [
+      currentYear - 10, 
+      currentYear - 5, 
+      currentYear - 2, 
+      currentYear, 
+      currentYear + 2, 
+      currentYear + 5, 
+      currentYear + 10,
+      currentYear + 20
+    ];
+  }, [currentYear]);
 
-  // Mock deterministic calculation for demo purposes in UI.
-  // In a real flow, this would call the backend's deterministic engine.
   const calculateRealValue = (year: number) => {
-    const currentYear = new Date().getFullYear();
     const diff = year - currentYear;
+    const rate = inflation / 100;
+    
     if (diff === 0) return amount;
     if (diff < 0) {
-      // Historical: Assuming 6% inflation backward
-      return Math.round(amount / Math.pow(1.06, Math.abs(diff)));
+      // Historical: How much less money was needed to buy the same thing
+      return Math.round(amount / Math.pow(1 + rate, Math.abs(diff)));
     }
-    // Future: Assuming 6% inflation forward
-    return Math.round(amount * Math.pow(1.06, diff));
+    // Future: How much more money will be needed to buy the same thing
+    return Math.round(amount * Math.pow(1 + rate, diff));
   };
 
-  const isHistorical = selectedYear < new Date().getFullYear();
+  const isHistorical = selectedYear < currentYear;
   const displayedValue = calculateRealValue(selectedYear);
 
   return (
@@ -36,16 +49,30 @@ export const AssetTimeMachine: React.FC = () => {
       
       <div className="p-6 pt-0 space-y-6">
         
-        {/* Amount Input */}
-        <div className="max-w-xs mx-auto text-center space-y-2">
-          <label className="text-sm font-medium text-[var(--color-text-secondary)]">Enter Target Amount (৳)</label>
-          <input 
-            type="number" 
-            min="0"
-            value={amount} 
-            onChange={e => setAmount(Number(e.target.value))}
-            className="w-full p-2 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-bold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
-          />
+        {/* Dynamic Inputs */}
+        <div className="max-w-md mx-auto grid grid-cols-2 gap-4 text-center">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[var(--color-text-secondary)]">Target Amount (৳)</label>
+            <input 
+              type="number" 
+              min="0"
+              value={amount} 
+              onChange={e => setAmount(Number(e.target.value))}
+              className="w-full p-2 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-bold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[var(--color-text-secondary)]">Inflation Rate (%)</label>
+            <input 
+              type="number" 
+              min="0"
+              max="100"
+              step="0.1"
+              value={inflation} 
+              onChange={e => setInflation(Number(e.target.value))}
+              className="w-full p-2 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] font-bold text-lg focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+            />
+          </div>
         </div>
 
         {/* Storytelling Canvas */}
