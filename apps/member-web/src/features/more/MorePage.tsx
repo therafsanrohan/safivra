@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Calendar
+  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Calendar, BarChart3
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,7 +12,7 @@ import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
 
 export const MorePage: React.FC = () => {
-  const { profile, signOut } = useAuthContext();
+  const { profile, user, signOut } = useAuthContext();
   const { t, toggleLocale, locale } = useLanguage();
   const { loaded: moreLoaded } = useFeatureTranslation('more');
   const { loaded: cardsLoaded } = useFeatureTranslation('creditCards');
@@ -49,6 +49,7 @@ export const MorePage: React.FC = () => {
         { to: '/dashboard/reports', label: t.more.reportsExports, icon: BookOpen },
         { to: '/dashboard/tools', label: locale === 'bn' ? 'ক্যালকুলেটর' : 'Calculators', icon: Calculator },
         { to: '/dashboard/zakat', label: locale === 'bn' ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
+        ...( ['admin@safivra.com'].includes(user?.email || '') ? [{ to: '/dashboard/real-wealth', label: locale === 'bn' ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] ),
         { to: '/dashboard/notifications', label: t.nav.notifications, icon: Bell },
       ],
     },

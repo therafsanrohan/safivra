@@ -149,7 +149,7 @@ const AddTransactionSheet: React.FC<{
 };
 
 export const Sidebar: React.FC = () => {
-  const { profile } = useAuthContext();
+  const { profile, user } = useAuthContext();
   const { t, toggleLocale, locale } = useLanguage();
   const isBn = locale === 'bn';
   const [addOpen, setAddOpen] = useState(false);
@@ -181,6 +181,7 @@ export const Sidebar: React.FC = () => {
         { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },
         { to: '/dashboard/zakat', label: isBn ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
+        ...( ['admin@safivra.com'].includes(user?.email || '') ? [{ to: '/dashboard/real-wealth', label: isBn ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] )
       ],
     },
   ];

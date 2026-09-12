@@ -40,4 +40,42 @@ export class RealWealthService {
     if (error) throw new InternalServerErrorException(error.message);
     return data;
   }
+
+  async generateAdvancedScenario(userId: string, body: any) {
+    const pythonServiceUrl = process.env.PYTHON_ANALYTICS_URL || 'https://analyticsservice-beige.vercel.app';
+    const internalApiKey = process.env.INTERNAL_API_KEY || 'dev-secret-key';
+    
+    const ownedPayload = {
+      ...body,
+      owner_id: userId,
+    };
+
+    try {
+      const response = await fetch(`${pythonServiceUrl}/v1/real-wealth/scenario`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Internal-API-Key': internalApiKey,
+        },
+        body: JSON.stringify(ownedPayload),
+      });
+
+      if (!response.ok) {
+        return {
+          owner_id: userId,
+          service_available: false,
+          error: await response.text(),
+        };
+      }
+
+      const result = await response.json();
+      return { ...result, service_available: true };
+    } catch (error) {
+      return {
+        owner_id: userId,
+        service_available: false,
+        error: 'Service unavailable',
+      };
+    }
+  }
 }
