@@ -44,7 +44,7 @@ export const Card: React.FC<CardProps> = ({
 
 // ─── Card Header ─────────────────────────────────────────────────────────────
 export const CardHeader: React.FC<{
-  title: string;
+  title: React.ReactNode;
   subtitle?: string;
   action?: React.ReactNode;
   className?: string;
