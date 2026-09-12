@@ -122,25 +122,30 @@ ALTER TABLE public.asset_projection_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.saved_asset_projections ENABLE ROW LEVEL SECURITY;
 
 -- Economic data is read-only for public/authenticated, writeable only by admin/service role
+DROP POLICY IF EXISTS "Public read access to economic_series" ON public.economic_series;
 CREATE POLICY "Public read access to economic_series"
   ON public.economic_series FOR SELECT USING (TRUE);
 
+DROP POLICY IF EXISTS "Public read access to economic_observations" ON public.economic_observations;
 CREATE POLICY "Public read access to economic_observations"
   ON public.economic_observations FOR SELECT USING (TRUE);
 
 -- User data is strictly isolated
+DROP POLICY IF EXISTS "Users manage their own asset_valuation_snapshots" ON public.asset_valuation_snapshots;
 CREATE POLICY "Users manage their own asset_valuation_snapshots"
   ON public.asset_valuation_snapshots
   FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users manage their own asset_projection_profiles" ON public.asset_projection_profiles;
 CREATE POLICY "Users manage their own asset_projection_profiles"
   ON public.asset_projection_profiles
   FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users manage their own saved_asset_projections" ON public.saved_asset_projections;
 CREATE POLICY "Users manage their own saved_asset_projections"
   ON public.saved_asset_projections
   FOR ALL
