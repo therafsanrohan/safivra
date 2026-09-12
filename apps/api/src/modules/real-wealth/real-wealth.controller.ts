@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { RealWealthService } from './real-wealth.service';
 import { SupabaseAuthGuard } from '../../auth/auth.guard';
+import { RealWealthScenarioDto } from './dto/real-wealth-scenario.dto';
 import type { Request } from 'express';
 
 @Controller('real-wealth')
@@ -22,7 +23,13 @@ export class RealWealthController {
 
   @Get('saved-scenarios')
   async getSavedScenarios(@Req() req: Request) {
-    const userId = (req.user as any).sub;
+    const userId = (req.user as any).sub || (req.user as any).userId;
     return this.realWealthService.getSavedScenarios(userId);
+  }
+
+  @Post('scenario')
+  async generateAdvancedScenario(@Req() req: Request, @Body() body: RealWealthScenarioDto) {
+    const userId = (req.user as any).sub || (req.user as any).userId;
+    return this.realWealthService.generateAdvancedScenario(userId, body);
   }
 }
