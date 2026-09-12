@@ -27,35 +27,45 @@ export const RealWealthDashboard: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader title="Current Nominal Net Worth" />
-          <div className="text-2xl font-bold">৳0.00</div>
-          <p className="text-xs text-muted-foreground">Based on latest valuations</p>
-        </Card>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <div className="min-w-0">
+          <Card>
+            <CardHeader title="Current Nominal Net Worth" />
+            <div className="text-2xl font-bold">৳0.00</div>
+            <p className="text-xs text-muted-foreground">Based on latest valuations</p>
+          </Card>
+        </div>
 
-        <Card>
-          <CardHeader title="Inflation-Adjusted Net Worth" />
-          <div className="text-2xl font-bold">৳0.00</div>
-          <p className="text-xs text-muted-foreground">Adjusted to base period CPI</p>
-        </Card>
+        <div className="min-w-0">
+          <Card>
+            <CardHeader title="Inflation-Adjusted Net Worth" />
+            <div className="text-2xl font-bold">৳0.00</div>
+            <p className="text-xs text-muted-foreground">Adjusted to base period CPI</p>
+          </Card>
+        </div>
 
-        <Card>
-          <CardHeader title="Projected Real Net Worth" />
-          <div className="text-2xl font-bold">৳0.00</div>
-          <p className="text-xs text-muted-foreground">10 year horizon</p>
-        </Card>
+        <div className="min-w-0 md:col-span-2 lg:col-span-2">
+          <Card>
+            <CardHeader title="Projected Real Net Worth" />
+            <div className="text-2xl font-bold">৳0.00</div>
+            <p className="text-xs text-muted-foreground">10 year horizon</p>
+          </Card>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <ScenarioEngine />
-        <div className="space-y-6">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+        <div className="min-w-0 w-full overflow-hidden">
+          <ScenarioEngine />
+        </div>
+        <div className="space-y-6 min-w-0 w-full overflow-hidden">
           <PurchasingPowerTool />
           <FutureTargetTool />
         </div>
       </div>
 
-      <AssetTimeMachine />
+      <div className="min-w-0 w-full overflow-hidden">
+        <AssetTimeMachine />
+      </div>
       
       <div className="text-xs text-muted-foreground mt-8 p-4 bg-muted/50 rounded-lg">
         <p className="font-semibold mb-1">Disclaimer</p>
