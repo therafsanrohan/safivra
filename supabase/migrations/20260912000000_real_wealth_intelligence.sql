@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.economic_series (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name                TEXT NOT NULL,
   provider            TEXT NOT NULL,
-  series_code         TEXT,
+  series_code         TEXT UNIQUE,
   base_period         TEXT,
   currency_code       TEXT DEFAULT 'BDT',
   frequency           TEXT DEFAULT 'monthly', -- monthly, yearly
