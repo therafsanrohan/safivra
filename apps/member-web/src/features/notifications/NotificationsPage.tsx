@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Check, Trash2, Info, ExternalLink, Megaphone, Landmark, CreditCard, Target, Coins, RefreshCw, HandHeart, BarChart3, Shield, Wallet, Filter } from 'lucide-react';
+import { Bell, Check, Trash2, Info, ExternalLink, Megaphone, Landmark, CreditCard, Target, Coins, RefreshCw, HandHeart, BarChart3, Shield, Wallet, Filter, PieChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthContext } from '@/context/AuthContext';
@@ -9,15 +9,22 @@ import { Card, Skeleton, EmptyState, ErrorState } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 
-interface NotificationRow {
+/**
+ * Unified notification row — merges legacy `notifications` table rows
+ * and new `notification_events` rows via the v_user_notifications view.
+ */
+interface UnifiedNotificationRow {
   id: string;
-  title: string;
-  body: string;
-  is_read: boolean;
-  created_at: string;
+  user_id: string;
+  source: 'legacy' | 'event';
   category?: string;
   priority?: 'low' | 'normal' | 'high' | 'critical';
+  title: string;
+  message: string;
   action_url?: string;
+  is_read: boolean;
+  created_at: string;
+  expires_at?: string;
   dismissed_at?: string;
 }
 
@@ -29,7 +36,7 @@ const CATEGORY_META: Record<string, { icon: React.ElementType; color: string; bg
   loans:             { icon: Landmark,    color: 'text-orange-600 dark:text-orange-400',     bg: 'bg-orange-500/10',   label: 'Loan',          labelBn: 'ঋণ' },
   credit_cards:      { icon: CreditCard,  color: 'text-rose-600 dark:text-rose-400',         bg: 'bg-rose-500/10',     label: 'Card',          labelBn: 'কার্ড' },
   salary:            { icon: Wallet,      color: 'text-cyan-600 dark:text-cyan-400',         bg: 'bg-cyan-500/10',     label: 'Salary',        labelBn: 'বেতন' },
-  budget:            { icon: Filter,      color: 'text-yellow-600 dark:text-yellow-400',     bg: 'bg-yellow-500/10',   label: 'Budget',        labelBn: 'বাজেট' },
+  budget:            { icon: PieChart,    color: 'text-yellow-600 dark:text-yellow-400',     bg: 'bg-yellow-500/10',   label: 'Budget',        labelBn: 'বাজেট' },
   real_wealth:       { icon: BarChart3,   color: 'text-indigo-600 dark:text-indigo-400',     bg: 'bg-indigo-500/10',   label: 'Wealth',        labelBn: 'সম্পদ' },
   zakat:             { icon: HandHeart,   color: 'text-teal-600 dark:text-teal-400',         bg: 'bg-teal-500/10',     label: 'Zakat',         labelBn: 'যাকাত' },
   admin_announcement:{ icon: Megaphone,   color: 'text-pink-600 dark:text-pink-400',         bg: 'bg-pink-500/10',     label: 'Announcement',  labelBn: 'ঘোষণা' },
@@ -47,7 +54,6 @@ function getCategoryMeta(category?: string) {
 // ─── Priority Badge ────────────────────────────────────────────────────────────
 function PriorityBadge({ priority, isBn }: { priority?: string; isBn: boolean }) {
   if (!priority || priority === 'normal' || priority === 'low') return null;
-  const isHigh = priority === 'high';
   const isCritical = priority === 'critical';
   return (
     <span
@@ -57,6 +63,16 @@ function PriorityBadge({ priority, isBn }: { priority?: string; isBn: boolean })
       ].join(' ')}
     >
       {isCritical ? (isBn ? 'জরুরি' : 'Critical') : (isBn ? 'গুরুত্বপূর্ণ' : 'High')}
+    </span>
+  );
+}
+
+// ─── Source Badge ──────────────────────────────────────────────────────────────
+function SourceBadge({ source }: { source: 'legacy' | 'event' }) {
+  if (source !== 'event') return null;
+  return (
+    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 uppercase tracking-wide">
+      Live
     </span>
   );
 }
@@ -71,12 +87,13 @@ export const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
   const isBn = locale === 'bn';
 
-  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
+  const [notifications, setNotifications] = useState<UnifiedNotificationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
 
+  // ── Auto-purge old legacy notifications (7 days) ────────────────────────────
   const autoPurgeOldNotifications = useCallback(async () => {
     if (!user) return;
     try {
@@ -91,6 +108,7 @@ export const NotificationsPage: React.FC = () => {
     }
   }, [user]);
 
+  // ── Fetch from unified view ─────────────────────────────────────────────────
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -99,14 +117,47 @@ export const NotificationsPage: React.FC = () => {
     try {
       await autoPurgeOldNotifications();
 
-      const { data, error: fetchErr } = await supabase
-        .from('notifications')
+      // Read from v_user_notifications (unified view of legacy + event-driven)
+      const { data, error: fetchErr } = await (supabase.from('v_user_notifications') as any)
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-      if (fetchErr) throw fetchErr;
-      setNotifications((data as NotificationRow[]) ?? []);
+      if (fetchErr) {
+        // Fallback: if view doesn't exist yet (migration not run), read from legacy table
+        console.warn('[NotificationsPage] v_user_notifications not available, falling back to legacy table:', fetchErr.message);
+        const { data: legacyData, error: legacyErr } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (legacyErr) throw legacyErr;
+
+        const legacyRows: UnifiedNotificationRow[] = (legacyData ?? []).map((n: any) => ({
+          id: n.id,
+          user_id: n.user_id,
+          source: 'legacy' as const,
+          category: n.category,
+          priority: n.priority,
+          title: n.title,
+          message: n.body,
+          action_url: n.action_url,
+          is_read: n.is_read,
+          created_at: n.created_at,
+          expires_at: n.expires_at,
+          dismissed_at: n.dismissed_at,
+        }));
+
+        setNotifications(legacyRows);
+        return;
+      }
+
+      // Deduplicate: if the same real-world event appears in both legacy + event tables,
+      // prefer the 'event' source (newer) and drop the duplicate legacy row.
+      const rows = (data as UnifiedNotificationRow[]) ?? [];
+      setNotifications(rows);
     } catch (err: any) {
       setError(err?.message || (isBn ? 'বিজ্ঞপ্তি লোড করতে সমস্যা হয়েছে' : 'Could not load notifications'));
       setNotifications([]);
@@ -119,28 +170,107 @@ export const NotificationsPage: React.FC = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  // ── Real-time subscription for new notifications ──────────────────────────
+  // ── Real-time subscription for BOTH tables ──────────────────────────────────
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel(`notifications:page:${user.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, () => {
-        fetchNotifications();
-      })
+
+    // Subscribe to legacy notifications table
+    const legacyChannel = supabase
+      .channel(`notifications:legacy:${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => { fetchNotifications(); })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Subscribe to new notification_events table
+    const eventsChannel = supabase
+      .channel(`notifications:events:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notification_events',
+        filter: `user_id=eq.${user.id}`,
+      }, () => { fetchNotifications(); })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(legacyChannel);
+      supabase.removeChannel(eventsChannel);
+    };
   }, [user, fetchNotifications]);
+
+  // ── Actions ─────────────────────────────────────────────────────────────────
+
+  const markAsRead = async (n: UnifiedNotificationRow) => {
+    if (!user || n.is_read) return;
+    try {
+      // Use the unified RPC to handle both legacy and event sources
+      const { error: rpcErr } = await (supabase.rpc as any)('fn_mark_notification_read', {
+        p_user_id: user.id,
+        p_id:      n.id,
+        p_source:  n.source,
+      });
+
+      if (rpcErr) {
+        // Fallback for legacy if RPC doesn't exist yet
+        if (n.source === 'legacy') {
+          await (supabase.from('notifications') as any)
+            .update({ is_read: true })
+            .eq('id', n.id)
+            .eq('user_id', user.id);
+        }
+      }
+
+      setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, is_read: true } : item));
+    } catch (err) {
+      console.warn('[NotificationsPage] markAsRead error:', err);
+    }
+  };
 
   const markAllRead = async () => {
     if (!user) return;
-    await (supabase.from('notifications') as any).update({ is_read: true }).eq('user_id', user.id);
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    try {
+      const { error: rpcErr } = await (supabase.rpc as any)('fn_mark_all_notifications_read', {
+        p_user_id: user.id,
+      });
+
+      if (rpcErr) {
+        // Fallback to legacy direct update
+        await (supabase.from('notifications') as any)
+          .update({ is_read: true })
+          .eq('user_id', user.id);
+      }
+
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (err) {
+      console.warn('[NotificationsPage] markAllRead error:', err);
+    }
   };
 
-  const markAsRead = async (id: string) => {
+  const deleteSingleNotification = async (n: UnifiedNotificationRow, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!user) return;
-    await (supabase.from('notifications') as any).update({ is_read: true }).eq('id', id).eq('user_id', user.id);
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    try {
+      const { error: rpcErr } = await (supabase.rpc as any)('fn_delete_notification', {
+        p_user_id: user.id,
+        p_id:      n.id,
+        p_source:  n.source,
+      });
+
+      if (rpcErr) {
+        // Fallback: direct delete for legacy
+        if (n.source === 'legacy') {
+          await supabase.from('notifications').delete().eq('id', n.id).eq('user_id', user.id);
+        }
+      }
+
+      setNotifications(prev => prev.filter(item => item.id !== n.id));
+    } catch (err: any) {
+      showError(isBn ? 'মুছতে ব্যর্থ' : 'Delete failed', err.message);
+    }
   };
 
   const clearAllNotifications = async () => {
@@ -154,8 +284,16 @@ export const NotificationsPage: React.FC = () => {
 
     setClearing(true);
     try {
+      // Clear legacy notifications
       const { error: delErr } = await supabase.from('notifications').delete().eq('user_id', user.id);
       if (delErr) throw delErr;
+
+      // Cancel all event-driven deliveries
+      await (supabase.from('notification_deliveries') as any)
+        .update({ status: 'cancelled' })
+        .eq('user_id', user.id)
+        .eq('channel', 'in_app');
+
       setNotifications([]);
       success(
         isBn ? 'বিজ্ঞপ্তি পরিষ্কার করা হয়েছে' : 'Notifications Cleared',
@@ -168,20 +306,8 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const deleteSingleNotification = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!user) return;
-    try {
-      const { error: delErr } = await supabase.from('notifications').delete().eq('id', id).eq('user_id', user.id);
-      if (delErr) throw delErr;
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    } catch (err: any) {
-      showError(isBn ? 'মুছতে ব্যর্থ' : 'Delete failed', err.message);
-    }
-  };
-
-  const handleNotificationClick = async (n: NotificationRow) => {
-    if (!n.is_read) await markAsRead(n.id);
+  const handleNotificationClick = async (n: UnifiedNotificationRow) => {
+    if (!n.is_read) await markAsRead(n);
     if (n.action_url) navigate(n.action_url);
   };
 
@@ -193,6 +319,7 @@ export const NotificationsPage: React.FC = () => {
     return (
       <div className="page-container pt-5 space-y-4">
         <Skeleton height={28} width={140} />
+        <Skeleton height={140} />
         <Skeleton height={140} />
         <Skeleton height={140} />
       </div>
@@ -262,13 +389,13 @@ export const NotificationsPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Auto-cleanup info ── */}
+      {/* ── Info bar ── */}
       <div className="flex items-center gap-2 text-xs p-3 rounded-[var(--radius-card)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text-secondary)]">
         <Info size={14} className="shrink-0 text-[var(--color-accent)]" />
         <span>
           {isBn
             ? 'স্টোরেজ খালি রাখতে ৭ দিনের পুরনো বিজ্ঞপ্তি স্বয়ংক্রিয়ভাবে মুছে ফেলা হয়।'
-            : 'Notifications older than 7 days are automatically purged to optimize storage.'}
+            : 'Legacy notifications older than 7 days are auto-purged. Live event notifications are retained in the audit log.'}
         </span>
       </div>
 
@@ -295,7 +422,7 @@ export const NotificationsPage: React.FC = () => {
 
               return (
                 <div
-                  key={n.id}
+                  key={`${n.source}:${n.id}`}
                   className={[
                     'flex items-start gap-3 p-4 transition-colors group',
                     !n.is_read ? 'bg-[var(--color-bg-subtle)]/60' : '',
@@ -323,9 +450,10 @@ export const NotificationsPage: React.FC = () => {
                         {n.title}
                       </p>
                       <PriorityBadge priority={n.priority} isBn={isBn} />
+                      <SourceBadge source={n.source} />
                     </div>
                     <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-0.5 whitespace-pre-wrap break-words leading-relaxed">
-                      {n.body}
+                      {n.message}
                     </p>
                     <div className="flex items-center gap-2 mt-1.5">
                       <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] text-[11px]">
@@ -348,7 +476,7 @@ export const NotificationsPage: React.FC = () => {
                       aria-hidden={n.is_read}
                     />
                     <button
-                      onClick={(e) => deleteSingleNotification(n.id, e)}
+                      onClick={(e) => deleteSingleNotification(n, e)}
                       title={isBn ? 'বিজ্ঞপ্তি মুছুন' : 'Delete notification'}
                       className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-50 group-hover:opacity-100"
                     >
