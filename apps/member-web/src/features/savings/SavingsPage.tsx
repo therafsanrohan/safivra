@@ -29,6 +29,7 @@ export interface SavingsSchemeRow {
   start_date: string;
   maturity_date: string | null;
   status: 'active' | 'matured' | 'closed';
+  linked_account_id?: string | null;
 }
 
 export const SavingsPage: React.FC = () => {
@@ -37,6 +38,7 @@ export const SavingsPage: React.FC = () => {
   const { loaded } = useFeatureTranslation('savings');
   const { success, error: showError } = useToast();
   const [schemes, setSchemes] = useState<SavingsSchemeRow[]>([]);
+  const [userAccounts, setUserAccounts] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('all');
   
@@ -54,6 +56,7 @@ export const SavingsPage: React.FC = () => {
   const [interestRate, setInterestRate] = useState(8.5);
   const [startDate, setStartDate] = useState(todayString());
   const [maturityDate, setMaturityDate] = useState('2030-01-01');
+  const [linkedAccountId, setLinkedAccountId] = useState<string>('');
 
   const fetchSchemes = useCallback(async () => {
     if (!user) return;

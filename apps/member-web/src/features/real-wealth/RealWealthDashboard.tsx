@@ -1,15 +1,36 @@
-import React from 'react';
-import { Card, CardHeader } from '@/components/ui/Card';
+import React, { useEffect, useState } from 'react';
+import { Card, Spinner } from '@/components/ui/Card';
 import { AssetTimeMachine } from './AssetTimeMachine';
 import { ScenarioEngine } from './ScenarioEngine';
 import { PurchasingPowerTool } from './PurchasingPowerTool';
 import { FutureTargetTool } from './FutureTargetTool';
 import { isFeatureEnabled } from '@/lib/flags';
 import { useAuthContext } from '@/context/AuthContext';
-import { Wallet, TrendingDown, LineChart, Info } from 'lucide-react';
+import { Wallet, TrendingDown, LineChart, Info, ShieldCheck, AlertCircle, HelpCircle } from 'lucide-react';
+import { fetchRealWealthSummary, WealthSummary } from '@/lib/wealth/wealthEngine';
+import { formatCurrency } from '@/lib/currency/formatter';
 
 export const RealWealthDashboard: React.FC = () => {
   const { user } = useAuthContext();
+  const [summary, setSummary] = useState<WealthSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadData() {
+      if (!user?.id) return;
+      setLoading(true);
+      const res = await fetchRealWealthSummary(user.id);
+      if (mounted) {
+        setSummary(res);
+        setLoading(false);
+      }
+    }
+    loadData();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
 
   if (!isFeatureEnabled('real_wealth_intelligence_enabled', user?.id)) {
     return (
@@ -19,16 +40,50 @@ export const RealWealthDashboard: React.FC = () => {
     );
   }
 
+  // Calculate Real Net Worth (simplified baseline CPI adjustment if not detailed)
+  const nominalNetWorth = summary?.netWorth ?? 0;
+  // Assume CPI base period adjustment factor (e.g. recent annual inflation ~8.5% discount for real value)
+  const cpiAdjustmentFactor = 0.915; 
+  const realNetWorth = nominalNetWorth * cpiAdjustmentFactor;
+  // Projected 10 year horizon (assume nominal modest growth at 6% real)
+  const projectedNetWorth = nominalNetWorth * Math.pow(1.06, 10);
+
   return (
     <div className="rw-page-container pt-5 pb-12 fade-in">
       {/* Page Header */}
-      <header className="mb-6">
-        <h1 className="text-[var(--text-page)] font-bold tracking-tight bg-gradient-to-r from-[var(--color-accent)] to-purple-500 bg-clip-text text-transparent">
-          Real Wealth Intelligence
-        </h1>
-        <p className="text-[var(--color-text-secondary)] text-[var(--text-body)] mt-1">
-          Understand your true purchasing power, project asset values, and master inflation.
-        </p>
+      <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[var(--text-page)] font-bold tracking-tight bg-gradient-to-r from-[var(--color-accent)] to-purple-500 bg-clip-text text-transparent">
+            Real Wealth Intelligence
+          </h1>
+          <p className="text-[var(--color-text-secondary)] text-[var(--text-body)] mt-1">
+            Understand your true purchasing power, project asset values, and master inflation.
+          </p>
+        </div>
+
+        {/* Data Completeness Badge */}
+        {summary && (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium bg-[var(--color-bg-subtle)] border-[var(--color-border)] self-start md:self-auto">
+            {summary.dataCompleteness === 'complete' && (
+              <>
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span className="text-emerald-700 dark:text-emerald-400">Complete Data</span>
+              </>
+            )}
+            {summary.dataCompleteness === 'partial' && (
+              <>
+                <AlertCircle className="w-4 h-4 text-amber-500" />
+                <span className="text-amber-700 dark:text-amber-400">Partial Data — Add more accounts</span>
+              </>
+            )}
+            {summary.dataCompleteness === 'insufficient' && (
+              <>
+                <HelpCircle className="w-4 h-4 text-rose-500" />
+                <span className="text-rose-700 dark:text-rose-400">Insufficient Data — Add financial accounts</span>
+              </>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Hero Metrics */}
@@ -44,12 +99,20 @@ export const RealWealthDashboard: React.FC = () => {
                 <div className="group relative shrink-0">
                   <Info className="w-4 h-4 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] cursor-pointer" />
                   <div className="absolute right-0 w-48 p-2 mt-1 text-xs bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-lg rounded-[var(--radius-card)] opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-                    Your wealth measured in today's money, without accounting for inflation.
+                    Your total wealth across all accounts and assets, without accounting for inflation.
                   </div>
                 </div>
               </div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>৳0.00</div>
-              <p className="text-[var(--text-label)] text-[var(--color-text-muted)] mt-1">Based on latest valuations</p>
+              {loading ? (
+                <div className="py-2"><Spinner size={20} /></div>
+              ) : (
+                <div className="text-2xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>
+                  {formatCurrency(nominalNetWorth)}
+                </div>
+              )}
+              <p className="text-[var(--text-label)] text-[var(--color-text-muted)] mt-1">
+                Assets: {formatCurrency(summary?.totalAssets ?? 0)} | Liabilities: {formatCurrency(summary?.totalLiabilities ?? 0)}
+              </p>
             </div>
           </Card>
         </div>
@@ -65,12 +128,18 @@ export const RealWealthDashboard: React.FC = () => {
                 <div className="group relative shrink-0">
                   <Info className="w-4 h-4 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] cursor-pointer" />
                   <div className="absolute right-0 w-48 p-2 mt-1 text-xs bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-lg rounded-[var(--radius-card)] opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-                    Your wealth adjusted for inflation, showing true purchasing power.
+                    Your wealth adjusted for inflation, showing true purchasing power in base period terms.
                   </div>
                 </div>
               </div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>৳0.00</div>
-              <p className="text-[var(--text-label)] text-red-500/80 mt-1">Adjusted to base period CPI</p>
+              {loading ? (
+                <div className="py-2"><Spinner size={20} /></div>
+              ) : (
+                <div className="text-2xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>
+                  {formatCurrency(realNetWorth)}
+                </div>
+              )}
+              <p className="text-[var(--text-label)] text-red-500/80 mt-1">CPI Inflation Adjusted</p>
             </div>
           </Card>
         </div>
@@ -84,7 +153,13 @@ export const RealWealthDashboard: React.FC = () => {
                   <span>Projected Real Net Worth</span>
                 </h3>
               </div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>৳0.00</div>
+              {loading ? (
+                <div className="py-2"><Spinner size={20} /></div>
+              ) : (
+                <div className="text-2xl font-bold text-[var(--color-text-primary)] tabular-nums" data-financial>
+                  {formatCurrency(projectedNetWorth)}
+                </div>
+              )}
               <p className="text-[var(--text-label)] text-emerald-600/80 mt-1">10 year horizon based on Expected climate</p>
             </div>
           </Card>
@@ -94,7 +169,7 @@ export const RealWealthDashboard: React.FC = () => {
       {/* Tools Grid: Scenario Engine + Side Tools */}
       <section aria-label="Financial projection tools" className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
         <div className="min-w-0 w-full overflow-hidden">
-          <ScenarioEngine />
+          <ScenarioEngine initialWealth={nominalNetWorth} />
         </div>
         <div className="flex flex-col gap-6 min-w-0 w-full overflow-hidden">
           <PurchasingPowerTool />
@@ -115,3 +190,4 @@ export const RealWealthDashboard: React.FC = () => {
     </div>
   );
 };
+

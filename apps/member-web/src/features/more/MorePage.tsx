@@ -11,6 +11,7 @@ import { Card, Skeleton } from '@/components/ui/Card';
 import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
 import { isFeatureEnabled } from '@/lib/flags';
+import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
 
 export const MorePage: React.FC = () => {
   const { profile, user, signOut } = useAuthContext();
@@ -18,6 +19,7 @@ export const MorePage: React.FC = () => {
   const { loaded: moreLoaded } = useFeatureTranslation('more');
   const { loaded: cardsLoaded } = useFeatureTranslation('creditCards');
   const { loaded: settingsLoaded } = useFeatureTranslation('settings');
+  const { unreadCount, hasUnread } = useNotificationBell(user?.id);
 
   const loaded = moreLoaded && cardsLoaded && settingsLoaded;
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
@@ -97,7 +99,17 @@ export const MorePage: React.FC = () => {
                   role="listitem"
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon size={18} className="text-[var(--color-text-secondary)]" />
+                    <span className="relative">
+                      <item.icon size={18} className="text-[var(--color-text-secondary)]" />
+                      {item.to === '/dashboard/notifications' && hasUnread && (
+                        <span
+                          className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[var(--color-negative)] text-white font-bold"
+                          style={{ fontSize: '9px', lineHeight: 1 }}
+                        >
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </span>
                     <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
                       {item.label}
                     </span>

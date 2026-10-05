@@ -3,7 +3,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { BottomNav, Sidebar } from '@/components/navigation/Navigation';
 import { usePlatform } from '@/context/PlatformContext';
 import { useAuthContext } from '@/context/AuthContext';
-import { syncNotifications } from '@/lib/notifications/sync';
+import { evaluateFinancialNotificationRules } from '@/lib/notifications/notificationEngine';
+import { subscribeUserToPush } from '@/lib/notifications/pushManager';
 import { trackFeatureUsage } from '@/lib/analytics/tracker';
 
 /**
@@ -18,10 +19,27 @@ export const AppLayout: React.FC = () => {
   const { user } = useAuthContext();
 
   useEffect(() => {
-    if (user) {
-      syncNotifications(user.id);
+    if (!user) return;
+
+    // Run full event-driven financial notification rules engine
+    // (idempotent — uses deduplication keys, safe to run on each login session)
+    evaluateFinancialNotificationRules(user.id);
+
+    // Listen for service worker messages (push subscription change, notification click)
+    if ('serviceWorker' in navigator) {
+      const handler = (event: MessageEvent) => {
+        if (event.data?.type === 'PUSH_SUBSCRIPTION_CHANGED') {
+          subscribeUserToPush(user.id);
+        }
+        if (event.data?.type === 'NOTIFICATION_CLICKED' && event.data.url) {
+          navigate(event.data.url);
+        }
+      };
+      navigator.serviceWorker.addEventListener('message', handler);
+      return () => navigator.serviceWorker.removeEventListener('message', handler);
     }
-  }, [user]);
+  }, [user, navigate]);
+
 
   useEffect(() => {
     if (!user || !location.pathname) return;

@@ -62,10 +62,14 @@ export async function sendAdminNotification({
       return { error: 'No recipient members found for the selected target audience.' }
     }
 
-    // Insert notifications for each target user
+    // Insert notifications for each target user with new schema fields
     const notificationsToInsert = targetUserIds.map(userId => ({
       user_id: userId,
-      notification_type: 'upcoming_bill', // Standard supported type for customer app
+      notification_type: 'admin_announcement',
+      category: 'admin_announcement',
+      priority: 'normal',
+      delivery_channel: 'in_app',
+      delivery_status: 'delivered',
       title: title.trim(),
       body: body.trim(),
       related_type: 'admin_broadcast',
@@ -80,6 +84,22 @@ export async function sendAdminNotification({
     if (insertError) {
       return { error: `Failed to insert notifications: ${insertError.message}` }
     }
+
+    // Record campaign in admin_notification_campaigns for analytics
+    await supabase.from('admin_notification_campaigns').insert({
+      admin_id: adminUser?.id || null,
+      title: title.trim(),
+      body: body.trim(),
+      category: 'admin_announcement',
+      priority: 'normal',
+      target_audience: targetAudience,
+      target_user_id: targetAudience === 'specific' ? specificUserId : null,
+      web_push_eligible: false,
+      status: 'sent',
+      sent_at: new Date().toISOString(),
+      recipient_count: targetUserIds.length,
+      delivered_count: targetUserIds.length,
+    }).then(() => {}) // Non-critical — ignore errors
 
     // Log admin audit log & auto-purge logs older than 30 days (1 month)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()

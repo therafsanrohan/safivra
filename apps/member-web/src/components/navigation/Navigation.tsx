@@ -11,6 +11,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { Sheet } from '@/components/ui/Dialog';
 import { Logo } from '@/components/ui/Logo';
 import { isFeatureEnabled } from '@/lib/flags';
+import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 export const BottomNav: React.FC = () => {
@@ -156,6 +157,7 @@ export const Sidebar: React.FC = () => {
   const [addOpen, setAddOpen] = useState(false);
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(' ')[0] ?? 'User';
+  const { unreadCount, hasUnread } = useNotificationBell(user?.id);
 
   const navGroups = [
     {
@@ -278,8 +280,23 @@ export const Sidebar: React.FC = () => {
             ].join(' ')
           }
         >
-          <Bell size={18} strokeWidth={1.75} aria-hidden="true" />
-          {t.nav.notifications}
+          {({ isActive }) => (
+            <>
+              <span className="relative">
+                <Bell size={18} strokeWidth={isActive ? 2.25 : 1.75} aria-hidden="true" />
+                {hasUnread && (
+                  <span
+                    className="absolute -top-1 -right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[var(--color-negative)] text-white font-bold"
+                    style={{ fontSize: '9px', lineHeight: 1 }}
+                    aria-label={`${unreadCount} unread notifications`}
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </span>
+              {t.nav.notifications}
+            </>
+          )}
         </NavLink>
         <NavLink
           to="/dashboard/settings"

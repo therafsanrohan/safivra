@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/components/ui/Toast';
@@ -7,7 +7,17 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { APP_CONFIG } from '@/config/app';
-import { Sun, Moon, Monitor, Globe, Lock, Info, LogOut } from 'lucide-react';
+import { Sun, Moon, Monitor, Globe, Lock, Info, LogOut, Bell, BellOff, BellRing } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
+import {
+  getUserNotificationSettings,
+  type UserNotificationSettings,
+} from '@/lib/notifications/notificationEngine';
+import {
+  isPushSupported,
+  getNotificationPermissionState,
+  subscribeUserToPush,
+} from '@/lib/notifications/pushManager';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -36,7 +46,7 @@ function applyTheme(mode: ThemeMode) {
 }
 
 export const SettingsPage: React.FC = () => {
-  const { profile, preferences, signOut, updateProfile, updatePassword, updatePreferences } = useAuthContext();
+  const { profile, preferences, user, signOut, updateProfile, updatePassword, updatePreferences } = useAuthContext();
   const { t, locale, setLocale } = useLanguage();
   const { success, error: showError } = useToast();
   const isBn = locale === 'bn';
@@ -92,6 +102,84 @@ export const SettingsPage: React.FC = () => {
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  // ── Notification Settings ──────────────────────────────────────────────────
+  const [notifSettings, setNotifSettings] = useState<UserNotificationSettings | null>(null);
+  const [savingNotif, setSavingNotif] = useState(false);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission | 'unsupported'>('default');
+  const [subscribingPush, setSubscribingPush] = useState(false);
+
+  const loadNotifSettings = useCallback(async () => {
+    if (!user) return;
+    const settings = await getUserNotificationSettings(user.id);
+    setNotifSettings(settings);
+    setPushPermission(getNotificationPermissionState());
+  }, [user]);
+
+  useEffect(() => {
+    loadNotifSettings();
+  }, [loadNotifSettings]);
+
+  const handleSaveNotifSettings = async () => {
+    if (!user || !notifSettings) return;
+    setSavingNotif(true);
+    try {
+      const { error: upsertErr } = await (supabase.from('user_notification_settings') as any).upsert({
+        user_id: user.id,
+        in_app_enabled: notifSettings.inAppEnabled,
+        web_push_enabled: notifSettings.webPushEnabled,
+        category_dps: notifSettings.categoryDps,
+        category_fdr: notifSettings.categoryFdr,
+        category_goals: notifSettings.categoryGoals,
+        category_loans: notifSettings.categoryLoans,
+        category_cards: notifSettings.categoryCards,
+        category_salary: notifSettings.categorySalary,
+        category_budget: notifSettings.categoryBudget,
+        category_wealth: notifSettings.categoryWealth,
+        category_zakat: notifSettings.categoryZakat,
+        category_admin: notifSettings.categoryAdmin,
+        category_security: notifSettings.categorySecurity,
+        quiet_hours_enabled: notifSettings.quietHoursEnabled,
+        quiet_hours_start: notifSettings.quietHoursStart,
+        quiet_hours_end: notifSettings.quietHoursEnd,
+        daily_push_limit: notifSettings.dailyPushLimit,
+      }, { onConflict: 'user_id' });
+
+      if (upsertErr) throw upsertErr;
+      success(
+        isBn ? 'বিজ্ঞপ্তি সেটিংস সংরক্ষিত' : 'Notification settings saved',
+        isBn ? 'আপনার পছন্দ আপডেট করা হয়েছে।' : 'Your preferences have been updated.'
+      );
+    } catch (err: any) {
+      showError(isBn ? 'সংরক্ষণ ব্যর্থ' : 'Save failed', err.message);
+    } finally {
+      setSavingNotif(false);
+    }
+  };
+
+  const handleEnablePush = async () => {
+    if (!user) return;
+    setSubscribingPush(true);
+    try {
+      const ok = await subscribeUserToPush(user.id);
+      if (ok) {
+        setPushPermission('granted');
+        success(
+          isBn ? 'পুশ নোটিফিকেশন সক্রিয়' : 'Push notifications enabled',
+          isBn ? 'এখন থেকে আপনি পুশ বিজ্ঞপ্তি পাবেন।' : 'You will now receive push notifications.'
+        );
+      } else {
+        setPushPermission(getNotificationPermissionState());
+        showError(
+          isBn ? 'সক্রিয় করা যায়নি' : 'Could not enable',
+          isBn ? 'ব্রাউজার পুশ নোটিফিকেশন অনুমতি দেয়নি।' : 'Browser denied push notification permission.'
+        );
+      }
+    } finally {
+      setSubscribingPush(false);
+    }
+  };
+
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -344,6 +432,152 @@ export const SettingsPage: React.FC = () => {
           </Button>
         </form>
       </Card>
+
+      {/* ── Notification Preferences ── */}
+      {notifSettings && (
+        <Card>
+          <CardHeader title={isBn ? 'বিজ্ঞপ্তি পছন্দ' : 'Notification Preferences'} />
+          <div className="space-y-5">
+
+            {/* Master Channels */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                {isBn ? 'চ্যানেল' : 'Channels'}
+              </p>
+              {[
+                { key: 'inAppEnabled', label: isBn ? 'ইন-অ্যাপ বিজ্ঞপ্তি' : 'In-App Notifications', sub: isBn ? 'অ্যাপের ভেতরে দেখাবে' : 'Shows inside the app', icon: Bell },
+                { key: 'webPushEnabled', label: isBn ? 'ওয়েব পুশ বিজ্ঞপ্তি' : 'Web Push Notifications', sub: isBn ? 'ব্রাউজার পুশ হিসেবে দেখাবে' : 'Appears as browser push', icon: BellRing },
+              ].map(({ key, label, sub, icon: Icon }) => (
+                <label key={key} className="flex items-center gap-3 cursor-pointer">
+                  <div className="w-8 h-8 rounded-[var(--radius-button)] bg-[var(--color-bg-subtle)] flex items-center justify-center shrink-0">
+                    <Icon size={16} className="text-[var(--color-text-secondary)]" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">{label}</p>
+                    <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">{sub}</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 accent-[var(--color-accent)]"
+                    checked={(notifSettings as any)[key]}
+                    onChange={(e) => setNotifSettings(prev => prev ? { ...prev, [key]: e.target.checked } : prev)}
+                  />
+                </label>
+              ))}
+            </div>
+
+            {/* Category Toggles */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                {isBn ? 'ক্যাটাগরি' : 'Categories'}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {([
+                  { key: 'categoryDps',      label: isBn ? 'ডিপিএস' : 'DPS' },
+                  { key: 'categoryFdr',      label: isBn ? 'এফডিআর' : 'FDR' },
+                  { key: 'categoryGoals',    label: isBn ? 'সঞ্চয় লক্ষ্য' : 'Savings Goals' },
+                  { key: 'categoryLoans',    label: isBn ? 'ঋণ' : 'Loans' },
+                  { key: 'categoryCards',    label: isBn ? 'ক্রেডিট কার্ড' : 'Credit Cards' },
+                  { key: 'categorySalary',   label: isBn ? 'বেতন' : 'Salary' },
+                  { key: 'categoryBudget',   label: isBn ? 'বাজেট' : 'Budget' },
+                  { key: 'categoryWealth',   label: isBn ? 'সম্পদ বিশ্লেষণ' : 'Wealth' },
+                  { key: 'categoryZakat',    label: isBn ? 'যাকাত' : 'Zakat' },
+                  { key: 'categoryAdmin',    label: isBn ? 'ঘোষণা' : 'Announcements' },
+                  { key: 'categorySecurity', label: isBn ? 'নিরাপত্তা' : 'Security' },
+                ] as { key: keyof UserNotificationSettings; label: string }[]).map(({ key, label }) => (
+                  <label key={key} className="flex items-center justify-between gap-2 px-3 py-2 rounded-[var(--radius-button)] bg-[var(--color-bg-subtle)] cursor-pointer hover:bg-[var(--color-bg-hover)] transition-colors">
+                    <span className="text-[var(--text-secondary)] text-[var(--color-text-primary)]">{label}</span>
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 accent-[var(--color-accent)]"
+                      checked={notifSettings[key] as boolean}
+                      onChange={(e) => setNotifSettings(prev => prev ? { ...prev, [key]: e.target.checked } : prev)}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Quiet Hours */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                {isBn ? 'নিরব সময়' : 'Quiet Hours'}
+              </p>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className="flex-1">
+                  <p className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                    {isBn ? 'নিরব সময় চালু করুন' : 'Enable quiet hours'}
+                  </p>
+                  <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+                    {isBn ? 'এই সময়ে শুধু জরুরি বিজ্ঞপ্তি পাবেন' : 'Only critical notifications during this window'}
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 accent-[var(--color-accent)]"
+                  checked={notifSettings.quietHoursEnabled}
+                  onChange={(e) => setNotifSettings(prev => prev ? { ...prev, quietHoursEnabled: e.target.checked } : prev)}
+                />
+              </label>
+              {notifSettings.quietHoursEnabled && (
+                <div className="flex gap-3 items-center">
+                  <div className="flex-1">
+                    <Input
+                      label={isBn ? 'শুরু' : 'Start'}
+                      type="time"
+                      value={notifSettings.quietHoursStart}
+                      onChange={(e) => setNotifSettings(prev => prev ? { ...prev, quietHoursStart: e.target.value } : prev)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      label={isBn ? 'শেষ' : 'End'}
+                      type="time"
+                      value={notifSettings.quietHoursEnd}
+                      onChange={(e) => setNotifSettings(prev => prev ? { ...prev, quietHoursEnd: e.target.value } : prev)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Web Push Device Subscription */}
+            {isPushSupported() && (
+              <div className="p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {pushPermission === 'granted' ? (
+                      <BellRing size={16} className="text-[var(--color-positive)]" />
+                    ) : pushPermission === 'denied' ? (
+                      <BellOff size={16} className="text-[var(--color-negative)]" />
+                    ) : (
+                      <Bell size={16} className="text-[var(--color-text-muted)]" />
+                    )}
+                    <div>
+                      <p className="text-[var(--text-secondary)] font-medium text-[var(--color-text-primary)]">
+                        {pushPermission === 'granted'
+                          ? (isBn ? 'এই ডিভাইসে পুশ সক্রিয়' : 'Push active on this device')
+                          : pushPermission === 'denied'
+                            ? (isBn ? 'পুশ অবরুদ্ধ (ব্রাউজার সেটিংস দেখুন)' : 'Push blocked (check browser settings)')
+                            : (isBn ? 'পুশ নোটিফিকেশন নিষ্ক্রিয়' : 'Push notifications not enabled')}
+                      </p>
+                    </div>
+                  </div>
+                  {pushPermission !== 'granted' && pushPermission !== 'denied' && (
+                    <Button size="sm" onClick={handleEnablePush} loading={subscribingPush} className="shrink-0">
+                      {isBn ? 'সক্রিয় করুন' : 'Enable'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <Button onClick={handleSaveNotifSettings} loading={savingNotif}>
+              {isBn ? 'বিজ্ঞপ্তি পছন্দ সংরক্ষণ করুন' : 'Save Notification Preferences'}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* App Info */}
       <Card>

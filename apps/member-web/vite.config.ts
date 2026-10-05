@@ -10,6 +10,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,svg,png,woff2}'],
+        injectionPoint: undefined,
+      },
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
         name: 'Safivra',
@@ -26,12 +33,8 @@ export default defineConfig({
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
-        globPatterns: ['**/*.{js,css,html,ico,svg}'],
-        runtimeCaching: [],
+      devOptions: {
+        enabled: false,
       },
     }),
   ],

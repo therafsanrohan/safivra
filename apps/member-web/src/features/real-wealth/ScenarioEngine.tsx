@@ -3,11 +3,23 @@ import { Card, CardHeader } from '@/components/ui/Card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { LineChart as ChartIcon, Zap, ShieldAlert, Target, Coins, Percent, CalendarDays } from 'lucide-react';
 
-export const ScenarioEngine: React.FC = () => {
+interface ScenarioEngineProps {
+  initialWealth?: number;
+}
+
+export const ScenarioEngine: React.FC<ScenarioEngineProps> = ({ initialWealth }) => {
   const [scenario, setScenario] = useState('expected');
   
-  // Fully functional dynamic inputs instead of hardcoded mock data
-  const [baseAmount, setBaseAmount] = useState<number>(1000000);
+  // Fully functional dynamic inputs initialized with live user wealth if present
+  const [baseAmount, setBaseAmount] = useState<number>(initialWealth && initialWealth > 0 ? initialWealth : 1000000);
+
+  // Sync initialWealth when it changes and baseAmount is at default
+  React.useEffect(() => {
+    if (initialWealth && initialWealth > 0) {
+      setBaseAmount(initialWealth);
+    }
+  }, [initialWealth]);
+
   const [inflation, setInflation] = useState<number>(6.0);
   const [growth, setGrowth] = useState<number>(8.0);
   const [timeHorizon, setTimeHorizon] = useState<number>(10);
