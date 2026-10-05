@@ -195,8 +195,8 @@ export const ScenarioEngine: React.FC<ScenarioEngineProps> = ({ initialWealth })
           </button>
         </div>
 
-        {/* Chart Area */}
-        <div className="rw-chart-area">
+        {/* Chart Area — responsive height */}
+        <div className="w-full" style={{ minHeight: 220, height: 'clamp(200px, 40vw, 320px)' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 16, bottom: 0, left: -10 }}>
               <defs>

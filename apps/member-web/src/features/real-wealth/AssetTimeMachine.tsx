@@ -76,7 +76,7 @@ export const AssetTimeMachine: React.FC = () => {
         </div>
 
         {/* Storytelling Canvas */}
-        <div className="p-8 bg-gradient-to-b from-[var(--color-bg-surface)] to-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)] text-center relative overflow-hidden group transition-all">
+        <div className="p-6 md:p-8 bg-gradient-to-b from-[var(--color-bg-surface)] to-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)] text-center relative overflow-hidden group transition-all">
           <Sparkles className="absolute top-4 left-4 w-6 h-6 text-[var(--color-accent)] opacity-20 group-hover:opacity-100 transition-opacity" />
           <Sparkles className="absolute bottom-4 right-4 w-6 h-6 text-purple-500 opacity-20 group-hover:opacity-100 transition-opacity" />
           
