@@ -49,7 +49,7 @@ interface TransactionWithEntries {
 
 export const ReportsPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const isBn = locale === 'bn';
 
   const [transactions, setTransactions] = useState<TransactionWithEntries[]>([]);

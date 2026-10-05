@@ -39,7 +39,7 @@ interface LoanRow {
 
 export const LoansPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const isBn = locale === 'bn';
   const [loans, setLoans] = useState<LoanRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,28 +126,28 @@ export const LoansPage: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            {t.loans.title}
+            {t('Loans & Debts')}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            {t.loans.subtitle}
+            {t('Track principal, interest, and payment schedules')}
           </p>
         </div>
         <Link to="/dashboard/loans/add">
           <Button size="sm" className="gap-1">
-            <Plus size={16} /> {t.loans.addLoan}
+            <Plus size={16} /> {t('Add Loan')}
           </Button>
         </Link>
       </header>
 
       {/* Summary */}
       <Card variant="glass">
-        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">{t.loans.totalOutstanding}</p>
+        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">{t('Total Loan Outstanding')}</p>
         <p className="text-2xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
           {formatCurrency(totalOutstanding)}
         </p>
         <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] mt-2">
           {locale === 'bn' 
-            ? `${displayLoans.length}${t.loans.activeCountText}`
+            ? `${displayLoans.length}${t('active loan')}`
             : `Across ${displayLoans.length} loan${displayLoans.length === 1 ? '' : 's'}`
           }
         </p>
@@ -156,17 +156,17 @@ export const LoansPage: React.FC = () => {
       {/* Active Loans */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          {t.loans.activeLoans} ({displayLoans.length})
+          {t('Active Loans')} ({displayLoans.length})
         </h2>
 
         {displayLoans.length === 0 ? (
           <EmptyState
             icon={<Landmark size={22} />}
-            title={t.loans.noLoans}
-            description={t.loans.noLoansDesc}
+            title={t('No active loans')}
+            description={t('Add personal, bank, or education loans to track repayment schedules.')}
             action={
               <Link to="/dashboard/loans/add">
-                <Button size="sm">{t.loans.addLoan}</Button>
+                <Button size="sm">{t('Add Loan')}</Button>
               </Link>
             }
           />
@@ -217,7 +217,7 @@ export const LoansPage: React.FC = () => {
                           {formatCurrency(outstanding)}
                         </p>
                         <p className="text-[11px] text-white/70 mt-1">
-                          {t.loans.ofLabel} {formatCurrency(original)}
+                          {t('of')} {formatCurrency(original)}
                         </p>
                       </div>
 

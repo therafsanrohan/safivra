@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase/client';
 import { differenceInDays, parseISO, isBefore } from 'date-fns';
 import { nowInDhaka } from '@/lib/dates/formatter';
 import { isQuietHoursActive, showLocalSystemNotification } from './pushManager';
+import { autoTranslationEngine, generateSourceHashSync } from '@/lib/i18n/autoTranslationEngine';
 
 export type NotificationCategory =
   | 'financial_reminder'
@@ -254,12 +255,15 @@ export async function evaluateFinancialNotificationRules(userId: string): Promis
           const amountStr = dps.installment_amount ? `৳${Number(dps.installment_amount).toLocaleString()}` : '';
 
           if (daysDiff === 3) {
+            const titleStr = 'DPS Contribution Approaching: {{name}}';
+            const bodyStr = 'Your {{amount}} DPS contribution is due in 3 days ({{date}}).';
+            
             await dispatchNotification({
               userId,
               category: 'dps',
               priority: 'normal',
-              title: `DPS Contribution Approaching: ${dps.product_name}`,
-              body: `Your ${amountStr} DPS contribution is due in 3 days (${dps.next_installment_date}).`,
+              title: autoTranslationEngine.translate(titleStr, generateSourceHashSync(titleStr), { variables: { name: dps.product_name } }),
+              body: autoTranslationEngine.translate(bodyStr, generateSourceHashSync(bodyStr), { variables: { amount: amountStr, date: dps.next_installment_date } }),
               actionUrl: '/plans/savings',
               relatedType: 'deposit_product',
               relatedId: dps.id,

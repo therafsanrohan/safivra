@@ -27,7 +27,7 @@ type AccountBalance = Database['public']['Views']['v_account_balances']['Row'];
 
 export const AccountsPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const isBn = locale === 'bn';
 
   const [accounts, setAccounts] = useState<AccountBalance[]>([]);
@@ -139,15 +139,15 @@ export const AccountsPage: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            {t.accounts.title}
+            {t('Accounts & Wallets')}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            {t.accounts.subtitle}
+            {t('Manage your liquid assets and liabilities')}
           </p>
         </div>
         <Link to="/dashboard/accounts/add">
           <Button size="sm" className="gap-1">
-            <Plus size={16} /> {t.accounts.addAccount}
+            <Plus size={16} /> {t('Add Account')}
           </Button>
         </Link>
       </header>
@@ -155,7 +155,7 @@ export const AccountsPage: React.FC = () => {
       {/* Summary */}
       <Card variant="glass">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">{t.accounts.totalNetAssets}</span>
+          <span className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">{t('Total Net Assets')}</span>
           <button
             onClick={() => setBalanceHidden((v) => !v)}
             className="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
@@ -169,13 +169,13 @@ export const AccountsPage: React.FC = () => {
         </p>
         <div className="flex justify-between text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-3 pt-3 border-t border-[var(--color-border)]">
           <div>
-            <span className="text-[var(--color-text-muted)]">{t.dashboard.assets}: </span>
+            <span className="text-[var(--color-text-muted)]">{t('Assets')}: </span>
             <span className="font-medium text-[var(--color-positive)]" data-financial>
               {balanceHidden ? '••••' : formatCurrency(totalAssetBalance)}
             </span>
           </div>
           <div>
-            <span className="text-[var(--color-text-muted)]">{t.dashboard.liabilities}: </span>
+            <span className="text-[var(--color-text-muted)]">{t('Liabilities')}: </span>
             <span className="font-medium text-[var(--color-negative)]" data-financial>
               {balanceHidden ? '••••' : formatCurrency(totalLiabilityBalance)}
             </span>
@@ -186,11 +186,11 @@ export const AccountsPage: React.FC = () => {
       {!hasAnyItems && (
         <EmptyState
           icon={<CreditCard size={24} />}
-          title={t.accounts.noAccounts}
-          description={t.accounts.noAccountsDesc}
+          title={t('No accounts found')}
+          description={t('You haven\'t added any financial accounts yet.')}
           action={
             <Link to="/dashboard/accounts/add">
-              <Button size="sm" className="mt-2">{t.accounts.addFirstBtn}</Button>
+              <Button size="sm" className="mt-2">{t('Add your first account')}</Button>
             </Link>
           }
         />
@@ -201,7 +201,7 @@ export const AccountsPage: React.FC = () => {
         <section className="space-y-3">
           <button onClick={() => setIsAssetsOpen(!isAssetsOpen)} className="w-full flex items-center justify-between hover:opacity-80 transition-opacity outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
             <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-              {t.accounts.assetAccounts} ({displayAssetAccounts.length})
+              {t('Asset Accounts')} ({displayAssetAccounts.length})
             </h2>
             {isAssetsOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]"/> : <ChevronDown size={18} className="text-[var(--color-text-muted)]"/>}
           </button>
@@ -383,7 +383,7 @@ export const AccountsPage: React.FC = () => {
         <section className="space-y-3">
           <button onClick={() => setIsLiabilitiesOpen(!isLiabilitiesOpen)} className="w-full flex items-center justify-between hover:opacity-80 transition-opacity outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
             <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-              {t.accounts.liabilityAccounts} ({displayLiabilityAccounts.length})
+              {t('Liability Accounts')} ({displayLiabilityAccounts.length})
             </h2>
             {isLiabilitiesOpen ? <ChevronUp size={18} className="text-[var(--color-text-muted)]"/> : <ChevronDown size={18} className="text-[var(--color-text-muted)]"/>}
           </button>

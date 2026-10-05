@@ -29,7 +29,7 @@ interface TxRow {
 
 export const ActivityPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const [transactions, setTransactions] = useState<TxRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -135,7 +135,7 @@ export const ActivityPage: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            {t.activity.title}
+            {t('Activity')}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
             {totalCount > 0

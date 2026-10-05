@@ -20,7 +20,7 @@ import {
 
 export const MoneyCalendarPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
 
@@ -190,12 +190,12 @@ export const MoneyCalendarPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-              {t.moneyCalendar.title}
+              {t('Money Calendar')}
             </h1>
             {!isEnabled && <Badge variant="warning">Rollout Preview</Badge>}
           </div>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-0.5">
-            {t.moneyCalendar.subtitle}
+            {t('Visual cash flow timeline and commitment schedule')}
           </p>
         </div>
 

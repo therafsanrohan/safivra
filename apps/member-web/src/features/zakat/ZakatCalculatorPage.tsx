@@ -26,7 +26,7 @@ type RateSnapshot = Database['public']['Tables']['zakat_rate_snapshots']['Row'];
 type RuleSet = Database['public']['Tables']['zakat_rule_sets']['Row'];
 
 export function ZakatCalculatorPage() {
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const { success, error: showError } = useToast();
   const navigate = useNavigate();
 
@@ -218,13 +218,13 @@ export function ZakatCalculatorPage() {
       });
 
       if (res.data) {
-        success(t.zakat.saveSnapshot, t.zakat.saveSuccess);
+        success(t('Save Snapshot'), t('Zakat snapshot saved successfully.'));
         navigate('/dashboard/zakat');
       } else {
-        showError(t.zakat.saveSnapshot, res.error?.message || t.zakat.saveError);
+        showError(t('Save Snapshot'), res.error?.message || t('Failed to save Zakat snapshot.'));
       }
     } catch (err: any) {
-      showError(t.zakat.saveSnapshot, err.message || t.zakat.saveError);
+      showError(t('Save Snapshot'), err.message || t('Failed to save Zakat snapshot.'));
     } finally {
       setSaving(false);
     }
@@ -271,10 +271,10 @@ export function ZakatCalculatorPage() {
         <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
         <div>
           <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            {t.zakat.calculatorTitle}
+            {t('Zakat Calculator')}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            {t.zakat.stepOf
+            {t('Step {{current}} of {{total}}')
               .replace('{{current}}', String(step))
               .replace('{{total}}', String(TOTAL_STEPS))}
           </p>
@@ -307,12 +307,12 @@ export function ZakatCalculatorPage() {
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-                  {t.zakat.step1Title}
+                  {t('Zakat Anniversary (Hawl)')}
                 </h2>
               </div>
-              <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step1Desc}</p>
+              <p className="text-[var(--color-text-secondary)] text-base">{t('Zakat becomes obligatory after holding wealth above the Nisab threshold for one full lunar year (Hawl). Please select your Zakat due date.')}</p>
               <div className="pt-6 max-w-md">
-                <label className="block text-sm font-medium mb-2">{t.zakat.hawlDateLabel}</label>
+                <label className="block text-sm font-medium mb-2">{t('Hawl Date (Gregorian)')}</label>
                 <input
                   type="date"
                   className="w-full rounded-2xl border border-[var(--color-border)] bg-white dark:bg-[#18181B] dark:text-white px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 shadow-sm transition-all"
@@ -321,7 +321,7 @@ export function ZakatCalculatorPage() {
                 />
                 <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 flex gap-3 text-sm text-emerald-800 dark:text-emerald-300">
                   <Info className="w-5 h-5 shrink-0" />
-                  <p>{t.zakat.hawlInfo}</p>
+                  <p>{t('Note: This calculator uses the standard Gregorian calendar for date entry. A lunar (Hijri) year is approximately 11 days shorter than a Gregorian year.')}</p>
                 </div>
               </div>
             </div>
@@ -335,14 +335,14 @@ export function ZakatCalculatorPage() {
                   <Wallet className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-                  {t.zakat.step2Title}
+                  {t('Cash & Bank Accounts')}
                 </h2>
               </div>
-              <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step2Desc}</p>
+              <p className="text-[var(--color-text-secondary)] text-base">{t('Include all liquid cash and money in bank accounts. Do not include money that is inaccessible.')}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
-                    label={t.zakat.cashInHand}
+                    label={t('Cash in Hand')}
                     value={formData.cashInHand}
                     onChange={(val) => setFormData({ ...formData, cashInHand: val })}
                     size="lg"
@@ -350,7 +350,7 @@ export function ZakatCalculatorPage() {
                 </div>
                 <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
-                    label={t.zakat.bankBalance}
+                    label={t('Bank Balance')}
                     value={formData.bankBalance}
                     onChange={(val) => setFormData({ ...formData, bankBalance: val })}
                     size="lg"
@@ -368,14 +368,14 @@ export function ZakatCalculatorPage() {
                   <Coins className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-                  {t.zakat.step3Title}
+                  {t('Gold & Silver')}
                 </h2>
               </div>
-              <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step3Desc}</p>
+              <p className="text-[var(--color-text-secondary)] text-base">{t('Enter the current market value of all gold and silver you own, including jewelry not used for daily wear.')}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm relative overflow-hidden">
                   <CurrencyInput
-                    label={t.zakat.goldValue}
+                    label={t('Value of Gold')}
                     value={formData.goldValue}
                     onChange={(val) => setFormData({ ...formData, goldValue: val })}
                     size="lg"
@@ -383,7 +383,7 @@ export function ZakatCalculatorPage() {
                 </div>
                 <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm relative overflow-hidden">
                   <CurrencyInput
-                    label={t.zakat.silverValue}
+                    label={t('Value of Silver')}
                     value={formData.silverValue}
                     onChange={(val) => setFormData({ ...formData, silverValue: val })}
                     size="lg"
@@ -401,14 +401,14 @@ export function ZakatCalculatorPage() {
                   <TrendingUp className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-                  {t.zakat.step4Title}
+                  {t('Investments & Business')}
                 </h2>
               </div>
-              <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step4Desc}</p>
+              <p className="text-[var(--color-text-secondary)] text-base">{t('Include the current market value of stocks held for trading, mutual funds, and business inventory.')}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
-                    label={t.zakat.stocksInvestments}
+                    label={t('Stocks & Investments')}
                     value={formData.investments}
                     onChange={(val) => setFormData({ ...formData, investments: val })}
                     size="lg"
@@ -416,7 +416,7 @@ export function ZakatCalculatorPage() {
                 </div>
                 <div className="bg-white dark:bg-[#18181B] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
-                    label={t.zakat.businessInventory}
+                    label={t('Business Inventory')}
                     value={formData.businessInventory}
                     onChange={(val) => setFormData({ ...formData, businessInventory: val })}
                     size="lg"
@@ -434,14 +434,14 @@ export function ZakatCalculatorPage() {
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-                  {t.zakat.step5Title}
+                  {t('Liabilities & Debts')}
                 </h2>
               </div>
-              <p className="text-[var(--color-text-secondary)] text-base">{t.zakat.step5Desc}</p>
+              <p className="text-[var(--color-text-secondary)] text-base">{t('Enter any outstanding debts that you are actively paying. These will be deducted from your Zakatable assets.')}</p>
               <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
-                    label={t.zakat.personalDebts}
+                    label={t('Personal Debts')}
                     value={formData.personalDebts}
                     onChange={(val) => setFormData({ ...formData, personalDebts: val })}
                     size="lg"
@@ -449,7 +449,7 @@ export function ZakatCalculatorPage() {
                 </div>
                 <div className="bg-[var(--color-bg-subtle)] p-5 rounded-3xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all">
                   <CurrencyInput
-                    label={t.zakat.businessDebts}
+                    label={t('Business Debts')}
                     value={formData.businessDebts}
                     onChange={(val) => setFormData({ ...formData, businessDebts: val })}
                     size="lg"
@@ -467,7 +467,7 @@ export function ZakatCalculatorPage() {
                   <Save className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-                  {t.zakat.step6Title}
+                  {t('Review & Save')}
                 </h2>
               </div>
 
@@ -475,22 +475,22 @@ export function ZakatCalculatorPage() {
                 <div className="py-12 flex flex-col items-center justify-center">
                   <Spinner size={32} />
                   <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
-                    {t.zakat.calculating}
+                    {t('Calculating your Zakat...')}
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Summary Breakdown */}
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">{t.zakat.calculationSummary}</h3>
+                    <h3 className="font-semibold text-lg">{t('Calculation Summary')}</h3>
                     <div className="bg-white dark:bg-black/30 p-5 rounded-3xl border border-[var(--color-border)] shadow-sm space-y-3">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-[var(--color-text-secondary)]">{t.zakat.totalAssets}</span>
+                        <span className="text-[var(--color-text-secondary)]">{t('Total Assets')}</span>
                         <span className="font-medium">{formatCurrency(getTotalAssets())}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-[var(--color-text-secondary)]">
-                          {t.zakat.totalDeductions}
+                          {t('Total Deductions')}
                         </span>
                         <span className="font-medium text-rose-500">
                           - {formatCurrency(getTotalDeductions())}
@@ -498,7 +498,7 @@ export function ZakatCalculatorPage() {
                       </div>
                       <div className="h-px bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent my-3" />
                       <div className="flex justify-between items-center font-medium">
-                        <span className="text-base">{t.zakat.netZakatableWealth}</span>
+                        <span className="text-base">{t('Net Zakatable Wealth')}</span>
                         <span className="text-lg">{formatCurrency(getNetWealth())}</span>
                       </div>
                     </div>
@@ -506,14 +506,14 @@ export function ZakatCalculatorPage() {
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/50 text-sm">
                       <div className="flex justify-between mb-1">
                         <span className="text-blue-800 dark:text-blue-300">
-                          {t.zakat.activeNisabThreshold}
+                          {t('Active Nisab Threshold')}
                         </span>
                         <span className="font-semibold text-blue-900 dark:text-blue-200">
                           {formatCurrency(calculationResult.thresholds.activeNisab)}
                         </span>
                       </div>
                       <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                        {t.zakat.nisabNote
+                        {t('Calculated using the {{standard}} standard as of {{date}}.')
                           .replace('{{standard}}', activeRules?.nisab_standard ?? 'gold')
                           .replace(
                             '{{date}}',
@@ -547,8 +547,8 @@ export function ZakatCalculatorPage() {
                           }`}
                         >
                           {calculationResult.isEligible
-                            ? t.zakat.estimatedZakatDue
-                            : t.zakat.alhamdulillah}
+                            ? t('Estimated Zakat Due')
+                            : t('Alhamdulillah')}
                         </h3>
 
                         {calculationResult.isEligible ? (
@@ -556,14 +556,14 @@ export function ZakatCalculatorPage() {
                             <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight py-4 drop-shadow-md break-all leading-tight max-w-full overflow-hidden text-ellipsis">
                               {formatCurrency(calculationResult.liability)}
                             </p>
-                            <p className="text-sm text-emerald-100/80">{t.zakat.zakatBasis}</p>
+                            <p className="text-sm text-emerald-100/80">{t('Based on 2.5% of your Net Zakatable Wealth.')}</p>
                           </>
                         ) : (
                           <div className="py-8">
                             <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-emerald-500" />
-                            <p className="text-xl font-semibold">{t.zakat.alhamdulillah}</p>
+                            <p className="text-xl font-semibold">{t('Alhamdulillah')}</p>
                             <p className="text-sm mt-2 text-[var(--color-text-secondary)]">
-                              {t.zakat.belowNisab}
+                              {t('Your net wealth is below the Nisab threshold. Zakat is not obligatory for you at this time.')}
                             </p>
                           </div>
                         )}
@@ -585,7 +585,7 @@ export function ZakatCalculatorPage() {
             className="gap-2 rounded-xl px-6 h-12 bg-[var(--color-bg-surface)] shadow-sm border-[var(--color-border)] hover:bg-[var(--color-bg-hover)] transition-all"
           >
             <ChevronLeft className="h-5 w-5" />
-            {t.zakat.back}
+            {t('Back')}
           </Button>
 
           {step < TOTAL_STEPS ? (
@@ -594,7 +594,7 @@ export function ZakatCalculatorPage() {
               onClick={nextStep}
               className="gap-2 rounded-xl px-8 h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all"
             >
-              {t.zakat.continue}
+              {t('Continue')}
               <ChevronRight className="h-5 w-5" />
             </Button>
           ) : (
@@ -605,7 +605,7 @@ export function ZakatCalculatorPage() {
               className="gap-2 rounded-xl px-8 h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all"
             >
               {saving ? <Spinner size={20} className="text-white" /> : <Save className="h-5 w-5" />}
-              {saving ? t.zakat.saving : t.zakat.saveSnapshot}
+              {saving ? t('Saving...') : t('Save Snapshot')}
             </Button>
           )}
         </div>

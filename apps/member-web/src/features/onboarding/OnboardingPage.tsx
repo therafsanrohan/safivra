@@ -38,7 +38,7 @@ export const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, updateProfile, refreshProfile } = useAuthContext();
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   const { success, error: showError } = useToast();
 
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
@@ -146,7 +146,7 @@ export const OnboardingPage: React.FC = () => {
 
       await refreshProfile();
 
-      success(t.onboarding.successTitle, t.onboarding.successDesc);
+      success(t('Setup Complete!'), t('Welcome to Safivra. Your account is ready.'));
 
       // Safe navigation to requested route or dashboard
       const from = (location.state as { from?: string })?.from;
@@ -156,7 +156,7 @@ export const OnboardingPage: React.FC = () => {
 
       navigate(destination, { replace: true });
     } catch (err) {
-      showError(t.onboarding.errorTitle, parseError(err).message);
+      showError(t('Setup Failed'), parseError(err).message);
     } finally {
       setSubmitting(false);
     }
@@ -175,10 +175,10 @@ export const OnboardingPage: React.FC = () => {
             )}
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            {t.onboarding.welcomeTitle}
+            {t('Welcome to Safivra')}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)] max-w-sm mx-auto">
-            {t.onboarding.welcomeSubtitle}
+            {t('Let us set up your profile and first account to get started.')}
           </p>
         </div>
 
@@ -186,10 +186,10 @@ export const OnboardingPage: React.FC = () => {
         <div className="bg-[var(--color-bg-surface)] p-4 rounded-xl border border-[var(--color-border)] shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-accent)]">
-              {t.onboarding.stepProgress.replace('{{current}}', String(currentStep)).replace('{{total}}', '2')}
+              {t('Step {{current}} of {{total}}', { variables: { current: currentStep, total: 2 } })}
             </span>
             <span className="text-xs font-medium text-[var(--color-text-secondary)]">
-              {currentStep === 1 ? t.onboarding.step1Title : t.onboarding.step2Title}
+              {currentStep === 1 ? t('Personal Details') : t('First Account')}
             </span>
           </div>
           <div className="w-full bg-[var(--color-bg-subtle)] h-1.5 rounded-full overflow-hidden">
@@ -208,25 +208,25 @@ export const OnboardingPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="border-b border-[var(--color-border)] pb-3 mb-4">
                   <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
-                    {t.onboarding.step1Title}
+                    {t('Personal Details')}
                   </h2>
                   <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                    {t.onboarding.step1Desc}
+                    {t('Tell us a bit about yourself to personalize your experience.')}
                   </p>
                 </div>
 
                 {/* 1. Full Name */}
                 <Input
-                  label={t.onboarding.fullNameLabel}
+                  label={t('Full Name')}
                   required
-                  placeholder={t.onboarding.fullNamePlaceholder}
+                  placeholder={t('e.g. Abdullah Al Mamun')}
                   error={errors.full_name?.message}
                   {...register('full_name')}
                 />
 
                 {/* 2. Date of Birth */}
                 <Input
-                  label={t.onboarding.dobLabel}
+                  label={t('Date of Birth')}
                   type="date"
                   required
                   error={errors.date_of_birth?.message}
@@ -239,15 +239,15 @@ export const OnboardingPage: React.FC = () => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      label={t.onboarding.genderLabel}
+                      label={t('Gender')}
                       required
                       value={field.value || ''}
                       onValueChange={field.onChange}
                       error={errors.gender?.message}
                       options={[
-                        { value: 'male', label: t.onboarding.genderMale },
-                        { value: 'female', label: t.onboarding.genderFemale },
-                        { value: 'other', label: t.onboarding.genderOther },
+                        { value: 'male', label: t('Male') },
+                        { value: 'female', label: t('Female') },
+                        { value: 'other', label: t('Other / Prefer not to say') },
                       ]}
                     />
                   )}
@@ -255,8 +255,8 @@ export const OnboardingPage: React.FC = () => {
 
                 {/* 4. Phone Number (Optional) */}
                 <Input
-                  label={t.onboarding.phoneLabel}
-                  placeholder={t.onboarding.phonePlaceholder}
+                  label={t('Phone Number')}
+                  placeholder={t('e.g. +880 1700 000000')}
                   error={errors.phone?.message}
                   {...register('phone')}
                 />
@@ -268,7 +268,7 @@ export const OnboardingPage: React.FC = () => {
                   onClick={handleNextStep}
                   className="mt-6 flex items-center justify-center gap-2"
                 >
-                  <span>{t.onboarding.nextBtn}</span>
+                  <span>{t('Next Step')}</span>
                   <ArrowRight size={18} />
                 </Button>
               </div>
@@ -279,18 +279,18 @@ export const OnboardingPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="border-b border-[var(--color-border)] pb-3 mb-4">
                   <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
-                    {t.onboarding.step2Title}
+                    {t('First Account')}
                   </h2>
                   <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                    {t.onboarding.step2Desc}
+                    {t('Set up your primary account and starting balance.')}
                   </p>
                 </div>
 
                 {/* First Account Name */}
                 <Input
-                  label={t.onboarding.accountNameLabel}
+                  label={t('First Account Name')}
                   required
-                  placeholder={t.onboarding.accountNamePlaceholder}
+                  placeholder={t('e.g. Physical Cash, City Bank, bKash')}
                   error={errors.account_name?.message}
                   {...register('account_name')}
                 />
@@ -301,15 +301,15 @@ export const OnboardingPage: React.FC = () => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      label={t.onboarding.accountTypeLabel}
+                      label={t('Account Type')}
                       required
                       value={field.value}
                       onValueChange={field.onChange}
                       options={[
-                        { value: 'cash', label: t.onboarding.accountTypeCash },
-                        { value: 'bank', label: t.onboarding.accountTypeBank },
-                        { value: 'mobile_financial_service', label: t.onboarding.accountTypeMfs },
-                        { value: 'savings', label: t.onboarding.accountTypeSavings },
+                        { value: 'cash', label: t('Physical Cash') },
+                        { value: 'bank', label: t('Bank Account') },
+                        { value: 'mobile_financial_service', label: t('bKash / Nagad / Rocket') },
+                        { value: 'savings', label: t('Savings Deposit') },
                       ]}
                     />
                   )}
@@ -321,9 +321,9 @@ export const OnboardingPage: React.FC = () => {
                   control={control}
                   render={({ field }) => (
                     <CurrencyInput
-                      label={t.onboarding.startingBalanceLabel}
+                      label={t('Current Starting Balance')}
                       required
-                      description={t.onboarding.startingBalanceDesc}
+                      description={t('Initial balance as of today')}
                       value={field.value}
                       onChange={field.onChange}
                       error={errors.opening_balance?.message}
@@ -341,7 +341,7 @@ export const OnboardingPage: React.FC = () => {
                     className="flex items-center justify-center gap-1.5"
                   >
                     <ArrowLeft size={18} />
-                    <span>{t.onboarding.backBtn}</span>
+                    <span>{t('Previous Step')}</span>
                   </Button>
 
                   <Button
@@ -353,7 +353,7 @@ export const OnboardingPage: React.FC = () => {
                     className="flex-1 flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 size={18} />
-                    <span>{t.onboarding.submitBtn}</span>
+                    <span>{t('Complete Setup & Enter Dashboard')}</span>
                   </Button>
                 </div>
               </div>

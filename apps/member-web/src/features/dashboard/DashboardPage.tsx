@@ -86,7 +86,7 @@ interface DashboardData {
 
 export const DashboardPage: React.FC = () => {
   const { user, profile } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -295,8 +295,8 @@ export const DashboardPage: React.FC = () => {
         
         <div className="relative z-10 flex items-start justify-between mb-2">
           <p className="flex items-center gap-1.5 text-white/90 font-medium">
-            {t.dashboard.totalBalance}
-            <InfoPopover content={t.dashboard.totalBalanceDesc} />
+            {t('Total Balance')}
+            <InfoPopover content={t('Your total available liquid balance (cash, bank, MFS).')} />
           </p>
           <button
             onClick={() => setBalanceHidden((v) => !v)}
@@ -317,38 +317,38 @@ export const DashboardPage: React.FC = () => {
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-4 gap-3 py-1">
-        <QuickAction icon={<ArrowDownLeft size={20} />} label={t.addTransaction.income} href="/dashboard/activity/add?type=income" color="text-[var(--color-positive)]" bg="bg-[var(--color-positive-soft)]" />
-        <QuickAction icon={<ArrowUpRight size={20} />} label={t.addTransaction.expense} href="/dashboard/activity/add?type=expense" color="text-[var(--color-negative)]" bg="bg-[var(--color-negative-soft)]" />
-        <QuickAction icon={<ArrowRightLeft size={20} />} label={t.addTransaction.transfer} href="/dashboard/activity/add?type=transfer" color="text-[var(--color-info)]" bg="bg-[var(--color-info-soft)]" />
+        <QuickAction icon={<ArrowDownLeft size={20} />} label={t('Income')} href="/dashboard/activity/add?type=income" color="text-[var(--color-positive)]" bg="bg-[var(--color-positive-soft)]" />
+        <QuickAction icon={<ArrowUpRight size={20} />} label={t('Expense')} href="/dashboard/activity/add?type=expense" color="text-[var(--color-negative)]" bg="bg-[var(--color-negative-soft)]" />
+        <QuickAction icon={<ArrowRightLeft size={20} />} label={t('Transfer')} href="/dashboard/activity/add?type=transfer" color="text-[var(--color-info)]" bg="bg-[var(--color-info-soft)]" />
         <QuickAction icon={<PieChart size={20} />} label={locale === 'bn' ? 'রিপোর্টস' : 'Reports'} href="/dashboard/reports" color="text-[var(--color-accent)]" bg="bg-[var(--color-accent-soft)]" />
       </div>
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-2 gap-3">
-        <SummaryCard label={t.addTransaction.income} tooltip={t.dashboard.incomeDesc} value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
-        <SummaryCard label={t.addTransaction.expense} tooltip={t.dashboard.expenseDesc} value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
-        <SummaryCard label={t.nav.loans} tooltip={t.dashboard.loansDesc} value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
-        <SummaryCard label={t.creditCards.title} tooltip={t.dashboard.creditCardsDesc} value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
+        <SummaryCard label={t('Income')} tooltip={t('Your total income received this month.')} value={data?.monthlySummary.income ?? 0} masked={balanceHidden} icon={<TrendingUp size={16} />} />
+        <SummaryCard label={t('Expense')} tooltip={t('Your total expenses incurred this month.')} value={data?.monthlySummary.expense ?? 0} masked={balanceHidden} icon={<TrendingDown size={16} />} />
+        <SummaryCard label={t('Loans')} tooltip={t('Your total outstanding active loans.')} value={data?.loanOutstanding ?? 0} masked={balanceHidden} icon={<Landmark size={16} />} href="/dashboard/loans" />
+        <SummaryCard label={t('Credit Cards')} tooltip={t('Your total outstanding credit card debt.')} value={data?.creditOutstanding ?? 0} masked={balanceHidden} icon={<CreditCard size={16} />} href="/dashboard/credit-cards" />
       </div>
 
       {/* Net Worth */}
       <Card variant="glass">
         <p className="flex items-center gap-1.5 text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-2">
-          {t.dashboard.netWorth}
-          <InfoPopover content={t.dashboard.netWorthDesc} />
+          {t('Current Net Worth')}
+          <InfoPopover content={t('Net Worth is calculated by subtracting your Total Liabilities from your Total Assets.')} />
         </p>
         <p className={['text-2xl font-semibold tabular-nums mb-3', netWorth >= 0 ? 'text-[var(--color-positive)]' : 'text-[var(--color-text-primary)]'].join(' ')} data-financial>
           {balanceHidden ? '৳ ••••••' : formatCurrency(netWorth)}
         </p>
         <div className="flex justify-between text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
           <span className="flex items-center gap-1">
-            <span className="text-[var(--color-text-muted)]">{t.dashboard.assets} </span>
-            <InfoPopover content={t.dashboard.assetsDesc} />
+            <span className="text-[var(--color-text-muted)]">{t('Assets')} </span>
+            <InfoPopover content={t('Assets represent your total balance in positive accounts like Cash, Bank, and Savings.')} />
             <span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalAssets)}</span>
           </span>
           <span className="flex items-center gap-1">
-            <span className="text-[var(--color-text-muted)]">{t.dashboard.liabilities} </span>
-            <InfoPopover content={t.dashboard.liabilitiesDesc} />
+            <span className="text-[var(--color-text-muted)]">{t('Liabilities')} </span>
+            <InfoPopover content={t('Liabilities represent your total outstanding debt like Credit Cards and Loans.')} />
             <span className="font-medium text-[var(--color-text-primary)]" data-financial>{balanceHidden ? '••••' : formatCurrency(totalLiabilities)}</span>
           </span>
         </div>
@@ -363,7 +363,7 @@ export const DashboardPage: React.FC = () => {
       {/* Cash Flow Chart */}
       {data && data.cashflowHistory.length > 0 && (
         <Card className="w-full min-w-0 overflow-hidden">
-          <CardHeader title={t.dashboard.monthlyCashFlow} subtitle={t.dashboard.last6Months} />
+          <CardHeader title={t('Monthly Cash Flow')} subtitle={t('Last 6 months')} />
           <div className="w-full min-w-0 overflow-x-auto pb-1 mt-2">
             <div className="min-w-[300px]">
               <ResponsiveContainer width="100%" height={220}>
@@ -381,9 +381,9 @@ export const DashboardPage: React.FC = () => {
                   <YAxis hide />
                   <ReferenceLine y={0} stroke="var(--color-border-strong)" />
                   <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'var(--color-bg-hover)', opacity: 0.5 }} />
-                  <Bar dataKey="income" name={t.addTransaction.income} fill="var(--color-positive)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="negativeExpense" name={t.addTransaction.expense} fill="var(--color-negative)" radius={[0, 0, 4, 4]} />
-                  <Line type="monotone" dataKey="net" name={t.dashboard.monthlyCashFlow || 'Net'} stroke="var(--color-info)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-info)', strokeWidth: 2, stroke: 'var(--color-bg-surface)' }} />
+                  <Bar dataKey="income" name={t('Income')} fill="var(--color-positive)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="negativeExpense" name={t('Expense')} fill="var(--color-negative)" radius={[0, 0, 4, 4]} />
+                  <Line type="monotone" dataKey="net" name={t('Monthly Cash Flow') || 'Net'} stroke="var(--color-info)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-info)', strokeWidth: 2, stroke: 'var(--color-bg-surface)' }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -394,15 +394,15 @@ export const DashboardPage: React.FC = () => {
       {/* Accounts */}
       <Card padding="none">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t.dashboard.accounts}</h2>
-          <Link to="/dashboard/accounts" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">{t.dashboard.seeAll}</Link>
+          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t('Accounts')}</h2>
+          <Link to="/dashboard/accounts" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">{t('See All')}</Link>
         </div>
         {liquidAccounts.length === 0 ? (
           <EmptyState
             icon={<Wallet size={22} />}
-            title={t.dashboard.noAccountsTitle}
-            description={t.dashboard.noAccountsDesc}
-            action={<Link to="/dashboard/accounts/add"><Button size="sm">{t.dashboard.addAccountBtn}</Button></Link>}
+            title={t('No accounts yet')}
+            description={t('Add your first account to track balances.')}
+            action={<Link to="/dashboard/accounts/add"><Button size="sm">{t('Add account')}</Button></Link>}
             className="py-8"
           />
         ) : (
@@ -435,7 +435,7 @@ export const DashboardPage: React.FC = () => {
       {data && data.upcomingPayments.length > 0 && (
         <Card padding="none">
           <div className="px-5 pt-5 pb-3">
-            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t.dashboard.upcomingPayments}</h2>
+            <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t('Upcoming Payments')}</h2>
           </div>
           <div className="divide-y divide-[var(--color-border)]" role="list">
             {data.upcomingPayments.map((pmt) => (
@@ -461,14 +461,14 @@ export const DashboardPage: React.FC = () => {
       {/* Recent Activity */}
       <Card padding="none">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t.dashboard.recentActivity}</h2>
-          <Link to="/dashboard/activity" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">{t.dashboard.seeAll}</Link>
+          <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">{t('Recent Activity')}</h2>
+          <Link to="/dashboard/activity" className="text-[var(--text-secondary)] text-[var(--color-accent)] font-semibold">{t('See All')}</Link>
         </div>
         {(!data || data.recentTransactions.length === 0) ? (
           <EmptyState
             icon={<ReceiptText size={22} />}
-            title={t.dashboard.noTransactions}
-            description={t.dashboard.noTransactionsDesc}
+            title={t('No transactions yet')}
+            description={t('Add your first income or expense to begin tracking.')}
             className="py-8"
           />
         ) : (

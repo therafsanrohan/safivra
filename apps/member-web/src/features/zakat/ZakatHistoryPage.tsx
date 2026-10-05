@@ -20,15 +20,15 @@ type ZakatCalc = Database['public']['Tables']['zakat_calculations']['Row'];
 function StatusBadge({ status, t }: { status: string; t: any }) {
   const map: Record<string, { label: string; cls: string }> = {
     draft: {
-      label: t.zakat.statusDraft,
+      label: t('Draft'),
       cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
     },
     confirmed_snapshot: {
-      label: t.zakat.statusConfirmed,
+      label: t('Confirmed'),
       cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
     },
     paid: {
-      label: t.zakat.statusPaid,
+      label: t('Paid'),
       cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
     },
   };
@@ -44,7 +44,7 @@ function StatusBadge({ status, t }: { status: string; t: any }) {
 }
 
 export function ZakatHistoryPage() {
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ export function ZakatHistoryPage() {
             <HandHeart className="w-5 h-5" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            {t.zakat.historyTitle}
+            {t('Zakat History')}
           </h1>
         </div>
       </div>
@@ -114,10 +114,10 @@ export function ZakatHistoryPage() {
             <HandCoins className="w-8 h-8" />
           </div>
           <p className="text-lg font-semibold text-[var(--color-text-primary)]">
-            {t.zakat.historyEmpty}
+            {t('No saved Zakat calculations yet.')}
           </p>
           <p className="text-sm text-[var(--color-text-secondary)] max-w-xs">
-            {t.zakat.historyEmptyDesc}
+            {t('Complete a Zakat calculation and save your snapshot to see it here.')}
           </p>
           <Button
             variant="primary"
@@ -125,7 +125,7 @@ export function ZakatHistoryPage() {
             className="mt-4 gap-2 rounded-2xl px-6 h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-0 shadow-lg shadow-emerald-500/20"
           >
             <Calculator className="w-4 h-4" />
-            {t.zakat.startCalculation}
+            {t('Start Calculation')}
           </Button>
         </div>
       )}
@@ -164,7 +164,7 @@ export function ZakatHistoryPage() {
                             : 'text-[var(--color-text-secondary)]'
                         }`}
                       >
-                        {calc.is_eligible ? t.zakat.eligible : t.zakat.notEligible}
+                        {calc.is_eligible ? t('Eligible') : t('Not Eligible')}
                       </span>
                       <StatusBadge status={calc.status} t={t} />
                     </div>
@@ -187,7 +187,7 @@ export function ZakatHistoryPage() {
                   {calc.is_eligible && (
                     <div>
                       <p className="text-xs text-[var(--color-text-tertiary)] font-medium uppercase tracking-wider">
-                        {t.zakat.estimatedZakatDue}
+                        {t('Estimated Zakat Due')}
                       </p>
                       <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(Number(calc.estimated_zakat_amount))}
@@ -196,7 +196,7 @@ export function ZakatHistoryPage() {
                   )}
                   <div className="text-right">
                     <p className="text-xs text-[var(--color-text-tertiary)]">
-                      {t.zakat.netZakatableWealth}
+                      {t('Net Zakatable Wealth')}
                     </p>
                     <p className="text-base font-semibold text-[var(--color-text-primary)]">
                       {formatCurrency(Number(calc.net_zakatable_wealth))}

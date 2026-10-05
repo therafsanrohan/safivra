@@ -15,7 +15,7 @@ import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
 
 export const MorePage: React.FC = () => {
   const { profile, user, signOut } = useAuthContext();
-  const { t, toggleLocale, locale } = useLanguage();
+  const { translate: t, toggleLocale, locale } = useLanguage();
   const { loaded: moreLoaded } = useFeatureTranslation('more');
   const { loaded: cardsLoaded } = useFeatureTranslation('creditCards');
   const { loaded: settingsLoaded } = useFeatureTranslation('settings');
@@ -35,31 +35,31 @@ export const MorePage: React.FC = () => {
 
   const menuSections = [
     {
-      title: t.more.financialAccounts,
+      title: t('Financial Accounts'),
       items: [
-        { to: '/dashboard/accounts', label: t.more.accountsWallets, icon: Wallet },
-        { to: '/dashboard/loans', label: t.more.loansDebts, icon: Landmark },
-        { to: '/dashboard/credit-cards', label: t.creditCards.title, icon: CreditCard },
+        { to: '/dashboard/accounts', label: t('Accounts & Wallets'), icon: Wallet },
+        { to: '/dashboard/loans', label: t('Loans & Debts'), icon: Landmark },
+        { to: '/dashboard/credit-cards', label: t('Credit Cards'), icon: CreditCard },
       ],
     },
     {
-      title: t.more.planningAnalytics,
+      title: t('Planning & Analytics'),
       items: [
         { to: '/dashboard/plans/available-to-spend', label: locale === 'bn' ? 'ব্যয়যোগ্য তহবিল' : 'Available to Spend', icon: Wallet },
         { to: '/dashboard/plans/calendar', label: locale === 'bn' ? 'অর্থ ক্যালেন্ডার' : 'Money Calendar', icon: Calendar },
-        { to: '/dashboard/plans/savings', label: t.more.savingsDps, icon: Coins },
-        { to: '/dashboard/plans/recurring', label: t.more.recurringCommitments, icon: RefreshCw },
-        { to: '/dashboard/reports', label: t.more.reportsExports, icon: BookOpen },
+        { to: '/dashboard/plans/savings', label: t('Savings, DPS & FDR'), icon: Coins },
+        { to: '/dashboard/plans/recurring', label: t('Recurring Commitments'), icon: RefreshCw },
+        { to: '/dashboard/reports', label: t('Reports & Exports'), icon: BookOpen },
         { to: '/dashboard/tools', label: locale === 'bn' ? 'ক্যালকুলেটর' : 'Calculators', icon: Calculator },
         { to: '/dashboard/zakat', label: locale === 'bn' ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
         ...( isFeatureEnabled('real_wealth_intelligence_enabled', user?.id) ? [{ to: '/dashboard/real-wealth', label: locale === 'bn' ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] ),
-        { to: '/dashboard/notifications', label: t.nav.notifications, icon: Bell },
+        { to: '/dashboard/notifications', label: t('Notifications'), icon: Bell },
       ],
     },
     {
-      title: t.more.appSection,
+      title: t('App'),
       items: [
-        { to: '/dashboard/settings', label: t.nav.settings, icon: Settings },
+        { to: '/dashboard/settings', label: t('Settings'), icon: Settings },
       ],
     },
   ];
@@ -139,7 +139,7 @@ export const MorePage: React.FC = () => {
           <div className="flex items-center gap-3">
             <Languages size={18} className="text-[var(--color-text-secondary)]" />
             <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
-              {t.settings.language}
+              {t('Language')}
             </span>
           </div>
           <span className="text-[var(--text-secondary)] font-medium text-[var(--color-accent)]">
@@ -153,7 +153,7 @@ export const MorePage: React.FC = () => {
         onClick={signOut}
         className="w-full flex items-center justify-center gap-2 p-3.5 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] text-[var(--color-negative)] font-medium hover:bg-red-100 transition-colors"
       >
-        <LogOut size={18} /> {t.more.signOut}
+        <LogOut size={18} /> {t('Sign Out')}
       </button>
     </div>
   );

@@ -12,12 +12,12 @@ export const PwaUpdatePrompt: React.FC = () => {
     updateServiceWorker,
   } = useRegisterSW();
 
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   const { success } = useToast();
 
   useEffect(() => {
     if (offlineReady) {
-      success(t.common.readyOffline, t.common.readyOfflineDesc);
+      success(t('Ready Offline'), t('App is ready to work offline.'));
       setOfflineReady(false);
     }
   }, [offlineReady, success, t, setOfflineReady]);
@@ -35,10 +35,10 @@ export const PwaUpdatePrompt: React.FC = () => {
         </div>
         <div>
           <h4 className="font-semibold text-[var(--color-text-primary)]">
-            {t.common.updateAvailable}
+            {t('Update Available')}
           </h4>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            {t.common.updateAvailableDesc}
+            {t('A new Safivra version is available. Update now?')}
           </p>
         </div>
       </div>
@@ -48,14 +48,14 @@ export const PwaUpdatePrompt: React.FC = () => {
           size="sm" 
           onClick={() => setNeedRefresh(false)}
         >
-          {t.common.later}
+          {t('Later')}
         </Button>
         <Button 
           variant="primary"
           size="sm" 
           onClick={() => updateServiceWorker(true)}
         >
-          {t.common.updateNow}
+          {t('Update now')}
         </Button>
       </div>
     </div>

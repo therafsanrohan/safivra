@@ -38,7 +38,7 @@ interface CardRow {
 
 export const CreditCardsPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const isBn = locale === 'bn';
   const [cards, setCards] = useState<CardRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,44 +123,44 @@ export const CreditCardsPage: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            {t.creditCards.title}
+            {t('Credit Cards')}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            {t.creditCards.subtitle}
+            {t('Track card statements, utilization, and due dates')}
           </p>
         </div>
         <Link to="/dashboard/credit-cards/add">
           <Button size="sm" className="gap-1">
-            <Plus size={16} /> {t.creditCards.addCard}
+            <Plus size={16} /> {t('Add Card')}
           </Button>
         </Link>
       </header>
 
       {/* Summary */}
       <Card variant="glass">
-        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">{t.creditCards.totalOutstanding}</p>
+        <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mb-1">{t('Total Credit Card Outstanding')}</p>
         <p className="text-2xl font-semibold tabular-nums text-[var(--color-negative)]" data-financial>
           {formatCurrency(totalOutstanding)}
         </p>
         <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)] mt-2">
-          {t.creditCards.totalLimitLabel}: {formatCurrency(totalLimit)}
+          {t('Total Credit Limit')}: {formatCurrency(totalLimit)}
         </p>
       </Card>
 
       {/* Cards List */}
       <section className="space-y-3">
         <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-          {t.creditCards.myCards} ({displayCards.length})
+          {t('My Cards')} ({displayCards.length})
         </h2>
 
         {displayCards.length === 0 ? (
           <EmptyState
             icon={<CreditCard size={22} />}
-            title={t.creditCards.noCards}
-            description={t.creditCards.noCardsDesc}
+            title={t('No credit cards added')}
+            description={t('Add your Visa, Mastercard, or AMEX credit cards to monitor utilization.')}
             action={
               <Link to="/dashboard/credit-cards/add">
-                <Button size="sm">{t.creditCards.addCard}</Button>
+                <Button size="sm">{t('Add Card')}</Button>
               </Link>
             }
           />

@@ -12,7 +12,7 @@ type RateSnapshot = Database['public']['Tables']['zakat_rate_snapshots']['Row'];
 type RuleSet = Database['public']['Tables']['zakat_rule_sets']['Row'];
 
 export function ZakatDashboardPage() {
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export function ZakatDashboardPage() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-8 bg-[var(--color-bg-page)] min-h-svh">
-        <h1 className="text-2xl font-bold mb-6 text-[var(--color-text-primary)]">{t.zakat.pageTitle}</h1>
+        <h1 className="text-2xl font-bold mb-6 text-[var(--color-text-primary)]">{t('Zakat Intelligence')}</h1>
         <Skeleton className="h-40 rounded-3xl" />
         <Skeleton className="h-64 rounded-3xl" />
       </div>
@@ -77,7 +77,7 @@ export function ZakatDashboardPage() {
   if (error) {
     return (
       <div className="space-y-6 p-4 md:p-8 bg-[var(--color-bg-page)] min-h-svh">
-        <h1 className="text-2xl font-bold mb-6 text-[var(--color-text-primary)]">{t.zakat.pageTitle}</h1>
+        <h1 className="text-2xl font-bold mb-6 text-[var(--color-text-primary)]">{t('Zakat Intelligence')}</h1>
         <ErrorState message={error} onRetry={fetchZakatData} />
       </div>
     );
@@ -98,7 +98,7 @@ export function ZakatDashboardPage() {
           <HandHeart className="w-6 h-6" />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text-primary)]">
-          {t.zakat.pageTitle}
+          {t('Zakat Intelligence')}
         </h1>
       </div>
 
@@ -111,10 +111,10 @@ export function ZakatDashboardPage() {
         <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
           <div className="space-y-3 text-center md:text-left w-full md:w-auto flex-1">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white drop-shadow-sm">
-              {t.zakat.calculatorTitle}
+              {t('Zakat Calculator')}
             </h2>
             <p className="text-emerald-50/90 text-sm md:text-base max-w-xl leading-relaxed">
-              {t.zakat.dashboardSubtitle}
+              {t('Determine your eligibility and estimate your Zakat easily using the latest available Nisab rates.')}
             </p>
           </div>
           <div className="shrink-0 w-full md:w-auto flex flex-col gap-3">
@@ -124,7 +124,7 @@ export function ZakatDashboardPage() {
               className="w-full md:w-auto bg-white text-emerald-900 hover:text-emerald-950 hover:bg-emerald-50 rounded-2xl h-14 px-8 font-bold shadow-lg shadow-black/10 transition-all active:scale-[0.98] border-0"
             >
               <Calculator className="w-5 h-5 mr-2" />
-              {t.zakat.startCalculation}
+              {t('Start Calculation')}
             </Button>
             <Button
               variant="outline"
@@ -132,7 +132,7 @@ export function ZakatDashboardPage() {
               className="w-full md:w-auto border-white/30 bg-white/10 text-white hover:bg-white/20 rounded-2xl h-12 transition-all"
             >
               <History className="w-4 h-4 mr-2" />
-              {t.zakat.viewHistory}
+              {t('View History')}
             </Button>
           </div>
         </div>
@@ -142,7 +142,7 @@ export function ZakatDashboardPage() {
       <section className="space-y-5 pt-4">
         <div className="flex items-center justify-between px-2">
           <h3 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            {t.zakat.currentNisab}
+            {t('Current Nisab & Rates')}
           </h3>
           <button
             onClick={handleRefreshRate}
@@ -150,7 +150,7 @@ export function ZakatDashboardPage() {
             className="flex items-center px-4 py-2 bg-white dark:bg-black/20 hover:bg-gray-50 dark:hover:bg-black/40 border border-[var(--color-border)] rounded-full text-sm font-medium text-emerald-600 dark:text-emerald-400 transition-all disabled:opacity-50 shadow-sm"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {t.zakat.refresh}
+            {t('Refresh')}
           </button>
         </div>
 
@@ -163,7 +163,7 @@ export function ZakatDashboardPage() {
               </div>
               <div className="text-right">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/70">
-                  {t.zakat.activeStandard}
+                  {t('Active Standard')}
                 </span>
                 <div className="inline-flex items-center mt-1 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 rounded-full">
                   <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 capitalize">
@@ -174,7 +174,7 @@ export function ZakatDashboardPage() {
             </div>
 
             <p className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300 mb-2">
-              {t.zakat.nisabThreshold}
+              {t('Current Nisab Threshold')}
             </p>
             <h4 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--color-text-primary)] dark:text-white">
               {activeRate ? formatCurrency(currentNisabValue) : '---'}
@@ -191,13 +191,13 @@ export function ZakatDashboardPage() {
           <div className="p-6 md:p-8 rounded-[2rem] bg-white dark:bg-[var(--color-bg-subtle)] border border-[var(--color-border)] shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
             <div className="space-y-5">
               <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2">
-                {t.zakat.marketRates}
+                {t('Market Rates')}
               </h3>
 
               <div className="flex justify-between items-center p-4 bg-yellow-50/50 dark:bg-yellow-950/20 border border-yellow-100 dark:border-yellow-900/40 rounded-2xl">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                  <span className="text-[var(--color-text-secondary)] dark:text-gray-300 font-medium">{t.zakat.goldPerGram}</span>
+                  <span className="text-[var(--color-text-secondary)] dark:text-gray-300 font-medium">{t('Gold (per gram)')}</span>
                 </div>
                 <span className="font-bold text-[var(--color-text-primary)] dark:text-white text-lg">
                   {activeRate ? formatCurrency(activeRate.gold_rate_per_gram) : '---'}
@@ -207,7 +207,7 @@ export function ZakatDashboardPage() {
               <div className="flex justify-between items-center p-4 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-2xl">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-slate-400" />
-                  <span className="text-[var(--color-text-secondary)] dark:text-gray-300 font-medium">{t.zakat.silverPerGram}</span>
+                  <span className="text-[var(--color-text-secondary)] dark:text-gray-300 font-medium">{t('Silver (per gram)')}</span>
                 </div>
                 <span className="font-bold text-[var(--color-text-primary)] dark:text-white text-lg">
                   {activeRate ? formatCurrency(activeRate.silver_rate_per_gram) : '---'}
@@ -217,13 +217,13 @@ export function ZakatDashboardPage() {
 
             <div className="mt-6 pt-5 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-[var(--color-text-tertiary)]">
               <span className="flex items-center bg-[var(--color-bg-subtle)] px-2.5 py-1 rounded-md">
-                {t.zakat.source}:{' '}
+                {t('Source')}:{' '}
                 <span className="ml-1 text-[var(--color-text-secondary)]">
                   {activeRate?.provider_name || '—'}
                 </span>
               </span>
               <span className="flex items-center bg-[var(--color-bg-subtle)] px-2.5 py-1 rounded-md">
-                {t.zakat.updated}:{' '}
+                {t('Updated')}:{' '}
                 {activeRate
                   ? new Date(activeRate.fetch_timestamp).toLocaleString([], {
                       year: 'numeric',
@@ -244,9 +244,9 @@ export function ZakatDashboardPage() {
         <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-500" />
         <p>
           <span className="font-semibold block mb-1 text-amber-900 dark:text-amber-100">
-            {t.zakat.disclaimer}
+            {t('Disclaimer')}
           </span>
-          {t.zakat.disclaimerText}
+          {t('The Zakat calculator provides an estimate based on the details you enter and the selected methodological rules. For personalized religious guidance, please consult a qualified Islamic scholar.')}
         </p>
       </div>
     </div>

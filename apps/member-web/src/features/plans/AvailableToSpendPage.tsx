@@ -18,7 +18,7 @@ import {
 
 export const AvailableToSpendPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
 
   const isEnabled = isFeatureEnabled('available_to_spend_enabled', user?.id);
 
@@ -61,12 +61,12 @@ export const AvailableToSpendPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-              {t.availableToSpend.title}
+              {t('Available to Spend')}
             </h1>
             {!isEnabled && <Badge variant="warning">Rollout Preview</Badge>}
           </div>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-0.5">
-            {t.availableToSpend.subtitle}
+            {t('Calculated uncommitted liquid funds after outstanding commitments and protected reserves')}
           </p>
         </div>
 

@@ -8,7 +8,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { isFeatureEnabled } from '@/lib/flags';
 
 export const PlansPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   const { loaded } = useFeatureTranslation('plans');
   const { user } = useAuthContext();
   const guidanceEnabled = isFeatureEnabled('guidance_planner_enabled', user?.id);
@@ -26,10 +26,10 @@ export const PlansPage: React.FC = () => {
     <div className="page-container pt-5 space-y-5 fade-in">
       <header>
         <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-          {t.plans.title}
+          {t('Financial Plans')}
         </h1>
         <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-          {t.plans.subtitle}
+          {t('Manage your financial goals and commitments')}
         </p>
       </header>
 
@@ -42,15 +42,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-bold text-[var(--color-text-primary)]">
-                  {t.plans.availableToSpend}
+                  {t('Available to Spend')}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t.plans.availableToSpendDesc}
+                  {t('Real-time uncommitted spending capacity after bills and protected reserves.')}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t.plans.manageAvailableToSpend} <ChevronRight size={16} />
+              {t('View Available to Spend')} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -63,15 +63,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  {t.plans.moneyCalendar}
+                  {t('Money Calendar')}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t.plans.moneyCalendarDesc}
+                  {t('Visual calendar of upcoming inflows, bills, loan payments, and commitments.')}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t.plans.manageMoneyCalendar} <ChevronRight size={16} />
+              {t('Open Money Calendar')} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -84,15 +84,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  {t.plans.budgets}
+                  {t('Budgets')}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t.plans.budgetsDesc}
+                  {t('Set category expense limits and track progress against spending.')}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t.plans.manageBudgets} <ChevronRight size={16} />
+              {t('Manage Budgets')} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -105,15 +105,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  {t.plans.savingsDps}
+                  {t('Savings, DPS & FDR')}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t.plans.savingsDpsDesc}
+                  {t('Deposit pension schemes, bank FDRs, and National Sanchaypatra.')}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t.plans.manageSavings} <ChevronRight size={16} />
+              {t('Manage Savings')} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -126,15 +126,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  {t.plans.recurring}
+                  {t('Recurring')}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t.plans.recurringDesc}
+                  {t('Track subscriptions and recurring bills.')}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t.plans.manageRecurring} <ChevronRight size={16} />
+              {t('Manage Recurring')} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>
@@ -147,15 +147,15 @@ export const PlansPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  {t.plans.goals}
+                  {t('Goals')}
                 </h2>
                 <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t.plans.goalsDesc}
+                  {t('Set financial goals and track your progress.')}
                 </p>
               </div>
             </div>
             <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t.plans.manageGoals} <ChevronRight size={16} />
+              {t('Manage Goals')} <ChevronRight size={16} />
             </div>
           </Card>
         </Link>

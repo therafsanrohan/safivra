@@ -33,7 +33,7 @@ interface RecurringRow {
 
 export const RecurringPage: React.FC = () => {
   const { user } = useAuthContext();
-  const { t, locale } = useLanguage();
+  const { translate: t, locale } = useLanguage();
   const { loaded } = useFeatureTranslation('recurring');
   const { success, error: showError } = useToast();
   const [items, setItems] = useState<RecurringRow[]>([]);
@@ -183,8 +183,8 @@ export const RecurringPage: React.FC = () => {
       setAutoPost(false);
       setShowAddDialog(false);
       success(
-        t.recurring.toastAdded,
-        t.recurring.toastAddedDesc
+        t('Recurring Item Added'),
+        t('{name} set for {amount}.')
           .replace('{name}', name.trim())
           .replace('{amount}', formatCurrency(amount))
       );
@@ -253,7 +253,7 @@ export const RecurringPage: React.FC = () => {
 
       setItems((prev) => prev.filter((item) => item.id !== selectedItem.id));
       setShowDeleteDialog(false);
-      success(t.recurring.toastDeleted, t.recurring.toastDeletedDesc);
+      success(t('Recurring Item Deleted'), t('Successfully removed recurring item.'));
     } catch (err) {
       showError('Could not delete item', parseError(err).message);
     }
@@ -292,17 +292,17 @@ export const RecurringPage: React.FC = () => {
     <div className="page-container pt-4 space-y-5 fade-in">
       <div className="flex items-center justify-between">
         <Link to="/dashboard/plans" className="flex items-center gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
-          <ArrowLeft size={18} /> {t.recurring.backToPlans}
+          <ArrowLeft size={18} /> {t('Plans')}
         </Link>
       </div>
 
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[var(--text-page)] font-semibold text-[var(--color-text-primary)]">
-            {t.recurring.pageTitle}
+            {t('Recurring Commitments')}
           </h1>
           <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)]">
-            {t.recurring.pageSubtitle}
+            {t('Subscriptions, bills, rent, and scheduled income')}
           </p>
         </div>
         <Button size="sm" onClick={() => {
@@ -313,15 +313,15 @@ export const RecurringPage: React.FC = () => {
           setAutoPost(false);
           setShowAddDialog(true);
         }} className="gap-1">
-          <Plus size={16} /> {t.recurring.addRecurring}
+          <Plus size={16} /> {t('Add Recurring')}
         </Button>
       </header>
 
       {items.length === 0 ? (
         <EmptyState
           icon={<RefreshCw size={22} />}
-          title={t.recurring.noCommitments}
-          description={t.recurring.noCommitmentsDesc}
+          title={t('No recurring commitments')}
+          description={t('Add monthly internet bills, house rent, or streaming subscriptions to receive timely reminders.')}
           action={<Button size="sm" onClick={() => {
             setName('');
             setAmount(1500);
@@ -329,7 +329,7 @@ export const RecurringPage: React.FC = () => {
             setNextDate(todayString());
             setAutoPost(false);
             setShowAddDialog(true);
-          }}>{t.recurring.addItem}</Button>}
+          }}>{t('Add Item')}</Button>}
         />
       ) : (
         <Card padding="none">
@@ -342,16 +342,16 @@ export const RecurringPage: React.FC = () => {
                       {item.name}
                     </p>
                     <Badge variant={item.transaction_type === 'income' ? 'positive' : 'neutral'}>
-                      {item.frequency === 'monthly' ? t.recurring.monthly : item.frequency === 'weekly' ? t.recurring.weekly : item.frequency === 'yearly' ? t.recurring.yearly : item.frequency}
+                      {item.frequency === 'monthly' ? t('Monthly') : item.frequency === 'weekly' ? t('Weekly') : item.frequency === 'yearly' ? t('Yearly') : item.frequency}
                     </Badge>
                     {item.auto_post && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-semibold">
-                        {t.recurring.autoPostLabel}
+                        {t('Auto Post')}
                       </span>
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--text-secondary)] text-[var(--color-text-muted)] text-[13px]">
-                    <span>{t.recurring.nextDue}: {formatDate(item.next_occurrence)}</span>
+                    <span>{t('Next due')}: {formatDate(item.next_occurrence)}</span>
                     {item.financial_accounts?.name && (
                       <>
                         <span>•</span>
@@ -399,58 +399,58 @@ export const RecurringPage: React.FC = () => {
       <Dialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        title={t.recurring.dialogTitle}
-        description={t.recurring.dialogDesc}
+        title={t('Add Recurring Commitment')}
+        description={t('Schedule a bill, rent payment, or subscription')}
       >
         {accounts.length === 0 ? (
           <div className="space-y-4 py-4 text-center">
             <p className="text-[var(--text-body)] text-[var(--color-text-secondary)] leading-relaxed">
-              {t.recurring.noAccountWarning}
+              {t('You must create a financial account first to schedule a recurring commitment.')}
             </p>
             <Link to="/dashboard/accounts/add" onClick={() => setShowAddDialog(false)} className="block">
-              <Button fullWidth>{t.recurring.createAccountBtn}</Button>
+              <Button fullWidth>{t('Create Account')}</Button>
             </Link>
           </div>
         ) : (
           <form onSubmit={handleAddRecurring} className="space-y-4 pt-2">
             <Input
-              label={t.recurring.titleLabel}
+              label={t('Title')}
               required
-              placeholder={t.recurring.titlePlaceholder}
+              placeholder={t('e.g. Internet Bill, House Rent, Netflix')}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             
             <CurrencyInput
-              label={t.recurring.amountLabel}
+              label={t('Amount')}
               required
               value={amount}
               onChange={setAmount}
             />
 
             <Select
-              label={t.recurring.typeLabel}
+              label={t('Transaction Type')}
               value={type}
               onValueChange={handleTypeChange}
               options={[
-                { value: 'expense', label: t.recurring.expense },
-                { value: 'income', label: t.recurring.income },
+                { value: 'expense', label: t('Expense') },
+                { value: 'income', label: t('Income') },
               ]}
             />
 
             <Select
-              label={t.recurring.frequencyLabel}
+              label={t('Frequency')}
               value={frequency}
               onValueChange={setFrequency}
               options={[
-                { value: 'weekly', label: t.recurring.weekly },
-                { value: 'monthly', label: t.recurring.monthly },
-                { value: 'yearly', label: t.recurring.yearly },
+                { value: 'weekly', label: t('Weekly') },
+                { value: 'monthly', label: t('Monthly') },
+                { value: 'yearly', label: t('Yearly') },
               ]}
             />
 
             <Select
-              label={t.recurring.accountLabel}
+              label={t('Account')}
               value={accountId}
               onValueChange={setAccountId}
               options={accounts.map((acc) => ({ value: acc.id, label: acc.name }))}
@@ -459,7 +459,7 @@ export const RecurringPage: React.FC = () => {
 
             {filteredCategories.length > 0 && (
               <Select
-                label={t.recurring.categoryLabel}
+                label={t('Category')}
                 value={categoryId}
                 onValueChange={setCategoryId}
                 options={[
@@ -471,7 +471,7 @@ export const RecurringPage: React.FC = () => {
             )}
 
             <Input
-              label={t.recurring.nextDueLabel}
+              label={t('Next Due Date')}
               type="date"
               required
               value={nextDate}
@@ -479,14 +479,14 @@ export const RecurringPage: React.FC = () => {
             />
 
             <Switch
-              label={t.recurring.autoPostLabel}
-              description={t.recurring.autoPostDesc}
+              label={t('Auto Post')}
+              description={t('Automatically record transaction on due date')}
               checked={autoPost}
               onCheckedChange={setAutoPost}
             />
 
             <Button type="submit" fullWidth className="mt-4">
-              {t.recurring.saveCommitment}
+              {t('Save Commitment')}
             </Button>
           </form>
         )}
@@ -501,38 +501,38 @@ export const RecurringPage: React.FC = () => {
       >
         <form onSubmit={handleEditRecurring} className="space-y-4 pt-2">
           <Input
-            label={t.recurring.titleLabel}
+            label={t('Title')}
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <CurrencyInput
-            label={t.recurring.amountLabel}
+            label={t('Amount')}
             required
             value={amount}
             onChange={setAmount}
           />
           <Select
-            label={t.recurring.typeLabel}
+            label={t('Transaction Type')}
             value={type}
             onValueChange={handleTypeChange}
             options={[
-              { value: 'expense', label: t.recurring.expense },
-              { value: 'income', label: t.recurring.income },
+              { value: 'expense', label: t('Expense') },
+              { value: 'income', label: t('Income') },
             ]}
           />
           <Select
-            label={t.recurring.frequencyLabel}
+            label={t('Frequency')}
             value={frequency}
             onValueChange={setFrequency}
             options={[
-              { value: 'weekly', label: t.recurring.weekly },
-              { value: 'monthly', label: t.recurring.monthly },
-              { value: 'yearly', label: t.recurring.yearly },
+              { value: 'weekly', label: t('Weekly') },
+              { value: 'monthly', label: t('Monthly') },
+              { value: 'yearly', label: t('Yearly') },
             ]}
           />
           <Select
-            label={t.recurring.accountLabel}
+            label={t('Account')}
             value={accountId}
             onValueChange={setAccountId}
             options={accounts.map((acc) => ({ value: acc.id, label: acc.name }))}
@@ -540,7 +540,7 @@ export const RecurringPage: React.FC = () => {
           />
           {filteredCategories.length > 0 && (
             <Select
-              label={t.recurring.categoryLabel}
+              label={t('Category')}
               value={categoryId}
               onValueChange={setCategoryId}
               options={[
@@ -551,15 +551,15 @@ export const RecurringPage: React.FC = () => {
             />
           )}
           <Input
-            label={t.recurring.nextDueLabel}
+            label={t('Next Due Date')}
             type="date"
             required
             value={nextDate}
             onChange={(e) => setNextDate(e.target.value)}
           />
           <Switch
-            label={t.recurring.autoPostLabel}
-            description={t.recurring.autoPostDesc}
+            label={t('Auto Post')}
+            description={t('Automatically record transaction on due date')}
             checked={autoPost}
             onCheckedChange={setAutoPost}
           />

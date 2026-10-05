@@ -47,7 +47,7 @@ function applyTheme(mode: ThemeMode) {
 
 export const SettingsPage: React.FC = () => {
   const { profile, preferences, user, signOut, updateProfile, updatePassword, updatePreferences } = useAuthContext();
-  const { t, locale, setLocale } = useLanguage();
+  const { translate: t, locale, setLocale } = useLanguage();
   const { success, error: showError } = useToast();
   const isBn = locale === 'bn';
 

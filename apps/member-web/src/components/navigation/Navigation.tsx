@@ -17,14 +17,14 @@ import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
 export const BottomNav: React.FC = () => {
   const [addOpen, setAddOpen] = useState(false);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
 
   const navItems = [
-    { to: '/dashboard', label: t.nav.home, icon: Home, end: true },
-    { to: '/dashboard/activity', label: t.nav.activity, icon: ReceiptText },
-    { action: () => setAddOpen(true), label: t.nav.add, icon: Plus, isAction: true },
-    { to: '/dashboard/plans', label: t.nav.plans, icon: Target },
-    { to: '/dashboard/more', label: t.nav.more, icon: MoreHorizontal },
+    { to: '/dashboard', label: t('Home'), icon: Home, end: true },
+    { to: '/dashboard/activity', label: t('Activity'), icon: ReceiptText },
+    { action: () => setAddOpen(true), label: t('Add'), icon: Plus, isAction: true },
+    { to: '/dashboard/plans', label: t('Plans'), icon: Target },
+    { to: '/dashboard/more', label: t('More'), icon: MoreHorizontal },
   ];
 
   return (
@@ -109,19 +109,19 @@ const AddTransactionSheet: React.FC<{
   onOpenChange: (v: boolean) => void;
   navigate: ReturnType<typeof useNavigate>;
 }> = ({ open, onOpenChange, navigate }) => {
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
 
   const primaryActions = [
-    { label: t.addTransaction.expense, icon: ReceiptText, color: 'text-[var(--color-negative)]', bg: 'bg-[var(--color-negative-soft)]', path: '/dashboard/activity/add?type=expense' },
-    { label: t.addTransaction.income, icon: Wallet, color: 'text-[var(--color-positive)]', bg: 'bg-[var(--color-positive-soft)]', path: '/dashboard/activity/add?type=income' },
-    { label: t.addTransaction.transfer, icon: HandCoins, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]', path: '/dashboard/activity/add?type=transfer' },
-    { label: t.addTransaction.loanPayment, icon: Landmark, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]', path: '/dashboard/activity/add?type=loan_payment' },
-    { label: t.addTransaction.cardPayment, icon: CreditCard, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-soft)]', path: '/dashboard/activity/add?type=credit_card_payment' },
-    { label: t.addTransaction.adjustment, icon: BarChart3, color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-subtle)]', path: '/dashboard/activity/add?type=balance_adjustment' },
+    { label: t('Expense'), icon: ReceiptText, color: 'text-[var(--color-negative)]', bg: 'bg-[var(--color-negative-soft)]', path: '/dashboard/activity/add?type=expense' },
+    { label: t('Income'), icon: Wallet, color: 'text-[var(--color-positive)]', bg: 'bg-[var(--color-positive-soft)]', path: '/dashboard/activity/add?type=income' },
+    { label: t('Transfer'), icon: HandCoins, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]', path: '/dashboard/activity/add?type=transfer' },
+    { label: t('Loan Payment'), icon: Landmark, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]', path: '/dashboard/activity/add?type=loan_payment' },
+    { label: t('Card Payment'), icon: CreditCard, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-soft)]', path: '/dashboard/activity/add?type=credit_card_payment' },
+    { label: t('Adjustment'), icon: BarChart3, color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-subtle)]', path: '/dashboard/activity/add?type=balance_adjustment' },
   ];
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t.addTransaction.title}>
+    <Sheet open={open} onOpenChange={onOpenChange} title={t('Add Transaction')}>
       <div className="grid grid-cols-3 gap-3">
         {primaryActions.map((action) => (
           <button
@@ -152,7 +152,7 @@ const AddTransactionSheet: React.FC<{
 
 export const Sidebar: React.FC = () => {
   const { profile, user } = useAuthContext();
-  const { t, toggleLocale, locale } = useLanguage();
+  const { translate: t, toggleLocale, locale } = useLanguage();
   const isBn = locale === 'bn';
   const [addOpen, setAddOpen] = useState(false);
   const navigate = useNavigate();
@@ -162,26 +162,26 @@ export const Sidebar: React.FC = () => {
   const navGroups = [
     {
       items: [
-        { to: '/dashboard', label: t.nav.dashboard, icon: Home, end: true },
-        { to: '/dashboard/activity', label: t.nav.activity, icon: ReceiptText },
+        { to: '/dashboard', label: t('Dashboard'), icon: Home, end: true },
+        { to: '/dashboard/activity', label: t('Activity'), icon: ReceiptText },
       ],
     },
     {
-      label: t.nav.manage,
+      label: t('Manage'),
       items: [
-        { to: '/dashboard/accounts', label: t.nav.accounts, icon: Wallet },
-        { to: '/dashboard/loans', label: t.nav.loans, icon: Landmark },
-        { to: '/dashboard/credit-cards', label: t.nav.creditCards, icon: CreditCard },
-        { to: '/dashboard/plans/recurring', label: t.nav.recurring, icon: RefreshCw },
+        { to: '/dashboard/accounts', label: t('Accounts'), icon: Wallet },
+        { to: '/dashboard/loans', label: t('Loans'), icon: Landmark },
+        { to: '/dashboard/credit-cards', label: t('Credit Cards'), icon: CreditCard },
+        { to: '/dashboard/plans/recurring', label: t('Recurring'), icon: RefreshCw },
       ],
     },
     {
-      label: t.nav.plan,
+      label: t('Plan'),
       items: [
         { to: '/dashboard/plans/available-to-spend', label: isBn ? 'ব্যয়যোগ্য তহবিল' : 'Available to Spend', icon: Wallet },
         { to: '/dashboard/plans/calendar', label: isBn ? 'অর্থ ক্যালেন্ডার' : 'Money Calendar', icon: Calendar },
-        { to: '/dashboard/plans', label: t.nav.plansGoals, icon: Target },
-        { to: '/dashboard/reports', label: t.nav.reports, icon: BookOpen },
+        { to: '/dashboard/plans', label: t('Plans & Goals'), icon: Target },
+        { to: '/dashboard/reports', label: t('Reports'), icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },
         { to: '/dashboard/zakat', label: isBn ? 'যাকাত' : 'Zakat Intelligence', icon: HandHeart },
         ...( isFeatureEnabled('real_wealth_intelligence_enabled', user?.id) ? [{ to: '/dashboard/real-wealth', label: isBn ? 'রিয়েল ওয়েলথ' : 'Real Wealth', icon: BarChart3 }] : [] )
@@ -208,7 +208,7 @@ export const Sidebar: React.FC = () => {
           ].join(' ')}
         >
           <Languages size={11} />
-          {t.common.switchLang}
+          {t('বাংলা')}
         </button>
       </div>
 
@@ -218,7 +218,7 @@ export const Sidebar: React.FC = () => {
           className="w-full flex items-center justify-center gap-2 bg-[var(--color-accent)] hover:opacity-90 text-white py-2.5 px-4 rounded-[var(--radius-button)] font-medium transition-opacity shadow-sm"
         >
           <Plus size={18} />
-          {t.nav.add}
+          {t('Add')}
         </button>
       </div>
 
@@ -294,7 +294,7 @@ export const Sidebar: React.FC = () => {
                   </span>
                 )}
               </span>
-              {t.nav.notifications}
+              {t('Notifications')}
             </>
           )}
         </NavLink>
@@ -311,7 +311,7 @@ export const Sidebar: React.FC = () => {
           }
         >
           <Settings size={18} strokeWidth={1.75} aria-hidden="true" />
-          {t.nav.settings}
+          {t('Settings')}
         </NavLink>
 
         {/* User */}
