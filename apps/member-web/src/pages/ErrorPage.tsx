@@ -9,6 +9,16 @@ export const ErrorPage: React.FC = () => {
   // Log securely to console. Do not render this in the UI.
   console.error('Unhandled Route Error:', error);
 
+  // Auto-reload on ChunkLoadError
+  if (
+    error && 
+    ((error as Error).name === 'ChunkLoadError' || 
+     (error as Error).message?.includes('Failed to fetch dynamically imported module'))
+  ) {
+    window.location.reload();
+    return null;
+  }
+
   return (
     <>
       <SEO title="Error" description="An unexpected error occurred." />
@@ -16,9 +26,14 @@ export const ErrorPage: React.FC = () => {
         <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4">
           Something went wrong
         </h1>
-        <p className="text-lg text-[var(--color-text-secondary)] mb-8 max-w-md">
+        <p className="text-lg text-[var(--color-text-secondary)] mb-4 max-w-md">
           Safivra could not complete this request. Please try again.
         </p>
+        {error && (
+          <div className="mb-8 p-4 bg-red-100 text-red-700 rounded-lg text-sm text-left w-full max-w-md overflow-auto font-mono">
+            {error instanceof Error ? error.message : String(error)}
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row gap-4">
           <Button variant="primary" size="lg" onClick={() => window.location.reload()}>
             Try Again
