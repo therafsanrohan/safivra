@@ -128,10 +128,12 @@ export async function calculateAdaptiveBudgetIntelligence(
 
     if (error) {
       console.error('[BudgetEngine] RPC error:', error);
-      return null;
+      throw error;
     }
 
-    if (!data || typeof data !== 'object') return null;
+    if (!data || typeof data !== 'object') {
+      throw new Error('RPC returned invalid data format: ' + JSON.stringify(data));
+    }
 
     // Map the JSONB response from the RPC to our TypeScript interface
     const d = data as Record<string, any>;
