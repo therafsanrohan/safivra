@@ -63,7 +63,7 @@ export const SalaryManagementDashboard: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       setRpcError(err?.message ?? 'Failed to calculate adaptive budget.');
-      showError('Error', 'Failed to calculate adaptive budget.');
+      showError('Error', err?.message ?? 'Failed to calculate adaptive budget.');
     } finally {
       setLoading(false);
     }
