@@ -15,17 +15,18 @@ export const useFeatureTranslation = (ns: string) => {
     const loadNamespace = async () => {
       try {
         const [enModule, bnModule] = await Promise.all([
-          import(`../../locales/en/${ns}.json`),
-          import(`../../locales/bn/${ns}.json`),
+          import(`../locales/en/${ns}.json`).catch(() => null),
+          import(`../locales/bn/${ns}.json`).catch(() => null),
         ]);
 
         if (!active) return;
 
-        i18n.addResourceBundle('en', ns, enModule.default, true, true);
-        i18n.addResourceBundle('bn', ns, bnModule.default, true, true);
-        setLoaded(true);
+        if (enModule?.default) i18n.addResourceBundle('en', ns, enModule.default, true, true);
+        if (bnModule?.default) i18n.addResourceBundle('bn', ns, bnModule.default, true, true);
       } catch (err) {
         console.error(`Failed to load i18n namespace: ${ns}`, err);
+      } finally {
+        if (active) setLoaded(true);
       }
     };
 
