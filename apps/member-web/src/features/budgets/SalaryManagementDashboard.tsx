@@ -19,6 +19,7 @@ import {
   TrendingUp,
   CreditCard,
   RefreshCw,
+  Settings2,
 } from 'lucide-react';
 import {
   calculateAdaptiveBudgetIntelligence,
@@ -27,6 +28,7 @@ import {
 } from '@/lib/budget/budgetEngine';
 import { IncomeSourcesManager } from './IncomeSourcesManager';
 import { SinkingFundsManager } from './SinkingFundsManager';
+import { BudgetConfigPanel } from './BudgetConfigPanel';
 
 export const SalaryManagementDashboard: React.FC = () => {
   const { user } = useAuthContext();
@@ -35,7 +37,7 @@ export const SalaryManagementDashboard: React.FC = () => {
   const [analysis, setAnalysis] = useState<AdaptiveBudgetAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedScenario, setSelectedScenario] = useState<BudgetScenarioType>('balanced');
-  const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'sinking_funds' | 'payday'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'sinking_funds' | 'payday' | 'settings'>('overview');
 
   const loadBudget = useCallback(async () => {
     if (!user?.id) return;
@@ -123,6 +125,16 @@ export const SalaryManagementDashboard: React.FC = () => {
             }`}
           >
             Payday Plan
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeTab === 'settings'
+                ? 'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+            }`}
+          >
+            ⚙️ Settings
           </button>
         </div>
       </div>
@@ -317,6 +329,65 @@ export const SalaryManagementDashboard: React.FC = () => {
             </div>
           </Card>
 
+          {/* Emergency Fund Intelligence Card */}
+          {analysis?.emergencyFund && (
+            <Card className="p-6 border-[var(--color-border)] space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm text-[var(--color-text-primary)] flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" /> Emergency Fund Status
+                </h3>
+                <Badge
+                  variant={
+                    analysis.emergencyFund.currentCoverageMonths >= analysis.emergencyFund.targetMonths
+                      ? 'positive'
+                      : analysis.emergencyFund.currentCoverageMonths >= 1
+                      ? 'warning'
+                      : 'negative'
+                  }
+                  className="text-[10px] px-2"
+                >
+                  {analysis.emergencyFund.currentCoverageMonths.toFixed(1)} / {analysis.emergencyFund.targetMonths} months
+                </Badge>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[var(--color-text-muted)]">Coverage Progress</span>
+                  <span className="font-medium text-[var(--color-text-primary)]">
+                    {formatCurrency(analysis.emergencyFund.currentLiquidSavings)} of {formatCurrency(analysis.emergencyFund.targetAmount)}
+                  </span>
+                </div>
+                <ProgressBar
+                  value={Math.min(analysis.emergencyFund.currentCoverageMonths, analysis.emergencyFund.targetMonths)}
+                  max={analysis.emergencyFund.targetMonths}
+                  className="h-2"
+                />
+              </div>
+
+              {analysis.emergencyFund.gapAmount > 0 ? (
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 bg-amber-50/60 dark:bg-amber-950/30 rounded-xl border border-amber-100 dark:border-amber-900/40">
+                    <span className="text-amber-700 dark:text-amber-400 block text-[10px] uppercase tracking-wide">Gap to Fill</span>
+                    <span className="font-bold text-amber-800 dark:text-amber-300 tabular-nums block mt-0.5">
+                      {formatCurrency(analysis.emergencyFund.gapAmount)}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+                    <span className="text-emerald-700 dark:text-emerald-400 block text-[10px] uppercase tracking-wide">Recommended Monthly</span>
+                    <span className="font-bold text-emerald-800 dark:text-emerald-300 tabular-nums block mt-0.5">
+                      {formatCurrency(analysis.emergencyFund.recommendedMonthlyContribution)}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 p-3 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  Emergency fund target achieved! Your financial safety net is secure.
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* Explainability Notes ("Why?") */}
           <Card className="p-6 border-[var(--color-border)] space-y-3 bg-[var(--color-bg-surface)]">
             <h3 className="font-semibold text-sm text-[var(--color-text-primary)] flex items-center gap-2">
@@ -409,6 +480,11 @@ export const SalaryManagementDashboard: React.FC = () => {
             </div>
           </div>
         </Card>
+      )}
+
+      {/* 5. SETTINGS TAB */}
+      {activeTab === 'settings' && (
+        <BudgetConfigPanel onConfigUpdated={loadBudget} />
       )}
     </div>
   );
