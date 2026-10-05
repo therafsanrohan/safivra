@@ -19,6 +19,12 @@ export const ErrorPage: React.FC = () => {
     return null;
   }
 
+  const errorMessage = error
+    ? error instanceof Error
+      ? error.message
+      : String(error)
+    : null;
+
   return (
     <>
       <SEO title="Error" description="An unexpected error occurred." />
@@ -29,11 +35,11 @@ export const ErrorPage: React.FC = () => {
         <p className="text-lg text-[var(--color-text-secondary)] mb-4 max-w-md">
           Safivra could not complete this request. Please try again.
         </p>
-        {error && (
+        {errorMessage ? (
           <div className="mb-8 p-4 bg-red-100 text-red-700 rounded-lg text-sm text-left w-full max-w-md overflow-auto font-mono">
-            {error instanceof Error ? error.message : String(error)}
+            {errorMessage}
           </div>
-        )}
+        ) : null}
         <div className="flex flex-col sm:flex-row gap-4">
           <Button variant="primary" size="lg" onClick={() => window.location.reload()}>
             Try Again
