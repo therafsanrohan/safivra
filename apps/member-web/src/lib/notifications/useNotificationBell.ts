@@ -13,11 +13,18 @@ export interface UnreadNotificationState {
  * Reads from v_user_notifications unified view (merges legacy + event schema).
  * Falls back to legacy `notifications` table if view not yet deployed.
  * Uses Supabase Realtime to react instantly on both tables.
+ *
+ * IMPORTANT: Each hook instance uses a unique channel ID (random suffix)
+ * so that multiple simultaneous mounts (e.g. Navigation + MorePage) never
+ * share channel names — Supabase throws if you call .on() on an already-
+ * subscribed channel with the same name.
  */
 export function useNotificationBell(userId: string | undefined): UnreadNotificationState {
   const [unreadCount, setUnreadCount] = useState(0);
   const channelLegacyRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const channelEventsRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  // Stable unique suffix per hook instance — never changes across re-renders
+  const instanceId = useRef<string>(Math.random().toString(36).slice(2, 8));
 
   const fetchCount = useCallback(async () => {
     if (!userId) {
@@ -52,9 +59,11 @@ export function useNotificationBell(userId: string | undefined): UnreadNotificat
 
     fetchCount();
 
+    const uid = instanceId.current;
+
     // Subscribe to legacy notifications table
     channelLegacyRef.current = supabase
-      .channel(`notifications:bell:legacy:${userId}`)
+      .channel(`notifications:bell:legacy:${userId}:${uid}`)
       .on(
         'postgres_changes',
         {
@@ -69,7 +78,7 @@ export function useNotificationBell(userId: string | undefined): UnreadNotificat
 
     // Subscribe to new notification_events table for instant badge refresh
     channelEventsRef.current = supabase
-      .channel(`notifications:bell:events:${userId}`)
+      .channel(`notifications:bell:events:${userId}:${uid}`)
       .on(
         'postgres_changes',
         {
