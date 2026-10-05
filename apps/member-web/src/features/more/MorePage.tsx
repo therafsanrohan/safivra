@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Calendar, BarChart3
+  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Calendar, BarChart3, PieChart
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -47,6 +47,7 @@ export const MorePage: React.FC = () => {
       items: [
         { to: '/dashboard/plans/available-to-spend', label: locale === 'bn' ? 'ব্যয়যোগ্য তহবিল' : 'Available to Spend', icon: Wallet },
         { to: '/dashboard/plans/calendar', label: locale === 'bn' ? 'অর্থ ক্যালেন্ডার' : 'Money Calendar', icon: Calendar },
+        { to: '/dashboard/plans/budgets', label: locale === 'bn' ? 'স্যালারি ও বাজেট' : 'Salary & Budget', icon: PieChart },
         { to: '/dashboard/plans/savings', label: t('Savings, DPS & FDR'), icon: Coins },
         { to: '/dashboard/plans/recurring', label: t('Recurring Commitments'), icon: RefreshCw },
         { to: '/dashboard/reports', label: t('Reports & Exports'), icon: BookOpen },

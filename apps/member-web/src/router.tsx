@@ -43,6 +43,7 @@ const NotificationsPage   = lazy(() => import('@/features/notifications/Notifica
 const ToolsPage           = lazy(() => import('@/features/tools/ToolsPage').then((m) => ({ default: m.ToolsPage })));
 const SettingsPage        = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const MorePage            = lazy(() => import('@/features/more/MorePage').then((m) => ({ default: m.MorePage })));
+const SalaryBudgetPage    = lazy(() => import('@/features/budgets/SalaryBudgetPage').then((m) => ({ default: m.SalaryBudgetPage })));
 const ErrorPage           = lazy(() => import('@/pages/ErrorPage').then((m) => ({ default: m.ErrorPage })));
 const NotFoundPage        = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
@@ -155,7 +156,8 @@ const router = createBrowserRouter([
       { path: 'plans', element: <Suspense fallback={<PageLoader />}><PlansPage /></Suspense> },
       { path: 'plans/available-to-spend', element: <Suspense fallback={<PageLoader />}><AvailableToSpendPage /></Suspense> },
       { path: 'plans/calendar', element: <Suspense fallback={<PageLoader />}><MoneyCalendarPage /></Suspense> },
-      { path: 'plans/budgets', element: <Suspense fallback={<PageLoader />}><BudgetsPage /></Suspense> },
+      { path: 'plans/budgets', element: <Suspense fallback={<PageLoader />}><SalaryBudgetPage /></Suspense> },
+      { path: 'plans/salary-budget', element: <Suspense fallback={<PageLoader />}><SalaryBudgetPage /></Suspense> },
       { path: 'plans/recurring', element: <Suspense fallback={<PageLoader />}><RecurringPage /></Suspense> },
       { path: 'plans/goals', element: <Suspense fallback={<PageLoader />}><GoalsPage /></Suspense> },
       { path: 'plans/savings', element: <Suspense fallback={<PageLoader />}><SavingsPage /></Suspense> },
