@@ -40,11 +40,19 @@ export const SalaryManagementDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'sinking_funds' | 'payday' | 'settings'>('overview');
 
   const loadBudget = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const result = await calculateAdaptiveBudgetIntelligence(user.id, selectedScenario);
-    setAnalysis(result);
-    setLoading(false);
+    try {
+      const result = await calculateAdaptiveBudgetIntelligence(user.id, selectedScenario);
+      setAnalysis(result);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.id, selectedScenario]);
 
   useEffect(() => {
@@ -128,13 +136,13 @@ export const SalaryManagementDashboard: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
               activeTab === 'settings'
                 ? 'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-sm'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
             }`}
           >
-            ⚙️ Settings
+            <Settings2 className="w-3.5 h-3.5 text-[var(--color-accent)]" /> Settings
           </button>
         </div>
       </div>

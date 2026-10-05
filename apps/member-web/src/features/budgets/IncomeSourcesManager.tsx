@@ -44,7 +44,7 @@ export const IncomeSourcesManager: React.FC<IncomeSourcesManagerProps> = ({ onIn
     try {
       const [sourcesRes, accountsRes] = await Promise.all([
         (supabase.from('income_sources') as any)
-          .select('*, financial_accounts(name)')
+          .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
         supabase
@@ -55,6 +55,9 @@ export const IncomeSourcesManager: React.FC<IncomeSourcesManagerProps> = ({ onIn
       ]);
 
       if (sourcesRes.error) throw sourcesRes.error;
+
+      const accList = (accountsRes.data as Array<{ id: string; name: string }>) ?? [];
+      const accMap = new Map<string, string>(accList.map(a => [a.id, a.name]));
 
       const formatted: IncomeSourceItem[] = (sourcesRes.data ?? []).map((inc: any) => ({
         id: inc.id,
@@ -67,12 +70,12 @@ export const IncomeSourcesManager: React.FC<IncomeSourcesManagerProps> = ({ onIn
         netTakehomeAmount: Number(inc.net_takehome_amount) || 0,
         paymentDay: inc.payment_day,
         receivingAccountId: inc.receiving_account_id,
-        receivingAccountName: inc.financial_accounts?.name,
+        receivingAccountName: inc.receiving_account_id ? accMap.get(inc.receiving_account_id) : undefined,
         isActive: inc.is_active,
       }));
 
       setSources(formatted);
-      setUserAccounts((accountsRes.data as Array<{ id: string; name: string }>) ?? []);
+      setUserAccounts(accList);
     } catch (err: any) {
       console.error(err);
       showError('Error', err.message || 'Failed to load income sources');

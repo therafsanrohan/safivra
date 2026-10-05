@@ -103,7 +103,7 @@ export async function calculateAdaptiveBudgetIntelligence(
   try {
     // 1. Fetch Income Sources
     const { data: incomeData } = await (supabase.from('income_sources') as any)
-      .select('*, financial_accounts(name)')
+      .select('*')
       .eq('user_id', userId)
       .eq('is_active', true);
 
@@ -118,7 +118,6 @@ export async function calculateAdaptiveBudgetIntelligence(
       netTakehomeAmount: Number(inc.net_takehome_amount) || 0,
       paymentDay: inc.payment_day,
       receivingAccountId: inc.receiving_account_id,
-      receivingAccountName: inc.financial_accounts?.name,
       isActive: inc.is_active,
     }));
 
