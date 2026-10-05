@@ -2,15 +2,18 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { translations, type Locale, type TranslationKeys } from '@/lib/i18n/translations';
 import i18n from '@/i18n';
 import { useAuthContext } from '@/context/AuthContext';
+import { autoTranslationEngine, generateSourceHashSync, type TranslationContext } from '@/lib/i18n/autoTranslationEngine';
 
 interface LanguageContextValue {
   locale: Locale;
   t: TranslationKeys;
+  translate: (text: string, options?: TranslationContext) => string;
   toggleLocale: () => void;
   setLocale: (locale: Locale) => void;
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
+
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { preferences, updatePreferences } = useAuthContext();
@@ -21,6 +24,20 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (saved === 'en' || saved === 'bn') return saved;
     return (preferences?.language as Locale) || 'en';
   });
+
+  // Track cache updates to trigger re-renders when auto-translation finishes
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    autoTranslationEngine.setLocale(localLocale);
+    
+    const unsubscribe = autoTranslationEngine.subscribe((hash, translated) => {
+      // Trigger a re-render so components get the new translation
+      setTick(t => t + 1);
+    });
+
+    return () => { unsubscribe(); };
+  }, [localLocale]);
 
   // Sync with cloud preference if available
   useEffect(() => {
@@ -54,15 +71,22 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLocale(localLocale === 'en' ? 'bn' : 'en');
   }, [localLocale, setLocale]);
 
-  // Direct, instant, and guaranteed translation dictionary
+  // The new dynamic Auto-Translation function
+  const translate = useCallback((text: string, options?: TranslationContext) => {
+    const hash = generateSourceHashSync(text);
+    return autoTranslationEngine.translate(text, hash, options);
+  }, []);
+
+  // Legacy direct dictionary (preserved for backward compatibility during migration)
   const tObject = translations[localLocale] || translations.en;
 
   return (
-    <LanguageContext.Provider value={{ locale: localLocale, t: tObject, toggleLocale, setLocale }}>
+    <LanguageContext.Provider value={{ locale: localLocale, t: tObject, translate, toggleLocale, setLocale }}>
       {children}
     </LanguageContext.Provider>
   );
 };
+
 
 export const useLanguage = (): LanguageContextValue => {
   const ctx = useContext(LanguageContext);
