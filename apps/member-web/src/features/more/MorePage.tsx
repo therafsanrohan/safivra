@@ -13,33 +13,27 @@ import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWid
 import { isFeatureEnabled } from '@/lib/flags';
 import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
 
-// ── Isolated error boundary so a widget crash never kills the entire More page ──
-class WidgetErrorBoundary extends React.Component<
+// ── Isolated error boundary ──
+class LocalErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; errorMsg: string }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMsg: '' };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, errorMsg: error?.message || String(error) };
   }
   componentDidCatch(err: unknown) {
-    console.error('[MorePage] Widget error caught by boundary:', err);
+    console.error('[MorePage] Error caught by boundary:', err);
   }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] text-sm">
-          <AlertCircle size={15} className="shrink-0" />
-          <span>Exchange rates temporarily unavailable.</span>
-          <button
-            className="ml-auto text-xs font-medium text-[var(--color-accent)]"
-            onClick={() => this.setState({ hasError: false })}
-          >
-            Retry
-          </button>
+        <div className="p-4 bg-red-100 text-red-700 rounded-lg whitespace-pre-wrap font-mono text-xs">
+          <strong>Error in MorePage:</strong><br/>
+          {this.state.errorMsg}
         </div>
       );
     }
@@ -100,98 +94,100 @@ export const MorePage: React.FC = () => {
   ];
 
   return (
-    <div className="page-container pt-5 space-y-5 fade-in">
-      {/* User Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center">
-          <span className="text-lg font-semibold text-[var(--color-accent)]">
-            {firstName[0]?.toUpperCase()}
-          </span>
-        </div>
-        <div>
-          <h1 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-            {profile?.full_name || 'User'}
-          </h1>
-          <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
-            {APP_CONFIG.name} Member
-          </p>
-        </div>
-      </div>
-
-      {/* Navigation Sections */}
-      {menuSections.map((section, sIdx) => (
-        <div key={sIdx} className="space-y-2">
-          <p className="px-1 text-[var(--text-label)] font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
-            {section.title}
-          </p>
-          <Card padding="none">
-            <div className="divide-y divide-[var(--color-border)]" role="list">
-              {section.items.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
-                  role="listitem"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="relative">
-                      <item.icon size={18} className="text-[var(--color-text-secondary)]" />
-                      {item.to === '/dashboard/notifications' && hasUnread && (
-                        <span
-                          className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[var(--color-negative)] text-white font-bold"
-                          style={{ fontSize: '9px', lineHeight: 1 }}
-                        >
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
-                      {item.label}
-                    </span>
-                  </div>
-                  <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
-                </Link>
-              ))}
-            </div>
-          </Card>
-        </div>
-      ))}
-
-      {/* Tools Section */}
-      <div className="space-y-2">
-        <p className="px-1 text-[var(--text-label)] font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
-          {locale === 'bn' ? 'টুলস' : 'Tools'}
-        </p>
-        <WidgetErrorBoundary>
-          <CurrencyExchangeWidget />
-        </WidgetErrorBoundary>
-      </div>
-
-      {/* Language Switcher */}
-      <Card padding="none">
-        <button
-          onClick={toggleLocale}
-          className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <Languages size={18} className="text-[var(--color-text-secondary)]" />
-            <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
-              {t('Language')}
+    <LocalErrorBoundary>
+      <div className="page-container pt-5 space-y-5 fade-in">
+        {/* User Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center">
+            <span className="text-lg font-semibold text-[var(--color-accent)]">
+              {firstName[0]?.toUpperCase()}
             </span>
           </div>
-          <span className="text-[var(--text-secondary)] font-medium text-[var(--color-accent)]">
-            {locale === 'en' ? 'বাংলা' : 'English'}
-          </span>
-        </button>
-      </Card>
+          <div>
+            <h1 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+              {profile?.full_name || 'User'}
+            </h1>
+            <p className="text-[var(--text-secondary)] text-[var(--color-text-muted)]">
+              {APP_CONFIG.name} Member
+            </p>
+          </div>
+        </div>
 
-      {/* Sign Out Button */}
-      <button
-        onClick={signOut}
-        className="w-full flex items-center justify-center gap-2 p-3.5 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] text-[var(--color-negative)] font-medium hover:bg-red-100 transition-colors"
-      >
-        <LogOut size={18} /> {t('Sign Out')}
-      </button>
-    </div>
+        {/* Navigation Sections */}
+        {menuSections.map((section, sIdx) => (
+          <div key={sIdx} className="space-y-2">
+            <p className="px-1 text-[var(--text-label)] font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
+              {section.title}
+            </p>
+            <Card padding="none">
+              <div className="divide-y divide-[var(--color-border)]" role="list">
+                {section.items.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
+                    role="listitem"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="relative">
+                        <item.icon size={18} className="text-[var(--color-text-secondary)]" />
+                        {item.to === '/dashboard/notifications' && hasUnread && (
+                          <span
+                            className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[var(--color-negative)] text-white font-bold"
+                            style={{ fontSize: '9px', lineHeight: 1 }}
+                          >
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                        {item.label}
+                      </span>
+                    </div>
+                    <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          </div>
+        ))}
+
+        {/* Tools Section */}
+        <div className="space-y-2">
+          <p className="px-1 text-[var(--text-label)] font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
+            {locale === 'bn' ? 'টুলস' : 'Tools'}
+          </p>
+          <LocalErrorBoundary>
+            <CurrencyExchangeWidget />
+          </LocalErrorBoundary>
+        </div>
+
+        {/* Language Switcher */}
+        <Card padding="none">
+          <button
+            onClick={toggleLocale}
+            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-bg-subtle)] transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Languages size={18} className="text-[var(--color-text-secondary)]" />
+              <span className="text-[var(--text-body)] font-medium text-[var(--color-text-primary)]">
+                {t('Language')}
+              </span>
+            </div>
+            <span className="text-[var(--text-secondary)] font-medium text-[var(--color-accent)]">
+              {locale === 'en' ? 'বাংলা' : 'English'}
+            </span>
+          </button>
+        </Card>
+
+        {/* Sign Out Button */}
+        <button
+          onClick={signOut}
+          className="w-full flex items-center justify-center gap-2 p-3.5 rounded-[var(--radius-button)] bg-[var(--color-negative-soft)] text-[var(--color-negative)] font-medium hover:bg-red-100 transition-colors"
+        >
+          <LogOut size={18} /> {t('Sign Out')}
+        </button>
+      </div>
+    </LocalErrorBoundary>
   );
 };
