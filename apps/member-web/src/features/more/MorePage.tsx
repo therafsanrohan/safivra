@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet, Landmark, CreditCard, RefreshCw, BookOpen,
-  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Calendar, BarChart3, PieChart
+  Settings, Bell, LogOut, ChevronRight, Coins, Languages, Calculator, HandHeart, Calendar, BarChart3, PieChart, AlertCircle
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,6 +12,40 @@ import { useFeatureTranslation } from '@/hooks/useFeatureTranslation';
 import { CurrencyExchangeWidget } from '@/features/dashboard/CurrencyExchangeWidget';
 import { isFeatureEnabled } from '@/lib/flags';
 import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
+
+// ── Isolated error boundary so a widget crash never kills the entire More page ──
+class WidgetErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(err: unknown) {
+    console.error('[MorePage] Widget error caught by boundary:', err);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] text-sm">
+          <AlertCircle size={15} className="shrink-0" />
+          <span>Exchange rates temporarily unavailable.</span>
+          <button
+            className="ml-auto text-xs font-medium text-[var(--color-accent)]"
+            onClick={() => this.setState({ hasError: false })}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export const MorePage: React.FC = () => {
   const { profile, user, signOut } = useAuthContext();
@@ -128,7 +162,9 @@ export const MorePage: React.FC = () => {
         <p className="px-1 text-[var(--text-label)] font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
           {locale === 'bn' ? 'টুলস' : 'Tools'}
         </p>
-        <CurrencyExchangeWidget />
+        <WidgetErrorBoundary>
+          <CurrencyExchangeWidget />
+        </WidgetErrorBoundary>
       </div>
 
       {/* Language Switcher */}
