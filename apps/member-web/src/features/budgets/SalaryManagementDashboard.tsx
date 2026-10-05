@@ -41,6 +41,7 @@ export const SalaryManagementDashboard: React.FC = () => {
 
   const [analysis, setAnalysis] = useState<AdaptiveBudgetAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rpcError, setRpcError] = useState<string | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<BudgetScenarioType>('balanced');
   const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'sinking_funds' | 'payday' | 'settings'>('overview');
   const [showWhyExplain, setShowWhyExplain] = useState(false);
@@ -51,11 +52,17 @@ export const SalaryManagementDashboard: React.FC = () => {
       return;
     }
     setLoading(true);
+    setRpcError(null);
     try {
       const result = await calculateAdaptiveBudgetIntelligence(user.id, selectedScenario);
-      setAnalysis(result);
+      if (result === null) {
+        setRpcError('Could not load budget data. The database function may not be set up yet. Please run the migrations in your Supabase dashboard.');
+      } else {
+        setAnalysis(result);
+      }
     } catch (err: any) {
       console.error(err);
+      setRpcError(err?.message ?? 'Failed to calculate adaptive budget.');
       showError('Error', 'Failed to calculate adaptive budget.');
     } finally {
       setLoading(false);
@@ -71,8 +78,79 @@ export const SalaryManagementDashboard: React.FC = () => {
       <div className="py-16 flex flex-col items-center justify-center space-y-3">
         <Spinner size={32} />
         <p className="text-sm font-medium text-[var(--color-text-secondary)]">
-          Calculating actual income, commitments & safe-to-spend...
+          Calculating actual income, commitments &amp; safe-to-spend...
         </p>
+      </div>
+    );
+  }
+
+  if (rpcError) {
+    return (
+      <div className="space-y-6 fade-in max-w-3xl mx-auto px-1">
+        {/* Header */}
+        <div className="border-b border-[var(--color-border)] pb-4">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">Salary &amp; Adaptive Budget</h1>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">Setup required to unlock your personalized plan.</p>
+        </div>
+
+        {/* Error card */}
+        <Card className="p-6 space-y-4 border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm text-[var(--color-text-primary)]">Database Setup Required</h3>
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                The Salary &amp; Adaptive Budget feature needs two database migrations to be run in your Supabase SQL Editor.
+              </p>
+              <div className="mt-3 p-3 bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border)] font-mono text-[10px] text-[var(--color-text-muted)] break-all">
+                {rpcError}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Setup Instructions */}
+        <Card className="p-6 space-y-4 border-[var(--color-border)]">
+          <h3 className="font-semibold text-sm text-[var(--color-text-primary)] flex items-center gap-2">
+            <FileSpreadsheet className="w-4 h-4 text-[var(--color-accent)]" />
+            How to Fix: Run These 2 SQL Migrations
+          </h3>
+          <div className="space-y-3 text-xs text-[var(--color-text-secondary)]">
+            <div className="flex items-start gap-2">
+              <span className="w-5 h-5 rounded-full bg-[var(--color-accent)] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+              <div>
+                <p className="font-semibold text-[var(--color-text-primary)]">Go to Supabase Dashboard → SQL Editor</p>
+                <p>Open your project at supabase.com</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="w-5 h-5 rounded-full bg-[var(--color-accent)] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+              <div>
+                <p className="font-semibold text-[var(--color-text-primary)]">Run Migration 1 — Tables</p>
+                <p className="font-mono">supabase/migrations/20261005000002_salary_and_adaptive_budget.sql</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="w-5 h-5 rounded-full bg-[var(--color-accent)] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+              <div>
+                <p className="font-semibold text-[var(--color-text-primary)]">Run Migration 2 — RPC Engine</p>
+                <p className="font-mono">supabase/migrations/20261006000000_adaptive_budget_rpc.sql</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+              <div>
+                <p className="font-semibold text-[var(--color-text-primary)]">Then come back and click Retry</p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={loadBudget}
+            className="w-full mt-2 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" /> Retry Now
+          </button>
+        </Card>
       </div>
     );
   }
