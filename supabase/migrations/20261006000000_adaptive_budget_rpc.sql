@@ -165,13 +165,15 @@ liquid AS (
 -- CTE 9a: Raw transaction window (6 months)
 tx_window AS (
     SELECT
-        amount,
-        transaction_type,
-        DATE_TRUNC('month', transaction_date::TIMESTAMPTZ) AS tx_month
-    FROM ledger_transactions
-    WHERE user_id        = p_user_id
-      AND status         = 'posted'
-      AND transaction_date >= (CURRENT_DATE - INTERVAL '6 months')
+        e.amount,
+        t.transaction_type,
+        DATE_TRUNC('month', t.transaction_date::TIMESTAMPTZ) AS tx_month
+    FROM ledger_transactions t
+    JOIN ledger_entries e ON e.ledger_transaction_id = t.id
+    WHERE t.user_id = p_user_id
+      AND t.status = 'posted'
+      AND t.transaction_date >= (CURRENT_DATE - INTERVAL '6 months')
+      AND e.entry_role = 'main'
 ),
 
 -- CTE 9b: Monthly expense aggregation
