@@ -4,7 +4,7 @@ Safivra is a premium, privacy-respecting Personal Financial Management (PFM) sys
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
 1. **100% Cross-Platform Ready**
    - **Web & PWA:** Fully responsive layout with Service Worker precaching.
@@ -30,7 +30,7 @@ Safivra is a premium, privacy-respecting Personal Financial Management (PFM) sys
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1. Prerequisites
 - Node.js 18+
