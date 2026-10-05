@@ -86,7 +86,7 @@ export const ScenarioEngine: React.FC = () => {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="flex flex-col">
       <CardHeader 
         title={<div className="flex items-center gap-2"><ChartIcon className="w-5 h-5 text-[var(--color-accent)]" /> Projection Scenarios</div>} 
         subtitle="Visualize the gap between nominal growth and true purchasing power." 
@@ -184,9 +184,9 @@ export const ScenarioEngine: React.FC = () => {
         </div>
 
         {/* Chart Area */}
-        <div className="flex-1 min-h-[350px]">
+        <div className="rw-chart-area">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 16, bottom: 0, left: -10 }}>
               <defs>
                 <linearGradient id="colorNominal" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={chartColor} stopOpacity={0.1}/>
@@ -198,8 +198,32 @@ export const ScenarioEngine: React.FC = () => {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.4} />
-              <XAxis dataKey="year" fontSize={11} tickMargin={10} stroke="var(--color-text-muted)" tickLine={false} axisLine={false} />
-              <YAxis fontSize={11} tickFormatter={(val) => `৳${(val / 1000)}k`} stroke="var(--color-text-muted)" tickLine={false} axisLine={false} width={60} />
+              <XAxis
+                dataKey="year"
+                fontSize={11}
+                tickMargin={8}
+                stroke="var(--color-text-muted)"
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
+                tick={{ fill: 'var(--color-text-muted)' }}
+              />
+              <YAxis
+                fontSize={11}
+                tickFormatter={(val: number) => {
+                  if (val === 0) return '৳0';
+                  const abs = Math.abs(val);
+                  if (abs >= 10_000_000) return `৳${(val / 10_000_000).toFixed(1)}Cr`;
+                  if (abs >= 100_000) return `৳${(val / 100_000).toFixed(1)}L`;
+                  if (abs >= 1_000) return `৳${(val / 1_000).toFixed(0)}k`;
+                  return `৳${val}`;
+                }}
+                stroke="var(--color-text-muted)"
+                tickLine={false}
+                axisLine={false}
+                width={70}
+                tick={{ fill: 'var(--color-text-muted)' }}
+              />
               <Tooltip content={<CustomTooltip />} />
               <Legend verticalAlign="top" height={36} iconType="circle" />
               <Area type="monotone" dataKey="Nominal" stroke={chartColor} strokeWidth={3} fillOpacity={1} fill="url(#colorNominal)" />

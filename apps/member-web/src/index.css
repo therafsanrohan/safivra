@@ -473,6 +473,63 @@
     }
   }
 
+  /* ── Real Wealth Intelligence page container ──────────────────────────────
+     Wider than the standard page-container to accommodate the data-dense
+     two-column layout (Scenario Engine + tools side-by-side).
+     Matches the same padding tokens so spacing stays consistent.
+  */
+  .rw-page-container {
+    width: 100%;
+    max-width: 80rem; /* 1280px — wide enough for the 2-col layout */
+    margin-inline: auto;
+    padding-inline: var(--page-padding-mobile);
+    padding-bottom: calc(var(--nav-height) + var(--space-6));
+  }
+
+  @media (min-width: 768px) {
+    .rw-page-container {
+      padding-inline: var(--page-padding-tablet);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .rw-page-container {
+      padding-inline: var(--page-padding-desktop);
+    }
+  }
+
+  /* ── Real Wealth chart area — responsive height ───────────────────────────
+     Mobile: 260px minimum to stay readable without wasting space.
+     Tablet+: 340px, giving a good ratio for the projection chart.
+  */
+  .rw-chart-area {
+    min-height: 260px;
+    height: 260px;
+  }
+
+  @media (min-width: 640px) {
+    .rw-chart-area {
+      min-height: 320px;
+      height: 320px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .rw-chart-area {
+      min-height: 360px;
+      height: 360px;
+    }
+  }
+
+  /* ── Hide scrollbar while keeping scroll functionality ───────────────────── */
+  .no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
   /* Card surface */
   .card {
     background: var(--color-bg-surface);
