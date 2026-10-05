@@ -2,8 +2,8 @@ import { supabase } from '@/lib/supabase/client';
 
 export type IncomeStability = 'stable' | 'variable' | 'unstable';
 export type BudgetHealthState = 'HEALTHY' | 'BALANCED' | 'TIGHT' | 'AT_RISK' | 'DEFICIT';
-export type DataConfidenceState = 'HIGH' | 'MEDIUM' | 'LOW' | 'STARTER';
-export type BudgetScenarioType = 'current' | 'balanced' | 'savings_focused' | 'debt_focused' | 'goal_focused';
+export type DataConfidenceState = 'HIGH_CONFIDENCE' | 'PERSONALIZED' | 'STARTER';
+export type BudgetScenarioType = 'balanced' | 'savings_focused' | 'debt_focused' | 'goal_focused';
 
 export interface IncomeSourceItem {
   id: string;
@@ -28,7 +28,7 @@ export interface SinkingFundItem {
   targetMonth?: number;
 }
 
-export interface BudgetLayerBreakdown {
+export interface BudgetPillarsBreakdown {
   essentials: number;
   financialSecurity: number;
   goalsAndFuture: number;
@@ -48,51 +48,55 @@ export interface EmergencyFundIntelligence {
 }
 
 export interface AdaptiveBudgetAnalysis {
-  // Income
+  // Income Breakdown
   totalGrossIncome: number;
   totalTakeHomeIncome: number;
+  conservativePlanningIncome: number;
+  variableIncomeAmount: number;
   incomeSourcesCount: number;
 
-  // Actual Commitments & Historicals
-  actualEssentialExpenses: number;
+  // Actual Commitments & Historical Expenses
+  actualEssentialExpenses: number; // Historical or estimated essentials
+  historicalAvgMonthlyExpense: number;
+  transactionHistoryMonthsCount: number;
   mandatoryDebtPayments: number;
   committedSavingsDps: number;
   activeGoalsTarget: number;
   sinkingFundMonthlyReserve: number;
   minimumBufferAmount: number;
 
-  // Calculated Metrics
+  // Key Outputs
   safeToSpend: number;
+  uncommittedMoneyLeft: number;
   savingsRate: number;              // % of take-home
   essentialExpenseRatio: number;    // % of take-home
   lifestyleExpenseRatio: number;    // % of take-home
   debtServiceRatio: number;         // % of take-home
-  surplusDeficit: number;
 
-  // 6 Major Budget Layers
-  layerAllocations: BudgetLayerBreakdown;
+  // 5 Core Budget Pillars
+  pillarAllocations: BudgetPillarsBreakdown;
   recommendedScenario: BudgetScenarioType;
 
-  // Intelligence States
+  // Intelligence & Explanations
   budgetHealth: BudgetHealthState;
+  budgetHealthReason: string;
   dataConfidence: DataConfidenceState;
+  dataConfidenceReason: string;
   emergencyFund: EmergencyFundIntelligence;
-
-  // Explainability Insights ("Why?")
   explainabilityNotes: string[];
 }
 
 /**
- * Pure, deterministic monetary arithmetic helper to avoid float precision bugs.
+ * Pure deterministic money arithmetic helper to prevent floating point issues.
  */
-
 export function roundMoney(val: number): number {
   return Math.round((val + Number.EPSILON) * 100) / 100;
 }
 
 /**
- * Calculates adaptive budget intelligence for a user by aggregating
- * live income sources, historical ledger entries, active debts, DPS/FDR, and savings goals.
+ * Centralized calculation engine for Salary Management & Adaptive Budget Intelligence.
+ * Safely integrates live income sources, historical ledger transactions, active debt,
+ * DPS/FDR commitments, and sinking funds while strictly preventing double-counting.
  */
 export async function calculateAdaptiveBudgetIntelligence(
   userId: string,
@@ -101,7 +105,7 @@ export async function calculateAdaptiveBudgetIntelligence(
   if (!userId) return null;
 
   try {
-    // 1. Fetch Income Sources
+    // 1. Fetch Active Income Sources
     const { data: incomeData } = await (supabase.from('income_sources') as any)
       .select('*')
       .eq('user_id', userId)
@@ -112,7 +116,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       name: inc.name,
       incomeType: inc.income_type,
       frequency: inc.frequency,
-      stability: inc.stability as IncomeStability,
+      stability: (inc.stability as IncomeStability) || 'stable',
       grossAmount: inc.gross_amount ? Number(inc.gross_amount) : undefined,
       deductionsAmount: inc.deductions_amount ? Number(inc.deductions_amount) : undefined,
       netTakehomeAmount: Number(inc.net_takehome_amount) || 0,
@@ -132,7 +136,23 @@ export async function calculateAdaptiveBudgetIntelligence(
       )
     );
 
-    // 2. Fetch Sinking Funds
+    // Calculate Conservative Planning Income (80% weighting on variable/unstable sources)
+    let variableIncomeTotal = 0;
+    let stableIncomeTotal = 0;
+
+    incomeSources.forEach((inc) => {
+      if (inc.stability === 'variable' || inc.stability === 'unstable') {
+        variableIncomeTotal += inc.netTakehomeAmount;
+      } else {
+        stableIncomeTotal += inc.netTakehomeAmount;
+      }
+    });
+
+    const conservativePlanningIncome = roundMoney(
+      stableIncomeTotal + variableIncomeTotal * 0.8
+    );
+
+    // 2. Fetch Sinking Funds (Irregular/Flex Expenses)
     const { data: sinkingData } = await (supabase.from('budget_sinking_funds') as any)
       .select('*')
       .eq('user_id', userId)
@@ -187,7 +207,7 @@ export async function calculateAdaptiveBudgetIntelligence(
 
     const mandatoryDebtPayments = roundMoney(loanInstallments + cardMinimums);
 
-    // 5. Fetch Deposit Products / DPS Installments
+    // 5. Fetch Deposit Products (DPS Installments)
     const { data: depositData } = await (supabase.from('deposit_products') as any)
       .select('installment_amount, product_type')
       .eq('user_id', userId)
@@ -200,7 +220,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       )
     );
 
-    // 6. Fetch Savings Goals
+    // 6. Fetch Active Savings Goals (Monthly Target Contribution)
     const { data: goalsData } = await (supabase.from('savings_goals') as any)
       .select('target_amount, current_amount, target_date')
       .eq('user_id', userId)
@@ -209,7 +229,8 @@ export async function calculateAdaptiveBudgetIntelligence(
     const activeGoalsTarget = roundMoney(
       (goalsData ?? []).reduce((sum: number, g: any) => {
         const remaining = Math.max(0, Number(g.target_amount) - Number(g.current_amount || 0));
-        if (!g.target_date || remaining <= 0) return sum + 2000; // default modest target
+        if (remaining <= 0) return sum;
+        if (!g.target_date) return sum + Math.min(remaining, 2000);
         const monthsLeft = Math.max(
           1,
           Math.ceil(
@@ -222,29 +243,59 @@ export async function calculateAdaptiveBudgetIntelligence(
 
     // 7. Fetch Liquid Assets from v_wealth_summary
     const { data: wealthSummary } = await (supabase.from('v_wealth_summary') as any)
-      .select('liquid_assets, net_worth, data_completeness')
+      .select('liquid_assets, net_worth')
       .eq('user_id', userId)
       .maybeSingle();
 
     const currentLiquidSavings = Number(wealthSummary?.liquid_assets || 0);
 
-    // 8. Estimate Essential Expenses (Rent, Food, Transport, Utilities, Debt)
-    const userRentEstimate = configData?.rent_estimate ? Number(configData.rent_estimate) : 0;
-    const userFoodEstimate = configData?.food_estimate ? Number(configData.food_estimate) : 0;
-    const userTransportEstimate = configData?.transport_estimate ? Number(configData.transport_estimate) : 0;
-    const userUtilitiesEstimate = configData?.utilities_estimate ? Number(configData.utilities_estimate) : 0;
-    const userFamilySupport = configData?.family_support_estimate ? Number(configData.family_support_estimate) : 0;
+    // 8. Analyze Actual Ledger Transaction History for Essentials & Overall History
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const totalUserEstimates = userRentEstimate + userFoodEstimate + userTransportEstimate + userUtilitiesEstimate + userFamilySupport;
+    const { data: txHistory } = await (supabase.from('ledger_transactions') as any)
+      .select('amount, transaction_type, transaction_date')
+      .eq('user_id', userId)
+      .eq('status', 'posted')
+      .gte('transaction_date', sixMonthsAgo.toISOString().split('T')[0]);
 
-    // Baseline essentials estimate if 0: 55% of take-home
-    const actualEssentialExpenses = roundMoney(
-      totalUserEstimates > 0
-        ? totalUserEstimates + mandatoryDebtPayments
-        : Math.max(mandatoryDebtPayments, totalTakeHomeIncome * 0.55)
-    );
+    let transactionHistoryMonthsCount = 0;
+    let historicalAvgMonthlyExpense = 0;
 
-    // 9. Emergency Fund Intelligence
+    if (txHistory && txHistory.length > 0) {
+      const dates = txHistory.map((t: any) => new Date(t.transaction_date).getTime());
+      const minDate = Math.min(...dates);
+      const maxDate = Math.max(...dates);
+      const diffMonths = Math.max(1, Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24 * 30.4)));
+      transactionHistoryMonthsCount = diffMonths;
+
+      const totalExpense = txHistory
+        .filter((t: any) => t.transaction_type === 'expense')
+        .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+
+      historicalAvgMonthlyExpense = roundMoney(totalExpense / diffMonths);
+    }
+
+    // 9. Estimate or Calculate Essential Monthly Expenses
+    const userRent = configData?.rent_estimate ? Number(configData.rent_estimate) : 0;
+    const userFood = configData?.food_estimate ? Number(configData.food_estimate) : 0;
+    const userTransport = configData?.transport_estimate ? Number(configData.transport_estimate) : 0;
+    const userUtilities = configData?.utilities_estimate ? Number(configData.utilities_estimate) : 0;
+    const userFamily = configData?.family_support_estimate ? Number(configData.family_support_estimate) : 0;
+
+    const userConfiguredEstimatesTotal = userRent + userFood + userTransport + userUtilities + userFamily;
+
+    // Use user estimates if provided, else historical essential expense avg, else 50% baseline
+    let actualEssentialExpenses = 0;
+    if (userConfiguredEstimatesTotal > 0) {
+      actualEssentialExpenses = userConfiguredEstimatesTotal;
+    } else if (historicalAvgMonthlyExpense > 0) {
+      actualEssentialExpenses = roundMoney(historicalAvgMonthlyExpense * 0.65);
+    } else {
+      actualEssentialExpenses = roundMoney(totalTakeHomeIncome * 0.50);
+    }
+
+    // 10. Emergency Fund Intelligence
     const emergencyTargetAmount = roundMoney(actualEssentialExpenses * emergencyTargetMonths);
     const emergencyGapAmount = Math.max(0, emergencyTargetAmount - currentLiquidSavings);
     const emergencyCoverageMonths = actualEssentialExpenses > 0
@@ -252,11 +303,11 @@ export async function calculateAdaptiveBudgetIntelligence(
       : 0;
 
     const recommendedEmergencyContribution = emergencyGapAmount > 0
-      ? roundMoney(Math.min(emergencyGapAmount / 6, totalTakeHomeIncome * 0.15))
+      ? roundMoney(Math.min(emergencyGapAmount / 6, conservativePlanningIncome * 0.15))
       : 0;
 
-    // 10. Scenario-Based Layer Allocation
-    let essentialsAlloc = actualEssentialExpenses;
+    // 11. Core Budget Pillar Allocations
+    let essentialsAlloc = actualEssentialExpenses + mandatoryDebtPayments;
     let securityAlloc = recommendedEmergencyContribution;
     let goalsAlloc = committedSavingsDps + activeGoalsTarget;
     let flexAlloc = sinkingFundMonthlyReserve;
@@ -266,29 +317,28 @@ export async function calculateAdaptiveBudgetIntelligence(
     // High interest debt check
     const hasHighCostDebt = (loansData ?? []).some((l: any) => Number(l.annual_rate || 0) > 12);
     if (hasHighCostDebt && selectedScenario !== 'savings_focused') {
-      debtAccelerationAlloc = roundMoney(totalTakeHomeIncome * 0.08);
+      debtAccelerationAlloc = roundMoney(conservativePlanningIncome * 0.10);
     }
 
-    // Apply scenario multipliers
+    // Scenario Tuning
     if (selectedScenario === 'savings_focused') {
-      securityAlloc = roundMoney(securityAlloc * 1.3);
-      goalsAlloc = roundMoney(goalsAlloc * 1.25);
+      securityAlloc = roundMoney(securityAlloc * 1.25);
+      goalsAlloc = roundMoney(goalsAlloc * 1.20);
     } else if (selectedScenario === 'debt_focused') {
-      debtAccelerationAlloc = roundMoney(totalTakeHomeIncome * 0.15);
-      goalsAlloc = roundMoney(goalsAlloc * 0.7);
+      debtAccelerationAlloc = roundMoney(conservativePlanningIncome * 0.15);
+      goalsAlloc = roundMoney(goalsAlloc * 0.75);
     } else if (selectedScenario === 'goal_focused') {
-      goalsAlloc = roundMoney(goalsAlloc * 1.35);
+      goalsAlloc = roundMoney(goalsAlloc * 1.30);
     }
 
-    // Remaining for Lifestyle & Buffer
+    // Money Left & Safe-to-Spend
     const committedTotal = essentialsAlloc + securityAlloc + goalsAlloc + flexAlloc + debtAccelerationAlloc;
-    const remainingForLifestyle = Math.max(0, totalTakeHomeIncome - committedTotal - minimumBufferAmount);
-    lifestyleAlloc = roundMoney(remainingForLifestyle);
-
-    // Safe-to-Spend Calculation
+    const uncommittedMoneyLeft = roundMoney(totalTakeHomeIncome - committedTotal);
     const safeToSpend = roundMoney(
-      Math.max(0, totalTakeHomeIncome - (essentialsAlloc + securityAlloc + goalsAlloc + flexAlloc + debtAccelerationAlloc + minimumBufferAmount))
+      Math.max(0, conservativePlanningIncome - (essentialsAlloc + securityAlloc + goalsAlloc + flexAlloc + debtAccelerationAlloc + minimumBufferAmount))
     );
+
+    lifestyleAlloc = Math.max(0, roundMoney(uncommittedMoneyLeft - minimumBufferAmount));
 
     // Financial Ratios
     const savingsRate = totalTakeHomeIncome > 0
@@ -307,84 +357,104 @@ export async function calculateAdaptiveBudgetIntelligence(
       ? roundMoney((mandatoryDebtPayments / totalTakeHomeIncome) * 100)
       : 0;
 
-    const surplusDeficit = roundMoney(totalTakeHomeIncome - (essentialsAlloc + securityAlloc + goalsAlloc + flexAlloc + lifestyleAlloc));
-
-    // 11. Budget Health Classification
+    // 12. Budget Health Classification & Reason
     let budgetHealth: BudgetHealthState = 'HEALTHY';
-    if (surplusDeficit < 0 || essentialExpenseRatio > 85) {
+    let budgetHealthReason = '';
+
+    if (uncommittedMoneyLeft < 0 || essentialExpenseRatio > 85) {
       budgetHealth = 'DEFICIT';
-    } else if (essentialExpenseRatio > 75 || debtServiceRatio > 40) {
+      budgetHealthReason = 'Your essential costs and debt commitments exceed your monthly take-home income.';
+    } else if (essentialExpenseRatio > 70 || debtServiceRatio > 35) {
       budgetHealth = 'AT_RISK';
-    } else if (safeToSpend < minimumBufferAmount || essentialExpenseRatio > 65) {
+      budgetHealthReason = 'A large portion of your income goes to mandatory costs and debt, leaving little room for surprises.';
+    } else if (safeToSpend < minimumBufferAmount || essentialExpenseRatio > 60) {
       budgetHealth = 'TIGHT';
-    } else if (savingsRate >= 15 && emergencyCoverageMonths >= 3) {
+      budgetHealthReason = 'Your essential commitments leave a tight margin for uncommitted spending this month.';
+    } else if (savingsRate >= 20 && emergencyCoverageMonths >= 3) {
       budgetHealth = 'HEALTHY';
+      budgetHealthReason = 'Your income comfortably covers essentials, debt, and healthy savings capacity.';
     } else {
       budgetHealth = 'BALANCED';
+      budgetHealthReason = 'Your income and expenses are evenly balanced with room for personal flexibility.';
     }
 
-    // 12. Data Confidence State
+    // 13. Data Confidence State & Reason
     let dataConfidence: DataConfidenceState = 'STARTER';
-    if (incomeSources.length > 0 && wealthSummary?.data_completeness === 'complete') {
-      dataConfidence = 'HIGH';
-    } else if (incomeSources.length > 0) {
-      dataConfidence = 'MEDIUM';
-    } else if (totalUserEstimates > 0) {
-      dataConfidence = 'LOW';
+    let dataConfidenceReason = '';
+
+    if (transactionHistoryMonthsCount >= 6) {
+      dataConfidence = 'HIGH_CONFIDENCE';
+      dataConfidenceReason = `Personalized budget based on ${transactionHistoryMonthsCount} months of continuous spending history.`;
+    } else if (transactionHistoryMonthsCount >= 3) {
+      dataConfidence = 'PERSONALIZED';
+      dataConfidenceReason = `Personalized budget based on ${transactionHistoryMonthsCount} months of recent transactions.`;
+    } else {
+      dataConfidence = 'STARTER';
+      dataConfidenceReason = 'Starter Budget based on your income & initial estimates. Safivra will refine this as transaction history builds.';
     }
 
-    // 13. Generate Explainability Notes ("Why?")
+    // 14. Structured Explainability Notes
     const explainabilityNotes: string[] = [];
 
     if (totalTakeHomeIncome === 0) {
-      explainabilityNotes.push('Please add your income sources to unlock personalized budget recommendations.');
+      explainabilityNotes.push('Please register your monthly salary or income sources to unlock personalized budget recommendations.');
     } else {
-      explainabilityNotes.push(`Your net take-home planning income is ${totalTakeHomeIncome.toLocaleString()} BDT/month across ${incomeSources.length} source(s).`);
+      explainabilityNotes.push(`Your net monthly take-home planning baseline is ${totalTakeHomeIncome.toLocaleString()} BDT from ${incomeSources.length} source(s).`);
+    }
+
+    if (variableIncomeTotal > 0) {
+      explainabilityNotes.push(
+        `Variable income (${variableIncomeTotal.toLocaleString()} BDT) is conservatively planned at 80% weight to protect against dry months.`
+      );
     }
 
     if (emergencyCoverageMonths < emergencyTargetMonths) {
       explainabilityNotes.push(
-        `Your liquid emergency reserve covers ${emergencyCoverageMonths.toFixed(1)} months of essential expenses (target: ${emergencyTargetMonths} months). Safivra recommends prioritizing safety savings.`
+        `Your liquid emergency fund currently covers ${emergencyCoverageMonths.toFixed(1)} months of essentials (Target: ${emergencyTargetMonths} months).`
       );
     } else {
       explainabilityNotes.push(
-        `Your emergency reserve is healthy at ${emergencyCoverageMonths.toFixed(1)} months of coverage.`
+        `Your emergency reserve is secure with ${emergencyCoverageMonths.toFixed(1)} months of essential coverage.`
       );
     }
 
     if (committedSavingsDps > 0) {
       explainabilityNotes.push(
-        `Your committed DPS installments (${committedSavingsDps.toLocaleString()} BDT/month) are automatically factored into your monthly plan.`
+        `Existing DPS contributions of ${committedSavingsDps.toLocaleString()} BDT/month are automatically included in your savings commitments.`
       );
     }
 
     if (hasHighCostDebt) {
       explainabilityNotes.push(
-        'High-interest debt detected. Safivra recommends accelerating debt payoff to save on interest.'
+        'High-interest debt detected (>12% annual rate). Additional debt payoff allocation is recommended.'
       );
     }
 
     explainabilityNotes.push(
-      `Your Safe-to-Spend limit is ${safeToSpend.toLocaleString()} BDT after reserving mandatory essentials, goals, sinking funds, and a ${minimumBufferAmount.toLocaleString()} BDT buffer.`
+      `Your Safe-to-Spend allowance is ${safeToSpend.toLocaleString()} BDT after reserving essentials, committed DPS/goals, sinking funds, and a ${minimumBufferAmount.toLocaleString()} BDT cash buffer.`
     );
 
     return {
       totalGrossIncome,
       totalTakeHomeIncome,
+      conservativePlanningIncome,
+      variableIncomeAmount: variableIncomeTotal,
       incomeSourcesCount: incomeSources.length,
       actualEssentialExpenses,
+      historicalAvgMonthlyExpense,
+      transactionHistoryMonthsCount,
       mandatoryDebtPayments,
       committedSavingsDps,
       activeGoalsTarget,
       sinkingFundMonthlyReserve,
       minimumBufferAmount,
       safeToSpend,
+      uncommittedMoneyLeft,
       savingsRate,
       essentialExpenseRatio,
       lifestyleExpenseRatio,
       debtServiceRatio,
-      surplusDeficit,
-      layerAllocations: {
+      pillarAllocations: {
         essentials: essentialsAlloc,
         financialSecurity: securityAlloc,
         goalsAndFuture: goalsAlloc,
@@ -394,7 +464,9 @@ export async function calculateAdaptiveBudgetIntelligence(
       },
       recommendedScenario: selectedScenario,
       budgetHealth,
+      budgetHealthReason,
       dataConfidence,
+      dataConfidenceReason,
       emergencyFund: {
         essentialMonthlyCost: actualEssentialExpenses,
         currentLiquidSavings,

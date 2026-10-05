@@ -14,12 +14,17 @@ import {
   ArrowUpRight,
   Info,
   CheckCircle2,
-  Lock,
-  HeartHandshake,
   TrendingUp,
   CreditCard,
   RefreshCw,
   Settings2,
+  CalendarDays,
+  ArrowRight,
+  HelpCircle as QuestionIcon,
+  PiggyBank,
+  Briefcase,
+  AlertCircle,
+  FileSpreadsheet,
 } from 'lucide-react';
 import {
   calculateAdaptiveBudgetIntelligence,
@@ -38,6 +43,7 @@ export const SalaryManagementDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedScenario, setSelectedScenario] = useState<BudgetScenarioType>('balanced');
   const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'sinking_funds' | 'payday' | 'settings'>('overview');
+  const [showWhyExplain, setShowWhyExplain] = useState(false);
 
   const loadBudget = useCallback(async () => {
     if (!user?.id) {
@@ -50,10 +56,11 @@ export const SalaryManagementDashboard: React.FC = () => {
       setAnalysis(result);
     } catch (err: any) {
       console.error(err);
+      showError('Error', 'Failed to calculate adaptive budget.');
     } finally {
       setLoading(false);
     }
-  }, [user?.id, selectedScenario]);
+  }, [user?.id, selectedScenario, showError]);
 
   useEffect(() => {
     loadBudget();
@@ -61,9 +68,11 @@ export const SalaryManagementDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="py-12 flex flex-col items-center justify-center space-y-3">
+      <div className="py-16 flex flex-col items-center justify-center space-y-3">
         <Spinner size={32} />
-        <p className="text-sm text-[var(--color-text-secondary)]">Analyzing income, commitments & adaptive budget...</p>
+        <p className="text-sm font-medium text-[var(--color-text-secondary)]">
+          Calculating actual income, commitments & safe-to-spend...
+        </p>
       </div>
     );
   }
@@ -76,24 +85,34 @@ export const SalaryManagementDashboard: React.FC = () => {
     DEFICIT: 'negative',
   };
 
-  const layers = analysis?.layerAllocations;
+  const pillars = analysis?.pillarAllocations;
   const takehome = analysis?.totalTakeHomeIncome ?? 0;
 
   return (
-    <div className="space-y-6 fade-in">
-      {/* Header & Sub-Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-4">
+    <div className="space-y-6 fade-in max-w-6xl mx-auto px-1 sm:px-0">
+      {/* Header & Navigation Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
-            Salary Management & Adaptive Budget
-          </h1>
-          <p className="text-xs md:text-sm text-[var(--color-text-secondary)] mt-0.5">
-            Intelligent planning layer based on your real take-home income and historical spending.
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+              Salary & Adaptive Budget
+            </h1>
+            {analysis?.dataConfidence && (
+              <Badge
+                variant={analysis.dataConfidence === 'HIGH_CONFIDENCE' ? 'positive' : 'info'}
+                className="text-[10px] uppercase font-semibold"
+              >
+                {analysis.dataConfidence === 'STARTER' ? 'Starter Budget' : 'Personalized'}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] mt-0.5">
+            Clear monthly spending limits based on your actual income and real obligations.
           </p>
         </div>
 
-        {/* Tab Buttons */}
-        <div className="flex items-center gap-1 bg-[var(--color-bg-subtle)] p-1 rounded-xl border border-[var(--color-border)] self-start sm:self-auto overflow-x-auto max-w-full">
+        {/* Tab Navigation Controls */}
+        <div className="flex items-center gap-1 bg-[var(--color-bg-subtle)] p-1 rounded-xl border border-[var(--color-border)] overflow-x-auto self-start md:self-auto max-w-full">
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -122,7 +141,7 @@ export const SalaryManagementDashboard: React.FC = () => {
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
             }`}
           >
-            Flex & Sinking Funds
+            Sinking Funds
           </button>
           <button
             onClick={() => setActiveTab('payday')}
@@ -147,111 +166,140 @@ export const SalaryManagementDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* TABS CONTENT */}
-
-      {/* 1. OVERVIEW TAB */}
+      {/* OVERVIEW TAB */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Top Hero Cards: Safe-to-Spend & Budget Health */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Safe-to-Spend Card */}
-            <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl shadow-emerald-600/10 rounded-3xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-emerald-400 opacity-20 blur-2xl rounded-full" />
-              <div className="relative z-10 flex flex-col justify-between h-full space-y-4">
-                <div className="flex items-center justify-between">
+          {/* SECTION 1: Your Monthly Money (Core Summary Cards) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card className="p-4 border-[var(--color-border)] space-y-1 bg-[var(--color-bg-surface)]">
+              <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider block">
+                Take-Home Income
+              </span>
+              <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] block tabular-nums">
+                {formatCurrency(analysis?.totalTakeHomeIncome ?? 0)}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-muted)] block">
+                {analysis?.incomeSourcesCount ?? 0} source(s)
+              </span>
+            </Card>
+
+            <Card className="p-4 border-[var(--color-border)] space-y-1 bg-[var(--color-bg-surface)]">
+              <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider block">
+                Essentials & Rent
+              </span>
+              <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] block tabular-nums">
+                {formatCurrency(analysis?.actualEssentialExpenses ?? 0)}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-muted)] block">
+                Priority costs
+              </span>
+            </Card>
+
+            <Card className="p-4 border-[var(--color-border)] space-y-1 bg-[var(--color-bg-surface)]">
+              <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider block">
+                Committed Debt & DPS
+              </span>
+              <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] block tabular-nums">
+                {formatCurrency((analysis?.mandatoryDebtPayments ?? 0) + (analysis?.committedSavingsDps ?? 0))}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-muted)] block">
+                Loans, Cards & DPS
+              </span>
+            </Card>
+
+            <Card className="p-4 border-[var(--color-border)] space-y-1 bg-[var(--color-bg-surface)]">
+              <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider block">
+                Money Left
+              </span>
+              <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 block tabular-nums">
+                {formatCurrency(analysis?.uncommittedMoneyLeft ?? 0)}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-muted)] block">
+                Uncommitted balance
+              </span>
+            </Card>
+          </div>
+
+          {/* SECTION 2: Hero Safe-to-Spend Banner */}
+          <Card className="p-6 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-lg rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-emerald-400 opacity-20 blur-2xl rounded-full pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-xl">
+                <div className="flex items-center gap-2">
                   <span className="text-xs uppercase tracking-wider font-semibold text-emerald-100 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-emerald-200" /> Safe-to-Spend
+                    <Sparkles className="w-4 h-4 text-emerald-200" /> Recommended Safe-to-Spend
                   </span>
-                  <Badge variant="info" className="bg-emerald-500/30 text-white border-emerald-400/40 text-[10px]">
-                    Monthly Allowance
-                  </Badge>
+                  {analysis?.budgetHealth && (
+                    <Badge variant="info" className="bg-emerald-500/30 text-white border-emerald-400/40 text-[10px]">
+                      Status: {analysis.budgetHealth}
+                    </Badge>
+                  )}
                 </div>
 
                 <div>
                   <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-sm tabular-nums">
                     {formatCurrency(analysis?.safeToSpend ?? 0)}
                   </div>
-                  <p className="text-xs text-emerald-100/80 mt-1">
-                    Remaining for uncommitted discretionary spending after reserving essentials, savings, debt & sinking funds.
+                  <p className="text-xs sm:text-sm text-emerald-100/90 mt-1">
+                    This is the estimated amount you can comfortably spend this month after reserving your essentials, debt obligations, DPS commitments, sinking funds, and a ৳{(analysis?.minimumBufferAmount ?? 5000).toLocaleString()} cash buffer.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-emerald-500/30 text-xs">
-                  <div>
-                    <span className="text-emerald-200/80 block text-[10px]">Take-Home</span>
-                    <span className="font-semibold">{formatCurrency(analysis?.totalTakeHomeIncome ?? 0)}</span>
-                  </div>
-                  <div>
-                    <span className="text-emerald-200/80 block text-[10px]">Essentials</span>
-                    <span className="font-semibold">{formatCurrency(analysis?.actualEssentialExpenses ?? 0)}</span>
-                  </div>
-                  <div>
-                    <span className="text-emerald-200/80 block text-[10px]">DPS & Goals</span>
-                    <span className="font-semibold">{formatCurrency((analysis?.committedSavingsDps ?? 0) + (analysis?.activeGoalsTarget ?? 0))}</span>
-                  </div>
-                  <div>
-                    <span className="text-emerald-200/80 block text-[10px]">Buffer</span>
-                    <span className="font-semibold">{formatCurrency(analysis?.minimumBufferAmount ?? 0)}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Budget Health & Confidence Card */}
-            <Card className="p-6 border-[var(--color-border)] flex flex-col justify-between space-y-4 shadow-sm">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-                    Budget Health
-                  </span>
-                  {analysis?.budgetHealth && (
-                    <Badge variant={healthVariantMap[analysis.budgetHealth] ?? 'info'} className="text-xs px-2.5 py-0.5">
-                      {analysis.budgetHealth}
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="mt-3 space-y-2 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[var(--color-text-secondary)]">Savings Rate:</span>
-                    <span className="font-bold text-emerald-600">{analysis?.savingsRate}%</span>
-                  </div>
-                  <ProgressBar value={analysis?.savingsRate ?? 0} max={100} className="h-1.5" />
-
-                  <div className="flex justify-between items-center pt-1">
-                    <span className="text-[var(--color-text-secondary)]">Essential Ratio:</span>
-                    <span className="font-bold">{analysis?.essentialExpenseRatio}%</span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-[var(--color-text-secondary)]">Debt Service Ratio:</span>
-                    <span className="font-bold text-amber-600">{analysis?.debtServiceRatio}%</span>
-                  </div>
-                </div>
+                <button
+                  onClick={() => setShowWhyExplain(!showWhyExplain)}
+                  className="text-xs text-emerald-200 hover:text-white font-medium underline inline-flex items-center gap-1"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                  {showWhyExplain ? 'Hide calculation breakdown' : 'Why this number?'}
+                </button>
               </div>
 
-              {/* Data Confidence Indicator */}
-              <div className="p-3 bg-[var(--color-bg-subtle)] rounded-xl border border-[var(--color-border)] text-xs flex items-center justify-between">
-                <span className="text-[var(--color-text-muted)]">Data Confidence</span>
-                <span className="font-semibold text-[var(--color-text-primary)] flex items-center gap-1">
-                  {analysis?.dataConfidence === 'HIGH' && <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />}
-                  {analysis?.dataConfidence === 'MEDIUM' && <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />}
-                  {analysis?.dataConfidence === 'STARTER' && <HelpCircle className="w-3.5 h-3.5 text-blue-500" />}
-                  {analysis?.dataConfidence}
-                </span>
-              </div>
-            </Card>
-          </div>
+              {/* Quick Health Meter Card */}
+              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-3 w-full md:w-64 shrink-0">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-emerald-100">Savings Capacity</span>
+                  <span className="font-bold text-white">{analysis?.savingsRate}%</span>
+                </div>
+                <ProgressBar value={analysis?.savingsRate ?? 0} max={100} className="h-1.5 bg-emerald-950/40" />
 
-          {/* Scenario Simulator Controls */}
-          <Card className="p-5 border-[var(--color-border)] space-y-3">
+                <div className="flex justify-between items-center text-xs pt-1">
+                  <span className="text-emerald-100">Essential Ratio</span>
+                  <span className="font-bold text-white">{analysis?.essentialExpenseRatio}%</span>
+                </div>
+
+                <div className="text-[10px] text-emerald-200/80 pt-1 border-t border-white/10">
+                  {analysis?.budgetHealthReason}
+                </div>
+              </div>
+            </div>
+
+            {/* Expandable Calculation Breakdown */}
+            {showWhyExplain && (
+              <div className="mt-5 pt-4 border-t border-emerald-500/30 space-y-2 text-xs text-emerald-100 bg-emerald-950/30 p-4 rounded-2xl">
+                <h4 className="font-semibold text-white flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> How Safivra Calculates Your Safe-to-Spend:
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+                  <div>+ Monthly Planning Income: <strong>{formatCurrency(analysis?.totalTakeHomeIncome ?? 0)}</strong></div>
+                  <div>- Essentials & Housing: <strong>{formatCurrency(analysis?.actualEssentialExpenses ?? 0)}</strong></div>
+                  <div>- Mandatory Debt Payments: <strong>{formatCurrency(analysis?.mandatoryDebtPayments ?? 0)}</strong></div>
+                  <div>- Committed DPS & Goals: <strong>{formatCurrency((analysis?.committedSavingsDps ?? 0) + (analysis?.activeGoalsTarget ?? 0))}</strong></div>
+                  <div>- Sinking Fund Reserves: <strong>{formatCurrency(analysis?.sinkingFundMonthlyReserve ?? 0)}</strong></div>
+                  <div>- Reserved Cash Buffer: <strong>{formatCurrency(analysis?.minimumBufferAmount ?? 0)}</strong></div>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* SECTION 3: Scenario Selection */}
+          <Card className="p-4 border-[var(--color-border)] space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="font-semibold text-sm text-[var(--color-text-primary)] flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[var(--color-accent)]" /> Budget Scenario Engine
+                  <Layers className="w-4 h-4 text-[var(--color-accent)]" /> Budget Scenario Model
                 </h3>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  Simulate different financial priorities without altering actual records.
+                  Adjust priorities to see recommended allocations for your cash flow.
                 </p>
               </div>
 
@@ -260,7 +308,7 @@ export const SalaryManagementDashboard: React.FC = () => {
                   <button
                     key={scen}
                     onClick={() => setSelectedScenario(scen)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
                       selectedScenario === scen
                         ? 'bg-[var(--color-accent)] text-white shadow-sm'
                         : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
@@ -273,137 +321,84 @@ export const SalaryManagementDashboard: React.FC = () => {
             </div>
           </Card>
 
-          {/* 6 Major Budget Layers */}
+          {/* SECTION 4: 5 Core Budget Pillars */}
           <Card className="p-6 border-[var(--color-border)] space-y-4">
-            <h3 className="font-semibold text-base text-[var(--color-text-primary)] flex items-center gap-2">
-              <PieIcon className="w-5 h-5 text-emerald-500" />
-              The 6 Budget Layers Breakdown
-            </h3>
+            <div>
+              <h3 className="font-semibold text-base text-[var(--color-text-primary)] flex items-center gap-2">
+                <PieIcon className="w-5 h-5 text-emerald-500" />
+                The 5 Core Budget Pillars Breakdown
+              </h3>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                How your monthly take-home income is distributed across your real obligations.
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Layer 1: Essentials */}
+              {/* Pillar 1: Essentials */}
               <div className="p-4 bg-[var(--color-bg-subtle)] rounded-2xl border border-[var(--color-border)] space-y-1">
-                <span className="text-xs font-semibold text-[var(--color-text-secondary)] block">A. Essentials</span>
+                <span className="text-xs font-semibold text-[var(--color-text-secondary)] block">1. Essentials & Housing</span>
                 <span className="text-lg font-bold text-[var(--color-text-primary)] block tabular-nums">
-                  {formatCurrency(layers?.essentials ?? 0)}
+                  {formatCurrency(pillars?.essentials ?? 0)}
                 </span>
-                <span className="text-[10px] text-[var(--color-text-muted)] block">Rent, food, utilities, basic transport & minimum debt</span>
+                <span className="text-[10px] text-[var(--color-text-muted)] block">
+                  Rent, food, utilities, transport & minimum debt payments
+                </span>
               </div>
 
-              {/* Layer 2: Security */}
-              <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 space-y-1">
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block">B. Financial Security</span>
+              {/* Pillar 2: Financial Security */}
+              <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 space-y-1">
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block">2. Financial Security</span>
                 <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400 block tabular-nums">
-                  {formatCurrency(layers?.financialSecurity ?? 0)}
+                  {formatCurrency(pillars?.financialSecurity ?? 0)}
                 </span>
-                <span className="text-[10px] text-emerald-600/80 block">Emergency fund reserve & cash buffer</span>
+                <span className="text-[10px] text-emerald-600/80 block">
+                  Emergency fund contributions & liquid reserves
+                </span>
               </div>
 
-              {/* Layer 3: Goals & Future */}
-              <div className="p-4 bg-blue-50/50 dark:bg-blue-950/20 rounded-2xl border border-blue-100 dark:border-blue-900/40 space-y-1">
-                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 block">C. Goals & Future</span>
+              {/* Pillar 3: Goals & Future */}
+              <div className="p-4 bg-blue-50/60 dark:bg-blue-950/20 rounded-2xl border border-blue-100 dark:border-blue-900/40 space-y-1">
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 block">3. Goals & Future</span>
                 <span className="text-lg font-bold text-blue-600 dark:text-blue-400 block tabular-nums">
-                  {formatCurrency(layers?.goalsAndFuture ?? 0)}
+                  {formatCurrency(pillars?.goalsAndFuture ?? 0)}
                 </span>
-                <span className="text-[10px] text-blue-600/80 block">DPS installments, FDR, and Savings Goals</span>
+                <span className="text-[10px] text-blue-600/80 block">
+                  Committed DPS installments & active Savings Goals
+                </span>
               </div>
 
-              {/* Layer 4: Lifestyle */}
-              <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-2xl border border-purple-100 dark:border-purple-900/40 space-y-1">
-                <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 block">D. Lifestyle</span>
-                <span className="text-lg font-bold text-purple-600 dark:text-purple-400 block tabular-nums">
-                  {formatCurrency(layers?.lifestyle ?? 0)}
-                </span>
-                <span className="text-[10px] text-purple-600/80 block">Restaurants, shopping, entertainment & hobbies</span>
-              </div>
-
-              {/* Layer 5: Flex / Irregular */}
-              <div className="p-4 bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl border border-amber-100 dark:border-amber-900/40 space-y-1">
-                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 block">E. Flex & Sinking Funds</span>
+              {/* Pillar 4: Flexible / Sinking Funds */}
+              <div className="p-4 bg-amber-50/60 dark:bg-amber-950/20 rounded-2xl border border-amber-100 dark:border-amber-900/40 space-y-1">
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 block">4. Irregular Sinking Funds</span>
                 <span className="text-lg font-bold text-amber-600 dark:text-amber-400 block tabular-nums">
-                  {formatCurrency(layers?.flexIrregular ?? 0)}
+                  {formatCurrency(pillars?.flexIrregular ?? 0)}
                 </span>
-                <span className="text-[10px] text-amber-600/80 block">Eid, annual insurance, repairs & gifts</span>
+                <span className="text-[10px] text-amber-600/80 block">
+                  Eid, annual fees, insurance, gifts & repairs reserve
+                </span>
               </div>
 
-              {/* Layer 6: Debt Acceleration */}
-              <div className="p-4 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-100 dark:border-rose-900/40 space-y-1">
-                <span className="text-xs font-semibold text-rose-700 dark:text-rose-400 block">F. Debt Acceleration</span>
-                <span className="text-lg font-bold text-rose-600 dark:text-rose-400 block tabular-nums">
-                  {formatCurrency(layers?.debtAcceleration ?? 0)}
+              {/* Pillar 5: Lifestyle */}
+              <div className="p-4 bg-purple-50/60 dark:bg-purple-950/20 rounded-2xl border border-purple-100 dark:border-purple-900/40 space-y-1 sm:col-span-2 lg:col-span-2">
+                <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 block">5. Lifestyle Spending</span>
+                <span className="text-lg font-bold text-purple-600 dark:text-purple-400 block tabular-nums">
+                  {formatCurrency(pillars?.lifestyle ?? 0)}
                 </span>
-                <span className="text-[10px] text-rose-600/80 block">Extra principal payoff for high-interest debt</span>
+                <span className="text-[10px] text-purple-600/80 block">
+                  Personal expenses, dining out, shopping & entertainment allowance
+                </span>
               </div>
             </div>
           </Card>
 
-          {/* Emergency Fund Intelligence Card */}
-          {analysis?.emergencyFund && (
-            <Card className="p-6 border-[var(--color-border)] space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm text-[var(--color-text-primary)] flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" /> Emergency Fund Status
-                </h3>
-                <Badge
-                  variant={
-                    analysis.emergencyFund.currentCoverageMonths >= analysis.emergencyFund.targetMonths
-                      ? 'positive'
-                      : analysis.emergencyFund.currentCoverageMonths >= 1
-                      ? 'warning'
-                      : 'negative'
-                  }
-                  className="text-[10px] px-2"
-                >
-                  {analysis.emergencyFund.currentCoverageMonths.toFixed(1)} / {analysis.emergencyFund.targetMonths} months
-                </Badge>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[var(--color-text-muted)]">Coverage Progress</span>
-                  <span className="font-medium text-[var(--color-text-primary)]">
-                    {formatCurrency(analysis.emergencyFund.currentLiquidSavings)} of {formatCurrency(analysis.emergencyFund.targetAmount)}
-                  </span>
-                </div>
-                <ProgressBar
-                  value={Math.min(analysis.emergencyFund.currentCoverageMonths, analysis.emergencyFund.targetMonths)}
-                  max={analysis.emergencyFund.targetMonths}
-                  className="h-2"
-                />
-              </div>
-
-              {analysis.emergencyFund.gapAmount > 0 ? (
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-amber-50/60 dark:bg-amber-950/30 rounded-xl border border-amber-100 dark:border-amber-900/40">
-                    <span className="text-amber-700 dark:text-amber-400 block text-[10px] uppercase tracking-wide">Gap to Fill</span>
-                    <span className="font-bold text-amber-800 dark:text-amber-300 tabular-nums block mt-0.5">
-                      {formatCurrency(analysis.emergencyFund.gapAmount)}
-                    </span>
-                  </div>
-                  <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
-                    <span className="text-emerald-700 dark:text-emerald-400 block text-[10px] uppercase tracking-wide">Recommended Monthly</span>
-                    <span className="font-bold text-emerald-800 dark:text-emerald-300 tabular-nums block mt-0.5">
-                      {formatCurrency(analysis.emergencyFund.recommendedMonthlyContribution)}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 p-3 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  Emergency fund target achieved! Your financial safety net is secure.
-                </div>
-              )}
-            </Card>
-          )}
-
-          {/* Explainability Notes ("Why?") */}
+          {/* SECTION 5: Explainability Insights ("Why Safivra Recommends This") */}
           <Card className="p-6 border-[var(--color-border)] space-y-3 bg-[var(--color-bg-surface)]">
             <h3 className="font-semibold text-sm text-[var(--color-text-primary)] flex items-center gap-2">
               <Info className="w-4 h-4 text-[var(--color-accent)]" /> Why Safivra Recommends This Plan
             </h3>
             <div className="space-y-2">
               {analysis?.explainabilityNotes.map((note, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-xs text-[var(--color-text-secondary)]">
+                <div key={idx} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)]">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <p>{note}</p>
                 </div>
@@ -413,17 +408,17 @@ export const SalaryManagementDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* 2. INCOME SOURCES TAB */}
+      {/* INCOME SOURCES TAB */}
       {activeTab === 'income' && (
         <IncomeSourcesManager onIncomeUpdated={loadBudget} />
       )}
 
-      {/* 3. SINKING FUNDS TAB */}
+      {/* SINKING FUNDS TAB */}
       {activeTab === 'sinking_funds' && (
         <SinkingFundsManager onFundsUpdated={loadBudget} />
       )}
 
-      {/* 4. PAYDAY ALLOCATION TAB */}
+      {/* PAYDAY PLAN TAB */}
       {activeTab === 'payday' && (
         <Card className="p-6 border-[var(--color-border)] space-y-6">
           <div>
@@ -432,65 +427,65 @@ export const SalaryManagementDashboard: React.FC = () => {
               Payday Allocation Recommendation
             </h3>
             <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-              When your salary of <span className="font-bold text-emerald-600">{formatCurrency(takehome)}</span> arrives, distribute it immediately to maintain financial peace of mind.
+              When your salary of <span className="font-bold text-emerald-600">{formatCurrency(takehome)}</span> arrives, distribute it immediately:
             </p>
           </div>
 
           <div className="space-y-3">
             <div className="p-4 bg-[var(--color-bg-subtle)] rounded-2xl flex items-center justify-between border border-[var(--color-border)]">
               <div>
-                <span className="font-semibold text-sm block">1. Cover Essentials & Mandatory Bills</span>
-                <span className="text-xs text-[var(--color-text-muted)]">Rent, groceries, utilities, loan EMIs</span>
+                <span className="font-semibold text-sm block">1. Transfer for Essentials & Rent</span>
+                <span className="text-xs text-[var(--color-text-muted)]">Rent, groceries, utilities & loan EMIs</span>
               </div>
               <span className="font-bold text-base text-[var(--color-text-primary)] tabular-nums">
-                {formatCurrency(layers?.essentials ?? 0)}
+                {formatCurrency(pillars?.essentials ?? 0)}
               </span>
             </div>
 
             <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-2xl flex items-center justify-between border border-emerald-100 dark:border-emerald-900/40">
               <div>
-                <span className="font-semibold text-sm text-emerald-800 dark:text-emerald-300 block">2. Transfer to Emergency Reserve</span>
-                <span className="text-xs text-emerald-700/80 dark:text-emerald-400/80">Building 3-6 month safety buffer</span>
+                <span className="font-semibold text-sm text-emerald-800 dark:text-emerald-300 block">2. Deposit to Emergency Reserve</span>
+                <span className="text-xs text-emerald-700/80 dark:text-emerald-400/80">Liquid cash emergency buffer</span>
               </div>
               <span className="font-bold text-base text-emerald-700 dark:text-emerald-300 tabular-nums">
-                {formatCurrency(layers?.financialSecurity ?? 0)}
+                {formatCurrency(pillars?.financialSecurity ?? 0)}
               </span>
             </div>
 
             <div className="p-4 bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl flex items-center justify-between border border-blue-100 dark:border-blue-900/40">
               <div>
                 <span className="font-semibold text-sm text-blue-800 dark:text-blue-300 block">3. Fund DPS & Savings Goals</span>
-                <span className="text-xs text-blue-700/80 dark:text-blue-400/80">Committed monthly wealth builders</span>
+                <span className="text-xs text-blue-700/80 dark:text-blue-400/80">Committed wealth building products</span>
               </div>
               <span className="font-bold text-base text-blue-700 dark:text-blue-300 tabular-nums">
-                {formatCurrency(layers?.goalsAndFuture ?? 0)}
+                {formatCurrency(pillars?.goalsAndFuture ?? 0)}
               </span>
             </div>
 
             <div className="p-4 bg-amber-50/60 dark:bg-amber-950/30 rounded-2xl flex items-center justify-between border border-amber-100 dark:border-amber-900/40">
               <div>
                 <span className="font-semibold text-sm text-amber-800 dark:text-amber-300 block">4. Reserve Sinking Funds</span>
-                <span className="text-xs text-amber-700/80 dark:text-amber-400/80">Eid, insurance, annual maintenance</span>
+                <span className="text-xs text-amber-700/80 dark:text-amber-400/80">Eid, annual fees & maintenance</span>
               </div>
               <span className="font-bold text-base text-amber-700 dark:text-amber-300 tabular-nums">
-                {formatCurrency(layers?.flexIrregular ?? 0)}
+                {formatCurrency(pillars?.flexIrregular ?? 0)}
               </span>
             </div>
 
             <div className="p-4 bg-purple-50/60 dark:bg-purple-950/30 rounded-2xl flex items-center justify-between border border-purple-100 dark:border-purple-900/40">
               <div>
-                <span className="font-semibold text-sm text-purple-800 dark:text-purple-300 block">5. Lifestyle Spending Allowance</span>
-                <span className="text-xs text-purple-700/80 dark:text-purple-400/80">Safe-to-Spend for entertainment & personal</span>
+                <span className="font-semibold text-sm text-purple-800 dark:text-purple-300 block">5. Personal Lifestyle Spending</span>
+                <span className="text-xs text-purple-700/80 dark:text-purple-400/80">Safe-to-Spend for entertainment & lifestyle</span>
               </div>
               <span className="font-bold text-base text-purple-700 dark:text-purple-300 tabular-nums">
-                {formatCurrency(layers?.lifestyle ?? 0)}
+                {formatCurrency(pillars?.lifestyle ?? 0)}
               </span>
             </div>
           </div>
         </Card>
       )}
 
-      {/* 5. SETTINGS TAB */}
+      {/* SETTINGS TAB */}
       {activeTab === 'settings' && (
         <BudgetConfigPanel onConfigUpdated={loadBudget} />
       )}
