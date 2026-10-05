@@ -105,12 +105,71 @@ export async function calculateAdaptiveBudgetIntelligence(
   if (!userId) return null;
 
   try {
-    // 1. Fetch Active Income Sources
-    const { data: incomeData } = await (supabase.from('income_sources') as any)
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true);
+    // ─── PARALLEL FETCH: All 9 independent data sources fire simultaneously ───
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
 
+    const [
+      { data: incomeData },
+      { data: sinkingData },
+      { data: configData },
+      { data: loansData },
+      { data: cardsData },
+      { data: depositData },
+      { data: goalsData },
+      { data: wealthSummary },
+      { data: txHistory },
+    ] = await Promise.all([
+      (supabase.from('income_sources') as any)
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true),
+
+      (supabase.from('budget_sinking_funds') as any)
+        .select('id, name, annual_estimated_cost, monthly_reserve_amount, target_month')
+        .eq('user_id', userId)
+        .eq('is_active', true),
+
+      (supabase.from('budget_configurations') as any)
+        .select('emergency_target_months, minimum_buffer_amount, rent_estimate, food_estimate, transport_estimate, utilities_estimate, family_support_estimate')
+        .eq('user_id', userId)
+        .maybeSingle(),
+
+      (supabase.from('loans') as any)
+        .select('monthly_installment, annual_rate')
+        .eq('user_id', userId)
+        .eq('status', 'active'),
+
+      (supabase.from('credit_cards') as any)
+        .select('minimum_payment')
+        .eq('user_id', userId)
+        .eq('status', 'active'),
+
+      (supabase.from('deposit_products') as any)
+        .select('installment_amount, product_type')
+        .eq('user_id', userId)
+        .eq('status', 'active'),
+
+      (supabase.from('savings_goals') as any)
+        .select('target_amount, current_amount, target_date')
+        .eq('user_id', userId)
+        .eq('status', 'active'),
+
+      (supabase.from('v_wealth_summary') as any)
+        .select('liquid_assets, net_worth')
+        .eq('user_id', userId)
+        .maybeSingle(),
+
+      (supabase.from('ledger_transactions') as any)
+        .select('amount, transaction_type, transaction_date')
+        .eq('user_id', userId)
+        .eq('status', 'posted')
+        .gte('transaction_date', sixMonthsAgoStr),
+    ]);
+    // ─── END PARALLEL FETCH ───────────────────────────────────────────────────
+
+    // 1. Process Income Sources
     const incomeSources: IncomeSourceItem[] = (incomeData ?? []).map((inc: any) => ({
       id: inc.id,
       name: inc.name,
@@ -136,7 +195,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       )
     );
 
-    // Calculate Conservative Planning Income (80% weighting on variable/unstable sources)
+    // Conservative Planning Income (80% weighting on variable/unstable sources)
     let variableIncomeTotal = 0;
     let stableIncomeTotal = 0;
 
@@ -152,12 +211,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       stableIncomeTotal + variableIncomeTotal * 0.8
     );
 
-    // 2. Fetch Sinking Funds (Irregular/Flex Expenses)
-    const { data: sinkingData } = await (supabase.from('budget_sinking_funds') as any)
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true);
-
+    // 2. Process Sinking Funds
     const sinkingFunds: SinkingFundItem[] = (sinkingData ?? []).map((sf: any) => ({
       id: sf.id,
       name: sf.name,
@@ -170,12 +224,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       sinkingFunds.reduce((sum, item) => sum + item.monthlyReserveAmount, 0)
     );
 
-    // 3. Fetch Budget Configurations
-    const { data: configData } = await (supabase.from('budget_configurations') as any)
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
-
+    // 3. Process Budget Config
     const emergencyTargetMonths = configData?.emergency_target_months
       ? Number(configData.emergency_target_months)
       : 3.0;
@@ -184,17 +233,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       ? Number(configData.minimum_buffer_amount)
       : 5000.00;
 
-    // 4. Fetch Debt Obligations (Loans & Credit Cards)
-    const { data: loansData } = await (supabase.from('loans') as any)
-      .select('monthly_installment, annual_rate')
-      .eq('user_id', userId)
-      .eq('status', 'active');
-
-    const { data: cardsData } = await (supabase.from('credit_cards') as any)
-      .select('minimum_payment')
-      .eq('user_id', userId)
-      .eq('status', 'active');
-
+    // 4. Process Debt Obligations
     const loanInstallments = (loansData ?? []).reduce(
       (sum: number, l: any) => sum + (Number(l.monthly_installment) || 0),
       0
@@ -207,12 +246,7 @@ export async function calculateAdaptiveBudgetIntelligence(
 
     const mandatoryDebtPayments = roundMoney(loanInstallments + cardMinimums);
 
-    // 5. Fetch Deposit Products (DPS Installments)
-    const { data: depositData } = await (supabase.from('deposit_products') as any)
-      .select('installment_amount, product_type')
-      .eq('user_id', userId)
-      .eq('status', 'active');
-
+    // 5. Process DPS/Deposit Commitments
     const committedSavingsDps = roundMoney(
       (depositData ?? []).reduce(
         (sum: number, d: any) => sum + (Number(d.installment_amount) || 0),
@@ -220,12 +254,7 @@ export async function calculateAdaptiveBudgetIntelligence(
       )
     );
 
-    // 6. Fetch Active Savings Goals (Monthly Target Contribution)
-    const { data: goalsData } = await (supabase.from('savings_goals') as any)
-      .select('target_amount, current_amount, target_date')
-      .eq('user_id', userId)
-      .eq('status', 'active');
-
+    // 6. Process Savings Goals Monthly Target
     const activeGoalsTarget = roundMoney(
       (goalsData ?? []).reduce((sum: number, g: any) => {
         const remaining = Math.max(0, Number(g.target_amount) - Number(g.current_amount || 0));
@@ -241,23 +270,8 @@ export async function calculateAdaptiveBudgetIntelligence(
       }, 0)
     );
 
-    // 7. Fetch Liquid Assets from v_wealth_summary
-    const { data: wealthSummary } = await (supabase.from('v_wealth_summary') as any)
-      .select('liquid_assets, net_worth')
-      .eq('user_id', userId)
-      .maybeSingle();
-
+    // 7. Process Liquid Assets
     const currentLiquidSavings = Number(wealthSummary?.liquid_assets || 0);
-
-    // 8. Analyze Actual Ledger Transaction History for Essentials & Overall History
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    const { data: txHistory } = await (supabase.from('ledger_transactions') as any)
-      .select('amount, transaction_type, transaction_date')
-      .eq('user_id', userId)
-      .eq('status', 'posted')
-      .gte('transaction_date', sixMonthsAgo.toISOString().split('T')[0]);
 
     let transactionHistoryMonthsCount = 0;
     let historicalAvgMonthlyExpense = 0;
