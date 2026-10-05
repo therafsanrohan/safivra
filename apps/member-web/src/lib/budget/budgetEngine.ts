@@ -214,7 +214,7 @@ export async function calculateAdaptiveBudgetIntelligence(
     return analysis;
   } catch (err) {
     console.error('[BudgetEngine] Unexpected error:', err);
-    return null;
+    throw err;
   }
 }
 
