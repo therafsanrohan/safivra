@@ -15,8 +15,8 @@ export const useFeatureTranslation = (ns: string) => {
     const loadNamespace = async () => {
       try {
         const [enModule, bnModule] = await Promise.all([
-          import(`../locales/en/${ns}.json`).catch(() => null),
-          import(`../locales/bn/${ns}.json`).catch(() => null),
+          import(`../../locales/en/${ns}.json`).catch(() => null),
+          import(`../../locales/bn/${ns}.json`).catch(() => null),
         ]);
 
         if (!active) return;
