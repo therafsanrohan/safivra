@@ -180,7 +180,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { to: '/dashboard/plans/available-to-spend', label: isBn ? 'ব্যয়যোগ্য তহবিল' : 'Available to Spend', icon: Wallet },
         { to: '/dashboard/plans/calendar', label: isBn ? 'অর্থ ক্যালেন্ডার' : 'Money Calendar', icon: Calendar },
-        { to: '/dashboard/plans/budgets', label: isBn ? 'স্যালারি ও বাজেট' : 'Salary & Budget', icon: PieChart },
+        ...( isFeatureEnabled('salary_budget_enabled', user?.id) ? [{ to: '/dashboard/plans/budgets', label: isBn ? 'স্যালারি ও বাজেট' : 'Salary & Budget', icon: PieChart }] : [] ),
         { to: '/dashboard/plans', label: t('Plans & Goals'), icon: Target },
         { to: '/dashboard/reports', label: t('Reports'), icon: BookOpen },
         { to: '/dashboard/tools', label: isBn ? 'টুলস' : 'Tools', icon: Calculator },

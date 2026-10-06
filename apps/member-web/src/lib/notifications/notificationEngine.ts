@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase/client';
 import { differenceInDays, parseISO, isBefore } from 'date-fns';
 import { nowInDhaka } from '@/lib/dates/formatter';
 import { isQuietHoursActive, showLocalSystemNotification } from './pushManager';
+import { isFeatureEnabled } from '@/lib/flags';
 
 export type NotificationCategory =
   | 'financial_reminder'
@@ -545,7 +546,7 @@ export async function evaluateFinancialNotificationRules(userId: string): Promis
             priority: 'high',
             title: 'Monthly Budget Alert: High Spending Detected',
             body: `You've spent ${Math.round(spendRatio * 100)}% of your monthly income. Review your Safe-to-Spend.`,
-            actionUrl: '/dashboard/plans/budgets',
+            actionUrl: isFeatureEnabled('salary_budget_enabled', userId) ? '/dashboard/plans/budgets' : '/dashboard/plans',
             deduplicationKey: `budget:spend:${currentMonth}:85pct`,
           });
         }

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
+import { isFeatureEnabled } from '@/lib/flags';
 import { formatCurrency } from '@/lib/currency/formatter';
 import { Card, Spinner, ProgressBar, Badge } from '@/components/ui/Card';
 import { useToast } from '@/components/ui/Toast';
@@ -38,6 +40,10 @@ import { BudgetConfigPanel } from './BudgetConfigPanel';
 export const SalaryManagementDashboard: React.FC = () => {
   const { user } = useAuthContext();
   const { error: showError } = useToast();
+
+  if (!isFeatureEnabled('salary_budget_enabled', user?.id)) {
+    return <Navigate to="/dashboard/plans" replace />;
+  }
 
   const [analysis, setAnalysis] = useState<AdaptiveBudgetAnalysis | null>(null);
   const [loading, setLoading] = useState(true);

@@ -76,26 +76,28 @@ export const PlansPage: React.FC = () => {
           </Card>
         </Link>
 
-        <Link to="/dashboard/plans/budgets" className="block">
-          <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-[var(--radius-button)] bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
-                <PieChart size={20} className="text-emerald-600 dark:text-emerald-400" />
+        {isFeatureEnabled('salary_budget_enabled', user?.id) && (
+          <Link to="/dashboard/plans/budgets" className="block">
+            <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-[var(--radius-button)] bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                  <PieChart size={20} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
+                    {t('Salary & Budget')}
+                  </h2>
+                  <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
+                    {t('Adaptive budget intelligence based on take-home income, 6-layer allocation, and emergency fund tracking.')}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-[var(--text-section)] font-semibold text-[var(--color-text-primary)]">
-                  {t('Salary & Budget')}
-                </h2>
-                <p className="text-[var(--text-secondary)] text-[var(--color-text-secondary)] mt-1">
-                  {t('Adaptive budget intelligence based on take-home income, 6-layer allocation, and emergency fund tracking.')}
-                </p>
+              <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
+                {t('Open Salary & Budget')} <ChevronRight size={16} />
               </div>
-            </div>
-            <div className="flex items-center text-[var(--color-accent)] font-semibold text-[var(--text-secondary)] mt-4">
-              {t('Open Salary & Budget')} <ChevronRight size={16} />
-            </div>
-          </Card>
-        </Link>
+            </Card>
+          </Link>
+        )}
 
         <Link to="/dashboard/plans/savings" className="block">
           <Card className="hover:border-[var(--color-border-strong)] transition-colors h-full flex flex-col justify-between">
